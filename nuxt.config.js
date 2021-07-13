@@ -6,15 +6,17 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - mysticalwizard-web',
-    title: 'mysticalwizard-web',
+    titleTemplate: '%s - web',
+    title: 'MysticalWizard',
     htmlAttrs: {
       lang: 'en'
     },
     meta: [
       { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
+      { hid: 'description', name: 'description', content: 'MysticalWizard - Maring Shin - A Personal Website' },
+      { name: 'keywords', content: 'mysticalwizard, mystical wizard, mystical, wizard, maring, maring shin, mysticalwizard-web, website' },
+      { name: 'author', content: 'MysticalWizard(Maring Shin) - https://github.com/MysticalWizard' },
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
