@@ -62,6 +62,10 @@ typings/
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
+# profiling files
+chrome-profiler-events*.json
+speed-measure-plugin*.json
+
 # next.js build output
 .next
 
@@ -79,12 +83,31 @@ dist
 
 # IDE / Editor
 .idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
 
 # Service worker
 sw.*
 
-# macOS
+# System Files
 .DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Vim swap files
 *.swp
