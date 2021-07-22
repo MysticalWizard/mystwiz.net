@@ -1,5 +1,6 @@
 # mysticalwizard-web
-[![Tests](https://github.com/mysticalwizard/mysticalwizard.github.io/actions/workflows/ci.yml/badge.svg)](https://github.com/mysticalwizard/mysticalwizard.github.io/actions/workflows/ci.yml)
+[![ci](https://github.com/mysticalwizard/mysticalwizard.github.io/actions/workflows/ci.yml/badge.svg)](https://github.com/mysticalwizard/mysticalwizard.github.io/actions/workflows/ci.yml)
+
 
 ## Build Setup
 
