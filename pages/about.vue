@@ -9,13 +9,13 @@
           <p>- Website working in progress -</p>
         </v-card-text>
         <v-card-actions>
-          <v-spacer />
+          <v-spacer>
           <v-btn
             color="primary"
             nuxt
             to="/"
           >
-            Continue
+            Back
           </v-btn>
         </v-card-actions>
       </v-card>
