@@ -19,9 +19,6 @@ jobs:
         os: [ubuntu-latest]
         node: [14]
 
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
@@ -53,8 +50,7 @@ jobs:
         run: npm run generate
 
       - name: Deploy 🚀
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: peaceiris/actions-gh-pages@v3-
         with:
           github_token: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           publish_dir: ./dist
