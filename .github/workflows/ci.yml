@@ -18,7 +18,10 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node: [14]
-
+        
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
@@ -51,6 +54,7 @@ jobs:
 
       - name: Deploy 🚀
         uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.ref == 'refs/heads/main' }}
         with:
-          github_token: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN}}
           publish_dir: ./dist
