@@ -15,7 +15,7 @@
             nuxt
             to="/"
           >
-            Continue
+            Back
           </v-btn>
         </v-card-actions>
       </v-card>

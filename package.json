@@ -12,26 +12,26 @@
     "test": "jest"
   },
   "dependencies": {
-    "@nuxt/content": "^1.14.0",
+    "@nuxt/content": "^1.15.0",
     "@nuxtjs/axios": "^5.13.6",
-    "core-js": "^3.16.2",
+    "core-js": "^3.19.1",
     "nuxt": "^2.15.8",
-    "vuetify": "^2.5.8"
+    "vuetify": "^2.5.12"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.15.0",
+    "@babel/eslint-parser": "^7.16.0",
     "@nuxtjs/eslint-config": "^6.0.1",
     "@nuxtjs/eslint-module": "^3.0.2",
     "@nuxtjs/vuetify": "^1.12.1",
     "@vue/test-utils": "^1.2.2",
     "babel-core": "7.0.0-bridge.0",
-    "babel-jest": "^27.0.5",
+    "babel-jest": "^27.3.1",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-nuxt": "^2.0.0",
-    "eslint-plugin-vue": "^7.16.0",
-    "jest": "^27.0.5",
-    "prettier": "^2.3.2",
+    "eslint-plugin-nuxt": "^3.0.0",
+    "eslint-plugin-vue": "^7.19.1",
+    "jest": "^27.3.1",
+    "prettier": "^2.4.1",
     "vue-jest": "^3.0.4"
   }
 }

@@ -18,13 +18,16 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node: [14]
-
+        
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
 
       - name: Setup node env 🏗
-        uses: actions/setup-node@v2.4.0
+        uses: actions/setup-node@v2.4.1
         with:
           node-version: ${{ matrix.node }}
           check-latest: true
@@ -46,11 +49,12 @@ jobs:
       - name: Run tests 🧪
         run: npm run test
         
-      - name: Generate page
+      - name: Generate page 📄
         run: npm run generate
 
-      - name: Deploy
+      - name: Deploy 🚀
         uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.ref == 'refs/heads/main' }}
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN}}
           publish_dir: ./dist
