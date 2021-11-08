@@ -6,7 +6,9 @@
           <p></p>
         </v-card-title>
         <v-card-text align="center">
-          <p>- Website working in progress -</p>
+          <p>
+            Hello there! My name is Maring Shin(a.k.a. MysticalWizard) and this is my personal website I made using Nuxtjs. I love programming and I am currently learning C# and PHP. This website is currently working in progress so check back later to see what have changed!
+          </p>
         </v-card-text>
         <v-card-actions>
           <v-spacer>
@@ -15,7 +17,7 @@
             nuxt
             to="/"
           >
-            Back
+            Home
           </v-btn>
         </v-card-actions>
       </v-card>
