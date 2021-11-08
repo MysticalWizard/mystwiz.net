@@ -3,7 +3,7 @@
     <v-col cols="12" sm="8" md="6">
       <div class="middle">
           <h1 class="title" style="font-size: 80px !important;">MysticalWizard</h1>
-          <p class="subtitle">Programmer & Game Developer</p>
+          <p class="subtitle">Game & Web Developer</p>
           <ul class="links" style="font-size: 25px;">
               <li>
                   <a href="https://osu.ppy.sh/users/19430051/osu/" target="_blank" rel="noopener noreferrer">osu!</a>
