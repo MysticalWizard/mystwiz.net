@@ -3,7 +3,7 @@
     <v-col cols="12" sm="8" md="6">
       <v-card>
         <v-card-title align="center">
-          <p></p>
+          <img style="display: block; margin-left: auto; margin-right: auto" src="/MysticalWizardLogo.jpg" alt="MysticalWizard" width=128px;>
         </v-card-title>
         <v-card-text align="center">
           <p>
