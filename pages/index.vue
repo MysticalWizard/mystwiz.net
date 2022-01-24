@@ -67,9 +67,8 @@
     color: #fff !important;
 }
 .middle .title {
-    margin: 0 0 42px;
     color: #fff;
-    line-height: 5rem;
+    line-height: 1em;
 }
 .middle .subtitle,
 .middle .title {
