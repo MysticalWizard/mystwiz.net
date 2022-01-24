@@ -2,7 +2,7 @@
   <v-row justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
       <div class="middle">
-          <h1 class="title" style="font-size: 80px !important;">MysticalWizard</h1>
+          <h1 class="title" style="font-size: 80px !important;">Mystical<wbr>Wizard</h1>
           <p class="subtitle">Game & Web Developer</p>
           <ul class="links" style="font-size: 25px;">
               <li>
@@ -69,6 +69,7 @@
 .middle .title {
     margin: 0 0 42px;
     color: #fff;
+    line-height: 5rem;
 }
 .middle .subtitle,
 .middle .title {
