@@ -77,9 +77,19 @@ export default {
           to: '/',
         },
         {
-          icon: 'mdi-chart-bubble',
+          icon: 'mdi-account-box',
           title: 'About',
           to: '/about',
+        },
+        {
+          icon: 'mdi-developer-board',
+          title: 'Projects',
+          to: '/projects',
+        },
+        {
+          icon: 'mdi-desktop-tower',
+          title: 'Setup',
+          to: '/setup',
         },
       ],
       miniVariant: false,

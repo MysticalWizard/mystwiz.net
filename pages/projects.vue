@@ -6,7 +6,7 @@
           <p></p>
         </v-card-title>
         <v-card-text align="center">
-          <p>- Working in progress -</p>
+          <p>Projects List (WIP)</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
