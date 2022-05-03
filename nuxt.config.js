@@ -17,14 +17,26 @@ export default {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
-      { hid: 'description', name: 'description', content: 'MysticalWizard - Maring Shin - A Personal Website' },
-      { name: 'keywords', content: 'mysticalwizard, mystical wizard, mysticalwiz, mystwiz, mystical, wizard, maring, maring shin, mysticalwizard-web, personal, website' },
-      { name: 'author', content: 'MysticalWizard(Maring Shin) - https://github.com/MysticalWizard' },
-      { name: 'format-detection', content: 'telephone=no' }
+      {
+        hid: 'description',
+        name: 'description',
+        content: 'MysticalWizard - Maring Shin - A Personal Website',
+      },
+      {
+        name: 'keywords',
+        content:
+          'mysticalwizard, mystical wizard, mysticalwiz, mystwiz, mystical, wizard, maring, maring shin, mysticalwizard-web, personal, website',
+      },
+      {
+        name: 'author',
+        content:
+          'MysticalWizard(Maring Shin) - https://github.com/MysticalWizard',
+      },
+      { name: 'format-detection', content: 'telephone=no' },
     ],
     link: [
       { rel: 'shortcut icon', type: 'image/x-icon', href: '/favicon.ico' },
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
     ],
   },
 

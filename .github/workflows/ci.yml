@@ -18,10 +18,10 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node: [16]
-        
+
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
-      
+
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
@@ -48,7 +48,7 @@ jobs:
 
       - name: Run tests 🧪
         run: npm run test
-        
+
       - name: Generate page 📄
         run: npm run generate
 

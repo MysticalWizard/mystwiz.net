@@ -3,7 +3,7 @@
     class="mysticalwizard-logo"
     alt="MysticalWizard Logo"
     src="/MysticalWizardLogo.jpg"
-  >
+  />
 </template>
 
 <style>
