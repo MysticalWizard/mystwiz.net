@@ -1,14 +1,14 @@
 <template>
   <img
-    class="MysticalWizardLogo"
+    class="mysticalwizard-logo"
     alt="MysticalWizard Logo"
     src="/MysticalWizardLogo.jpg"
   >
 </template>
 
 <style>
-.MysticalWizardLogo {
-  height: 180px;
-  width: 180px;
+.mysticalwizard-logo {
+  height: 128px;
+  width: 128px;
 }
 </style>

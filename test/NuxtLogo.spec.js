@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import NuxtLogo from '~/components/nuxt-logo.vue'
+import NuxtLogo from '@/components/NuxtLogo.vue'
 
 describe('NuxtLogo', () => {
   test('is a Vue instance', () => {

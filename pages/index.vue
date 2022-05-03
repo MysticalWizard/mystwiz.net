@@ -26,6 +26,12 @@
   </v-row>
 </template>
 
+<script>
+export default {
+  name: 'IndexPage',
+}
+</script>
+
 <style>
 .middle {
     position: absolute;

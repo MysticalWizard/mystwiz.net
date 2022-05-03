@@ -1,3 +1,9 @@
+###
+# Place your Prettier ignore content here
+
+###
+# .gitignore content is duplicated here due to https://github.com/prettier/prettier/issues/8506
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template
 # Logs
@@ -62,10 +68,6 @@ typings/
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
-# profiling files
-chrome-profiler-events*.json
-speed-measure-plugin*.json
-
 # next.js build output
 .next
 
@@ -83,23 +85,12 @@ dist
 
 # IDE / Editor
 .idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
 
 # Service worker
 sw.*
 
-# System Files
+# macOS
 .DS_Store
-.DS_Store?
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
 # Vim swap files
 *.swp
