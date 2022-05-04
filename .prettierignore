@@ -85,12 +85,23 @@ dist
 
 # IDE / Editor
 .idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 
 # Service worker
 sw.*
 
-# macOS
+# System Files
 .DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Vim swap files
 *.swp
