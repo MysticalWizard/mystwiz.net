@@ -68,7 +68,7 @@ export default {
   data() {
     return {
       clipped: true,
-      drawer: true,
+      drawer: false,
       fixed: false,
       items: [
         {
