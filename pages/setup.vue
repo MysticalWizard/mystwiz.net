@@ -19,7 +19,7 @@
           <v-card-text>
             Kᴇʏʙᴏᴀʀᴅ1: Logitech G513 Carbon RGB (GX-Blue)<br />
             Kᴇʏʙᴏᴀʀᴅ2: Ducky One2 TKL (Cherry MX Red)<br />
-            Mᴏᴜsᴇ1:  Logitech G Pro X Superlight<br />
+            Mᴏᴜsᴇ1: Logitech G Pro X Superlight<br />
             Mᴏᴜsᴇ2: Logitech G502 Hero<br />
             Mᴏᴜsᴇᴘᴀᴅ: Cherry G80 Desk Soft (900x350mm)<br />
             Hᴇᴀᴅsᴇᴛ: HyperX Cloud II<br />Mɪᴄʀᴏᴘʜᴏɴᴇ: HyperX Quadcast S <br />
