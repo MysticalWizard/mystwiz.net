@@ -1,0 +1,19 @@
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      spacing: {
+        'header': '82px', // Add a positive value
+      },
+    },
+  },
+  plugins: [],
+};
+export default config;
