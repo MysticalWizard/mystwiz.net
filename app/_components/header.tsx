@@ -17,7 +17,7 @@ export default function Header({}: Props) {
         </div>
         <div className="flex flex-row items-center">
           <SocialIcon
-            url="https://github.com/MysticalWizard"
+            url="https://github.com/MysticalWizard/mystwiz.net"
             fgColor="gray"
             bgColor="transparent"
             />
