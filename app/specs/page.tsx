@@ -37,6 +37,9 @@ export default function Page() {
               <p>Mᴏɴɪᴛᴏʀ2: Pixio PX248 PRO 24&quot; 1080p IPS 165Hz</p>
             </div>
           </div>
+          <div className="text-sm text-neutral-500">
+            <span>Last updated: 2024.02.13</span>
+          </div>
         </div>
       </div>
     </div>
