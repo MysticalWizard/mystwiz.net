@@ -2867,7 +2867,7 @@ __metadata:
     postcss: "npm:^8.4.35"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
-    react-social-icons: "npm:^6.12.0"
+    react-social-icons: "npm:^6.14.0"
     sharp: "npm:^0.33.2"
     tailwindcss: "npm:^3.4.1"
     typescript: "npm:^5.3.3"
@@ -3420,9 +3420,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-social-icons@npm:^6.12.0":
-  version: 6.12.0
-  resolution: "react-social-icons@npm:6.12.0"
+"react-social-icons@npm:^6.14.0":
+  version: 6.14.0
+  resolution: "react-social-icons@npm:6.14.0"
   dependencies:
     "@babel/runtime": "npm:^7.23.8"
     react: "npm:^18.2.0"
@@ -3430,7 +3430,7 @@ __metadata:
   peerDependencies:
     react: 15.x.x || 16.x.x || 17.x.x || 18.x.x
     react-dom: 15.x.x || 16.x.x || 17.x.x || 18.x.x
-  checksum: 10c0/5777b59c6fc936944c245ac0d726aa7b8a9e29d7db122723641171351fccb1c1b8270446c376acdc52fa42dfa3ba05b273c5a8b734df7ca93d8c55271999d55b
+  checksum: 10c0/49b81f0aac077dec8b2173eb22866d1d3c90da7abfcea720ec83024332ab9aef038aaa440f05bd473ff343fcfc0980e3a9789f282b4bd1a021008aea8a78c8c0
   languageName: node
   linkType: hard
 
