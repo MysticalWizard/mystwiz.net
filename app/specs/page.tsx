@@ -6,7 +6,7 @@ export default function Page() {
           <div>
             <div className="mb-2 text-xl font-bold">PC</div>
             <div className="text-base text-gray-700">
-              <p>CPU: Intel Core i5-9600K OC@4.70GHz</p>
+              <p>CPU: Intel Core i5-9600K OC@4.80GHz</p>
               <p>Cᴏᴏʟᴇʀ: Cooler Master MasterLiquid ML240L RGB</p>
               <p>Mᴏʙᴏ: MSI MPG Z390 GAMING EDGE AC</p>
               <p>RAM: Corsair VENGEANCE RGB PRO 32GB (2 x 16GB) DDR4 3000MHz CL16</p>
