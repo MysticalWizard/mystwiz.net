@@ -1,3 +1,9 @@
+import { Metadata } from 'next';
+ 
+export const metadata: Metadata = {
+  title: 'Blog | MysticalWizard',
+};
+
 export default function Page() {
     return (
       <div className="p-4">

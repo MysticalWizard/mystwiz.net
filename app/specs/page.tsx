@@ -1,3 +1,9 @@
+import { Metadata } from 'next';
+ 
+export const metadata: Metadata = {
+  title: 'Specs | MysticalWizard',
+};
+
 export default function Page() {
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-8 py-4">
