@@ -414,15 +414,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/third-parties@npm:^14.1.0":
-  version: 14.1.0
-  resolution: "@next/third-parties@npm:14.1.0"
+"@next/third-parties@npm:^14.1.1":
+  version: 14.1.1
+  resolution: "@next/third-parties@npm:14.1.1"
   dependencies:
     third-party-capital: "npm:1.0.20"
   peerDependencies:
     next: ^13.0.0 || ^14.0.0
     react: ^18.2.0
-  checksum: 10c0/39df592ddc26b39ce0512201202f78f297440f03e2df2cbd1211869960eea2592eed6f1d520dc7675bd33e68a92be823999a6d951e7bfa95460e2b218a61effa
+  checksum: 10c0/ab606f0151481195d765b98421e246c8463ca325c850895e197228196e17498945a445a2b5fce712b9209c6944b979d1351255f92b620849588ef9a7f3ee4041
   languageName: node
   linkType: hard
 
@@ -2858,7 +2858,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "mystwiz.net@workspace:."
   dependencies:
-    "@next/third-parties": "npm:^14.1.0"
+    "@next/third-parties": "npm:^14.1.1"
     "@types/node": "npm:^20.11.20"
     "@types/react": "npm:^18.2.59"
     "@types/react-dom": "npm:^18.2.19"
