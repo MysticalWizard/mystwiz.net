@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import Header from './_components/header'
@@ -12,6 +12,23 @@ export const metadata: Metadata = {
   description: 'A Personal Website: Wonsik Shin',
   keywords: 'MysticalWizard, MysticalWiz, MystWiz, Wonsik Shin, Maring, Personal Website',
   authors: [{ name: 'Wonsik Shin' }],
+  alternates: {
+    canonical: 'https://mystwiz.net/',
+  },
+  openGraph: {
+    title: 'MysticalWizard',
+    type: 'website',
+    url: 'https://mystwiz.net/',
+    description: 'A Personal Website: Wonsik Shin',
+  },
+  metadataBase: new URL('https://mystwiz.net/'),
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f7f7f7' },
+    { media: '(prefers-color-scheme: dark)', color: '#1e1e1e' },
+  ],
 }
 
 export default function RootLayout({
