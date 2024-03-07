@@ -1,8 +1,6 @@
 import React from 'react';
 
-type Props = {};
-
-export default function Footer({}: Props) {
+export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (

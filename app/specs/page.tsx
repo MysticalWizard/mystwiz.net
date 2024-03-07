@@ -6,8 +6,8 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="flex flex-col items-center justify-center h-full space-y-8 py-4">
-      <div className="w-max mx-auto overflow-hidden transition-shadow duration-300 ease-in-out bg-white rounded-lg shadow-lg hover:shadow-xl">
+    <div className="flex flex-col items-center justify-center h-full py-4 space-y-8">
+      <div className="mx-auto overflow-hidden transition-shadow duration-300 ease-in-out bg-white rounded-lg shadow-lg w-max hover:shadow-xl">
         <div className="px-6 py-4 space-y-4">
           <div>
             <div className="mb-2 text-xl font-bold">PC</div>
