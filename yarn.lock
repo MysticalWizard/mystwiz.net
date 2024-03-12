@@ -2942,7 +2942,7 @@ __metadata:
     postcss: "npm:^8.4.35"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
-    react-social-icons: "npm:^6.14.0"
+    react-social-icons: "npm:^6.15.0"
     sharp: "npm:^0.33.2"
     tailwindcss: "npm:^3.4.1"
     typescript: "npm:^5.4.2"
@@ -3502,9 +3502,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-social-icons@npm:^6.14.0":
-  version: 6.14.0
-  resolution: "react-social-icons@npm:6.14.0"
+"react-social-icons@npm:^6.15.0":
+  version: 6.15.0
+  resolution: "react-social-icons@npm:6.15.0"
   dependencies:
     "@babel/runtime": "npm:^7.23.8"
     react: "npm:^18.2.0"
@@ -3512,7 +3512,7 @@ __metadata:
   peerDependencies:
     react: 15.x.x || 16.x.x || 17.x.x || 18.x.x
     react-dom: 15.x.x || 16.x.x || 17.x.x || 18.x.x
-  checksum: 10c0/49b81f0aac077dec8b2173eb22866d1d3c90da7abfcea720ec83024332ab9aef038aaa440f05bd473ff343fcfc0980e3a9789f282b4bd1a021008aea8a78c8c0
+  checksum: 10c0/049ec2073e280d2dc4ec3865bb3b2dcbd1cc0b6f47f342f60525e23ea00e57d26a6524259d6f064b3a5e77173a8e4c619ec1aa40c0dea51e07586d95238b2bef
   languageName: node
   linkType: hard
 
@@ -4304,11 +4304,11 @@ __metadata:
 
 "typescript@patch:typescript@npm%3A^5.4.2#optional!builtin<compat/typescript>":
   version: 5.4.2
-  resolution: "typescript@patch:typescript@npm%3A5.4.2#optional!builtin<compat/typescript>::version=5.4.2&hash=d69c25"
+  resolution: "typescript@patch:typescript@npm%3A5.4.2#optional!builtin<compat/typescript>::version=5.4.2&hash=5adc0c"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/22e2f213c3ffe5960c5eaec6c95c04e01858fed57a94be250746f540b935b2c18c3c3fc80d3ab65d28c0aba1eb76284557ba3bf521d28caee811c44ba2b648f9
+  checksum: 10c0/fcf6658073d07283910d9a0e04b1d5d0ebc822c04dbb7abdd74c3151c7aa92fcddbac7d799404e358197222006ccdc4c0db219d223d2ee4ccd9e2b01333b49be
   languageName: node
   linkType: hard
 
