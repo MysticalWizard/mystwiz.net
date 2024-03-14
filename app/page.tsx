@@ -12,7 +12,9 @@ export default function Home() {
         alt="Profile"
         width={200}
         height={200}
+        quality={85}
         className="rounded-full select-none"
+        priority
       />
       <div>
         <h1 className="text-4xl font-medium dark:text-white">MysticalWizard</h1>

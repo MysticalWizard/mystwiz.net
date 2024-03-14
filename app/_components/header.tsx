@@ -11,7 +11,7 @@ export default function Header() {
           <span>{"/"}</span>
           <Link href="/about" className="dark:text-neutral-300 dark:hover:text-white">about</Link>
           <Link href="/projects" className="dark:text-neutral-300 dark:hover:text-white">projects</Link>
-          <Link href="/specs" className="hidden dark:text-neutral-300 dark:hover:text-white md:inline">specs</Link>
+          <Link href="/specs" className="hidden dark:text-neutral-300 dark:hover:text-white sm:inline">specs</Link>
         </div>
         <div className="flex flex-row items-center">
           <SocialIcon
