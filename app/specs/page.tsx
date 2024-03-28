@@ -9,7 +9,7 @@ export default function Page() {
     <div className="flex flex-col items-center justify-center h-full py-4 space-y-8">
       <div className="mx-auto overflow-hidden transition-shadow duration-300 ease-in-out bg-white rounded-lg shadow-lg w-max hover:shadow-xl">
         <div className="px-6 py-4 space-y-4">
-          <div>
+          <div id="PC">
             <div className="mb-2 text-xl font-bold">PC</div>
             <div className="text-base text-gray-700">
               <p>CPU: Intel Core i5-9600K OC@4.80GHz</p>
@@ -24,7 +24,7 @@ export default function Page() {
               <p>PSU: Cooler Master V550</p>
             </div>
           </div>
-          <div>
+          <div id="Peripherals">
             <div className="mb-2 text-xl font-bold">Peripherals</div>
             <div className="text-base text-gray-700">
               <p>Kᴇʏʙᴏᴀʀᴅ1: HyperX Alloy Origins Core</p>
