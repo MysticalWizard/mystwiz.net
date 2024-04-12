@@ -12,7 +12,7 @@ export default function Page() {
         <div className="px-6 py-4">
           <div className="mb-2 text-xl font-bold">About Me</div>
           <p className="text-base text-gray-700">
-            Hey there! I&apos;m Wonsik Shin (aka MysticalWizard), a computer science enthusiast with a passion for AI, machine learning, and web development. Currently, I&apos;m diving deep into web development using NextJS and game development using Unreal Engine 5. Check out the <Link href="/projects">projects</Link> page to see what I&apos;m working on!
+            Hey there! I&apos;m Wonsik Shin (aka MysticalWizard), a tech enthusiast with a passion for AI, machine learning, networking, and web development. Currently, I&apos;m diving deep into web development using NextJS. Check out the <Link href="/projects">projects</Link> page to see what I&apos;m working on!
           </p>
         </div>
       </div>
