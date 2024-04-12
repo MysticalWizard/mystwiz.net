@@ -1,3 +1,6 @@
+[![ci](https://github.com/MysticalWizard/mystwiz.net/actions/workflows/ci.yml/badge.svg)](https://github.com/MysticalWizard/mystwiz.net/actions/workflows/ci.yml)
+[![CodeFactor](https://www.codefactor.io/repository/github/mysticalwizard/mystwiz.net/badge)](https://www.codefactor.io/repository/github/mysticalwizard/mystwiz.net)
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
