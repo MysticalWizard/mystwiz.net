@@ -548,13 +548,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.2.77":
-  version: 18.2.77
-  resolution: "@types/react@npm:18.2.77"
+"@types/react@npm:^18.3.3":
+  version: 18.3.3
+  resolution: "@types/react@npm:18.3.3"
   dependencies:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 10c0/9114149933dbee3fdf5900786e660afe3146e8e277424aaf94dca50e29f1de56802b38a83bb65166ff53da086062bb8d001af563a6c906fe3540bdc46554d05a
+  checksum: 10c0/fe455f805c5da13b89964c3d68060cebd43e73ec15001a68b34634604a78140e6fc202f3f61679b9d809dde6d7a7c2cb3ed51e0fd1462557911db09879b55114
   languageName: node
   linkType: hard
 
@@ -2950,14 +2950,14 @@ __metadata:
   dependencies:
     "@next/third-parties": "npm:^14.2.0"
     "@types/node": "npm:^20.12.7"
-    "@types/react": "npm:^18.2.77"
+    "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.2.25"
     autoprefixer: "npm:^10.4.19"
     eslint: "npm:^8.57.0"
     eslint-config-next: "npm:14.1.4"
     next: "npm:^14.2.0"
     postcss: "npm:^8.4.38"
-    react: "npm:^18.2.0"
+    react: "npm:^18.3.1"
     react-dom: "npm:^18.2.0"
     react-social-icons: "npm:^6.16.0"
     sharp: "npm:^0.33.3"
@@ -3542,6 +3542,15 @@ __metadata:
   dependencies:
     loose-envify: "npm:^1.1.0"
   checksum: 10c0/b562d9b569b0cb315e44b48099f7712283d93df36b19a39a67c254c6686479d3980b7f013dc931f4a5a3ae7645eae6386b4aa5eea933baa54ecd0f9acb0902b8
+  languageName: node
+  linkType: hard
+
+"react@npm:^18.3.1":
+  version: 18.3.1
+  resolution: "react@npm:18.3.1"
+  dependencies:
+    loose-envify: "npm:^1.1.0"
+  checksum: 10c0/283e8c5efcf37802c9d1ce767f302dd569dd97a70d9bb8c7be79a789b9902451e0d16334b05d73299b20f048cbc3c7d288bbbde10b701fa194e2089c237dbea3
   languageName: node
   linkType: hard
 
