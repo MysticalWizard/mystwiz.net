@@ -17,7 +17,7 @@ export default function Page() {
             <p className="mt-2 text-gray-600">Discord bot for a server with friends.</p>
           </div>
           <div>
-            <p className="mt-4 text-gray-500">Technologies: Discord.JS, JavaScript</p>
+            <p className="mt-4 text-gray-500">Technologies: Discord.JS, Node.js, JavaScript</p>
           </div>
         </div>
       </div>
