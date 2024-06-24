@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Projects | MysticalWizard',
@@ -61,6 +62,9 @@ export default function Page() {
             <p className="mt-2 text-gray-600">
               A Wuthering Waves Tool that works on discord and web.
             </p>
+          </div>
+          <div className="mt-2 font-medium text-yellow-600 hover:underline">
+            <Link href="https://wuwa.mystwiz.net/">Visit site</Link>
           </div>
           <div>
             <p className="mt-4 text-gray-500">
