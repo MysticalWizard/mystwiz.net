@@ -1,5 +1,5 @@
-import { MetadataRoute } from 'next'
- 
+import { MetadataRoute } from 'next';
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
@@ -8,5 +8,5 @@ export default function robots(): MetadataRoute.Robots {
       disallow: '/*.json',
     },
     sitemap: 'https://mystwiz.net/sitemap.xml',
-  }
+  };
 }

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
- 
+
 export const metadata: Metadata = {
   title: 'Specs | MysticalWizard',
 };
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="flex flex-col items-center justify-center h-full py-4 space-y-8">
-      <div className="mx-auto overflow-hidden transition-shadow duration-300 ease-in-out bg-white rounded-lg shadow-lg w-max hover:shadow-xl">
+      <div className="mx-auto overflow-hidden bg-white rounded-lg shadow-lg transition-shadow duration-300 ease-in-out w-max hover:shadow-xl">
         <div className="px-6 py-4 space-y-4">
           <div id="PC">
             <div className="mb-2 text-xl font-bold">PC</div>
@@ -15,7 +15,9 @@ export default function Page() {
               <p>CPU: Intel Core i5-9600K OC@4.80GHz</p>
               <p>Cᴏᴏʟᴇʀ: Cooler Master MasterLiquid ML240L RGB</p>
               <p>Mᴏʙᴏ: MSI MPG Z390 GAMING EDGE AC</p>
-              <p>RAM: Corsair VENGEANCE RGB PRO 32GB (2 x 16GB) DDR4 3000MHz CL16</p>
+              <p>
+                RAM: Corsair VENGEANCE RGB PRO 32GB (2 x 16GB) DDR4 3000MHz CL16
+              </p>
               <p>GPU: MSI GeForce GTX 1060 GAMING X 6G</p>
               <p>Sᴛᴏʀᴀɢᴇ1: Samsung 990 PRO 1TB</p>
               <p>Sᴛᴏʀᴀɢᴇ2: Samsung 970 EVO Plus 500GB</p>
@@ -49,5 +51,5 @@ export default function Page() {
         </div>
       </div>
     </div>
-  )
+  );
 }

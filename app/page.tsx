@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import React from "react";
-import Image from "next/image";
+import React from 'react';
+import Image from 'next/image';
 import Typewriter from 'typewriter-effect';
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
       <div>
         <h1 className="text-4xl font-medium dark:text-white">MysticalWizard</h1>
         <div className="dark:text-white">
-          <Typewriter 
+          <Typewriter
             options={{
               strings: [
                 'print("Hello World!")',
@@ -27,21 +27,51 @@ export default function Home() {
                 'Console.WriteLine("Hello World!");',
                 'System.out.println("Hello World!");',
                 'cout << "Hello World!";',
-                'echo "Hello World!";'
+                'echo "Hello World!";',
               ],
               autoStart: true,
-              loop: true
+              loop: true,
             }}
           />
         </div>
       </div>
       <div className="flex items-center justify-center gap-4 dark:text-white">
-        <a href="https://osu.ppy.sh/users/19430051/osu/" target="_blank" rel="noopener noreferrer">osu!</a>
-        <a href="https://steamcommunity.com/id/mysticalwiz/" target="_blank" rel="noopener noreferrer">Steam</a>
-        <a href="https://www.youtube.com/@mysticalwizard/" target="_blank" rel="noopener noreferrer">YouTube</a>
-        <a href="https://www.twitch.tv/mystclwzrd/" target="_blank" rel="noopener noreferrer">Twitch</a>
-        <a href="https://github.com/mysticalwizard/" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a
+          href="https://osu.ppy.sh/users/19430051/osu/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          osu!
+        </a>
+        <a
+          href="https://steamcommunity.com/id/mysticalwiz/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Steam
+        </a>
+        <a
+          href="https://www.youtube.com/@mysticalwizard/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          YouTube
+        </a>
+        <a
+          href="https://www.twitch.tv/mystclwzrd/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Twitch
+        </a>
+        <a
+          href="https://github.com/mysticalwizard/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
       </div>
     </div>
-  )
+  );
 }

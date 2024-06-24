@@ -1,4 +1,4 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -20,10 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: 'https://mystwiz.net/projects',
       lastModified: new Date(),
+      priority: 0.6,
     },
     {
       url: 'https://mystwiz.net/specs',
       lastModified: new Date(),
     },
-  ]
+  ];
 }
