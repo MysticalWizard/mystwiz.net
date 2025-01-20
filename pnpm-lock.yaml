@@ -21,8 +21,8 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
       react-social-icons:
-        specifier: ^6.16.0
-        version: 6.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^6.19.0
+        version: 6.19.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       sharp:
         specifier: ^0.33.4
         version: 0.33.4
@@ -70,8 +70,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@babel/runtime@7.24.7':
-    resolution: {integrity: sha512-UwgBRMjJP+xv857DCngvqXI3Iq6J4v0wXmwc6sapg+zyhbwmQX67LUEFrkK5tbyJ30jGuG3ZvWpBiB9LCy1kWw==}
+  '@babel/runtime@7.26.0':
+    resolution: {integrity: sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==}
     engines: {node: '>=6.9.0'}
 
   '@emnapi/runtime@1.2.0':
@@ -1432,11 +1432,11 @@ packages:
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
-  react-social-icons@6.16.0:
-    resolution: {integrity: sha512-9mLDzPc85szYJeL0RB78PSdgBnCyexFD6rg6uyxQgwMgo3JaiuGLkxMmKVWBjoX+QW9bxq7VoKk6BGa7PYeJ1g==}
+  react-social-icons@6.19.0:
+    resolution: {integrity: sha512-MG/La4zkF3eDVtfg6JA7XIZB/DRCy1khiKhBqWWyUXEEmFT1f9y3296OUeyU1oQKyf1D4CuUAk3Ir298Kowq9A==}
     peerDependencies:
-      react: 15.x.x || 16.x.x || 17.x.x || 18.x.x
-      react-dom: 15.x.x || 16.x.x || 17.x.x || 18.x.x
+      react: 15.x.x || 16.x.x || 17.x.x || 18.x.x || 19.x.x
+      react-dom: 15.x.x || 16.x.x || 17.x.x || 18.x.x || 19.x.x
 
   react@18.3.1:
     resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
@@ -1764,7 +1764,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@babel/runtime@7.24.7':
+  '@babel/runtime@7.26.0':
     dependencies:
       regenerator-runtime: 0.14.1
 
@@ -3270,9 +3270,9 @@ snapshots:
 
   react-is@16.13.1: {}
 
-  react-social-icons@6.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-social-icons@6.19.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.24.7
+      '@babel/runtime': 7.26.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
