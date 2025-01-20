@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@next/third-parties':
-        specifier: ^14.2.4
-        version: 14.2.4(next@14.2.21(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        specifier: ^15.1.5
+        version: 15.1.5(next@14.2.21(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       next:
         specifier: ^14.2.21
         version: 14.2.21(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -303,11 +303,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@next/third-parties@14.2.4':
-    resolution: {integrity: sha512-bf5d5m4a+Fh9syLz0Pf9Ax7LdLazlp7ur7DqX0LUMDyIx9Z/F0J/XxieklA9lRqM9KjrCVNT8Tkhg0AvotTBTQ==}
+  '@next/third-parties@15.1.5':
+    resolution: {integrity: sha512-APPZrBerXvZn1IvNwC+TqusqWiTaj6goa1P6/YJe8nr9GTG+j8+vGJ39py49+kUgyiYRYUly2tc6Uxu6g/VEWw==}
     peerDependencies:
-      next: ^13.0.0 || ^14.0.0
-      react: ^18.2.0
+      next: ^13.0.0 || ^14.0.0 || ^15.0.0
+      react: ^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1942,7 +1942,7 @@ snapshots:
   '@next/swc-win32-x64-msvc@14.2.21':
     optional: true
 
-  '@next/third-parties@14.2.4(next@14.2.21(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@next/third-parties@15.1.5(next@14.2.21(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
       next: 14.2.21(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
