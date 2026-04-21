@@ -1,0 +1,42 @@
+---
+import { GLYPH } from '../consts';
+
+const year = new Date().getFullYear();
+const romanMap: Record<number, string> = {
+    2024: 'mmxxiv',
+    2025: 'mmxxv',
+    2026: 'mmxxvi',
+    2027: 'mmxxvii',
+    2028: 'mmxxviii',
+    2029: 'mmxxix',
+    2030: 'mmxxx',
+};
+const display = romanMap[year] ?? year.toString();
+---
+
+<footer class="rule">
+    <span>{display}</span>
+    <span class="glyph" aria-hidden="true">{GLYPH}</span>
+</footer>
+
+<style>
+    .rule {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        font-size: 0.7rem;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: var(--hai);
+    }
+
+    .glyph {
+        font-family: var(--mincho);
+        font-size: 1rem;
+        letter-spacing: 0;
+        color: var(--hai);
+        user-select: none;
+    }
+</style>

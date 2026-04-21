@@ -1,0 +1,84 @@
+---
+import { MOTIF, SITE_TITLE, TAGLINE } from '../consts';
+---
+
+<section class="composition" aria-labelledby="name">
+    <div class="text">
+        <p class="eyebrow" aria-hidden="true">—</p>
+        <h1 id="name">{SITE_TITLE}</h1>
+        <p class="line">
+            {
+                TAGLINE.map((line, i) => (
+                    <>
+                        {i > 0 && <br />}
+                        {line}
+                    </>
+                ))
+            }
+        </p>
+    </div>
+    <div class="motif" aria-hidden="true">{MOTIF}</div>
+</section>
+
+<style>
+    .composition {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: clamp(1.5rem, 6vw, 5rem);
+        max-width: 64rem;
+        width: 100%;
+        margin: 0 auto;
+        padding: clamp(1rem, 6vh, 4rem) 0;
+    }
+
+    .text {
+        max-width: 22rem;
+    }
+
+    .eyebrow {
+        color: var(--hai);
+        margin: 0 0 1.25rem;
+        letter-spacing: 0.4em;
+        font-size: 0.85rem;
+        user-select: none;
+    }
+
+    h1 {
+        font-size: clamp(1.65rem, 3.5vw, 2.1rem);
+        font-weight: 400;
+        margin: 0 0 1.25rem;
+    }
+
+    .line {
+        color: var(--hai);
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
+    .motif {
+        font-family: var(--mincho);
+        font-weight: 200;
+        font-size: clamp(9rem, 22vw, 17rem);
+        line-height: 0.9;
+        color: var(--usu);
+        user-select: none;
+        justify-self: end;
+        padding-right: clamp(0.5rem, 3vw, 2rem);
+    }
+
+    @media (max-width: 720px) {
+        .composition {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .motif {
+            order: -1;
+            justify-self: start;
+            padding-right: 0;
+            margin-bottom: 1.5rem;
+            font-size: clamp(7rem, 32vw, 11rem);
+        }
+    }
+</style>

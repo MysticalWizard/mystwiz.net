@@ -1,0 +1,70 @@
+:root {
+    --washi: #f3efe7;
+    --kinari: #ebe6db;
+    --sumi: #1c1a17;
+    --hai: #8a857d;
+    --usu: #d6d0c2;
+    --ai: #2a3a4a;
+
+    --sans:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+        "Yu Gothic", Meiryo, sans-serif;
+    --mincho:
+        "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "MS Mincho",
+        "Source Han Serif JP", "Noto Serif JP", serif;
+
+    --leading: 1.65;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--washi);
+    color: var(--sumi);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: var(--leading);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    min-height: 100vh;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid var(--usu);
+    transition: border-color 240ms ease, color 240ms ease;
+}
+
+a:hover {
+    border-bottom-color: var(--sumi);
+}
+
+::selection {
+    background: var(--sumi);
+    color: var(--washi);
+}
+
+p {
+    margin: 0;
+}
+
+h1,
+h2,
+h3 {
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+}

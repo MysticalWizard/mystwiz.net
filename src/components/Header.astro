@@ -1,0 +1,74 @@
+---
+import { REPO_URL, SITE_TITLE } from '../consts';
+---
+
+<header class="mark">
+    <div class="left">
+        <span aria-hidden="true" class="dot">·</span>
+        <span class="domain">mystwiz.net</span>
+        <span class="visually-hidden">{SITE_TITLE}</span>
+    </div>
+    <a
+        class="right"
+        href={REPO_URL}
+        rel="me noopener noreferrer"
+        target="_blank"
+    >
+        source
+    </a>
+</header>
+
+<style>
+    .mark {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        font-size: 0.7rem;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: var(--hai);
+    }
+
+    .left {
+        display: flex;
+        align-items: center;
+        gap: 0.6em;
+    }
+
+    .dot {
+        color: var(--sumi);
+        font-size: 1.1rem;
+        line-height: 0;
+        transform: translateY(-1px);
+    }
+
+    .right {
+        color: var(--hai);
+        border-bottom-color: transparent;
+    }
+
+    .right:hover {
+        color: var(--sumi);
+        border-bottom-color: var(--sumi);
+    }
+
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    @media (max-width: 720px) {
+        .right {
+            display: none;
+        }
+    }
+</style>

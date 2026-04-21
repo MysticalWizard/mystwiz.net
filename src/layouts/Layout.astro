@@ -1,0 +1,38 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    </head>
+    <body>
+        <div class="frame">
+            <Header />
+            <main>
+                <slot />
+            </main>
+            <Footer />
+        </div>
+    </body>
+</html>
+
+<style>
+    .frame {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        padding: clamp(1.25rem, 3.5vw, 2.5rem)
+            clamp(1.25rem, 5vw, 3rem);
+        gap: clamp(1.5rem, 4vw, 3rem);
+    }
+
+    main {
+        display: flex;
+        align-items: center;
+    }
+</style>
