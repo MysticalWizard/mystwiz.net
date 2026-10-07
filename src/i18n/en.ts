@@ -279,9 +279,25 @@ const en = {
         `Series ${series}, ${cars} cars`,
     },
     car: (n: number) => `Car ${n}`,
+    carLabel: (n: number, type: string) => `Car ${n}, ${type}`,
+    formation: 'Train formation. Each car is a PC part.',
+    plate: {
+      title: "Builder's plate",
+      inspected: 'Inspected',
+      depot: 'MZ Depot',
+    },
     cab: {
       label: 'Cab equipment',
       heading: "The driver's desk",
+    },
+    tap: {
+      label: 'Keypad test',
+      heading: 'Try the Wooting',
+      key: (key: string) => `Tap key ${key}`,
+      bpm: 'BPM, 1/4 streams',
+      taps: 'Taps',
+      best: 'Best',
+      text: 'Tap Z and X on your keyboard, or the keys here. It measures your stream speed the way osu! players count it.',
     },
   },
 

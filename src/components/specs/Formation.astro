@@ -1,0 +1,321 @@
+---
+// The PC as an 8-car train named after its CPU. Pressing a car selects it and shows its
+// builder's plate below. Every plate is in the page; the selected one is shown.
+import { CARS, INSPECTED } from '../../data/specs';
+import { getStrings } from '../../i18n';
+import Picto from '../Picto.astro';
+
+const t = getStrings(Astro.currentLocale);
+const s = t.specs;
+/** The GPU car is selected to start with. */
+const FIRST = 4;
+---
+
+<mz-formation class="formation rise" style="--i: 0">
+  <div class="train" role="group" aria-label={s.formation} data-noswipe>
+    {CARS.map((car, i) => (
+      <button
+        type="button"
+        class:list={['car', { front: i === 0, rear: i === CARS.length - 1 }]}
+        aria-pressed={i === FIRST ? 'true' : 'false'}
+        aria-controls="builders-plate"
+        aria-label={s.carLabel(i + 1, car.type)}
+        data-car={i}
+      >
+        <span class="stripe" />
+        <span class="ct">{car.type}</span>
+        <span class="cno">{s.car(i + 1)}</span>
+        <Picto name={car.picto} />
+      </button>
+    ))}
+  </div>
+  <div class="rail"></div>
+  <div id="builders-plate" aria-live="polite">
+    {CARS.map((car, i) => (
+      <div class="plate" data-plate={i} hidden={i !== FIRST}>
+        <div class="pl-no">{i + 1}</div>
+        <div>
+          <div class="pl-type">
+            {`${s.car(i + 1)} · ${car.type} · ${s.plate.title}`}
+          </div>
+          <div class="pl-model">{car.model}</div>
+          <div class="pl-extra">{car.detail}</div>
+        </div>
+        <div class="stamp" aria-hidden="true">
+          <span>
+            {s.plate.inspected}
+            <b>{INSPECTED}</b>
+            {s.plate.depot}
+          </span>
+        </div>
+      </div>
+    ))}
+  </div>
+</mz-formation>
+
+<script>
+  class MzFormation extends HTMLElement {
+    connectedCallback() {
+      this.addEventListener('click', (event) => {
+        const car = (event.target as Element).closest<HTMLElement>(
+          '[data-car]',
+        );
+        if (car) this.select(Number(car.dataset.car));
+      });
+    }
+
+    select(index: number) {
+      for (const car of this.querySelectorAll<HTMLElement>('[data-car]')) {
+        car.setAttribute(
+          'aria-pressed',
+          String(Number(car.dataset.car) === index),
+        );
+      }
+      for (const plate of this.querySelectorAll<HTMLElement>('[data-plate]')) {
+        plate.hidden = Number(plate.dataset.plate) !== index;
+      }
+    }
+  }
+
+  customElements.define('mz-formation', MzFormation);
+</script>
+
+<style>
+  .formation {
+    position: relative;
+    display: block;
+  }
+
+  .train {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 12px 4px 30px;
+    scroll-snap-type: x proximity;
+  }
+
+  .car {
+    position: relative;
+    flex: 0 0 138px;
+    height: 92px;
+    border: 2px solid var(--fg);
+    border-radius: 8px;
+    background: var(--panel);
+    text-align: left;
+    scroll-snap-align: center;
+    transition:
+      transform 0.35s var(--brake),
+      background 0.25s,
+      color 0.25s;
+  }
+
+  /* Windows. */
+  .car::before {
+    content: '';
+    position: absolute;
+    top: 11px;
+    left: 12px;
+    right: 12px;
+    height: 20px;
+    border-radius: 3px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--door-glass) 0 22px,
+      transparent 22px 28px
+    );
+  }
+
+  /* Two bogies. */
+  .car::after {
+    content: '';
+    position: absolute;
+    bottom: -13px;
+    left: 14px;
+    right: 14px;
+    height: 14px;
+    background: radial-gradient(
+        circle at 12px 7px,
+        var(--fg) 5px,
+        transparent 5.6px
+      )
+      0 0 / 50% 100% repeat-x;
+  }
+
+  .stripe {
+    position: absolute;
+    top: 38px;
+    left: 0;
+    right: 0;
+    height: 7px;
+    background: var(--line);
+  }
+
+  .cno {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .ct {
+    position: absolute;
+    bottom: 22px;
+    left: 10px;
+    font-size: 16px;
+    font-weight: 780;
+    font-stretch: 112%;
+    line-height: 1;
+  }
+
+  .car :global(.picto) {
+    position: absolute;
+    right: 10px;
+    bottom: 9px;
+    width: 22px;
+    height: 22px;
+  }
+
+  /* The front and rear cars have a nose. */
+  .car.front {
+    border-top-left-radius: 46px 64px;
+  }
+
+  .car.front::before {
+    left: 30px;
+  }
+
+  .car.rear {
+    border-top-right-radius: 46px 64px;
+  }
+
+  .car.rear::before {
+    right: 30px;
+  }
+
+  .car:hover {
+    transform: translateY(-4px);
+  }
+
+  .car[aria-pressed='true'] {
+    background: var(--fg);
+    color: var(--bg);
+    transform: translateY(-6px);
+  }
+
+  .car[aria-pressed='true'] .stripe {
+    background: var(--lit);
+  }
+
+  .rail {
+    height: 4px;
+    margin-top: -22px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--rule-2) 0 18px,
+      transparent 18px 24px
+    );
+  }
+
+  .plate {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 28px;
+    margin-top: 28px;
+    padding: 22px 28px;
+    border: 2px solid var(--rule-2);
+    border-radius: 6px;
+    background: var(--panel-2);
+    font-family: var(--f-mono);
+  }
+
+  .plate[hidden] {
+    display: none;
+  }
+
+  /* Rivets in the corners. */
+  .plate::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    pointer-events: none;
+    background:
+      radial-gradient(circle, var(--rule-2) 3px, transparent 3.5px) 0 0 / 8px
+        8px no-repeat,
+      radial-gradient(circle, var(--rule-2) 3px, transparent 3.5px) 100% 0 / 8px
+        8px no-repeat,
+      radial-gradient(circle, var(--rule-2) 3px, transparent 3.5px) 0 100% / 8px
+        8px no-repeat,
+      radial-gradient(circle, var(--rule-2) 3px, transparent 3.5px) 100% 100% /
+        8px 8px no-repeat;
+  }
+
+  .pl-no {
+    color: var(--line-ink);
+    font-family: var(--f-sign);
+    font-size: 64px;
+    font-stretch: 70%;
+    font-weight: 850;
+    line-height: 0.9;
+  }
+
+  .pl-type {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .pl-model {
+    font-family: var(--f-sign);
+    font-size: clamp(22px, 2.6vw, 34px);
+    font-stretch: 104%;
+    font-weight: 760;
+    line-height: 1.1;
+  }
+
+  .pl-extra {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .stamp {
+    display: grid;
+    place-items: center;
+    width: 104px;
+    height: 104px;
+    border: 3px solid var(--line-ink);
+    border-radius: 50%;
+    color: var(--line-ink);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.35;
+    text-align: center;
+    text-transform: uppercase;
+    opacity: 0.9;
+    transform: rotate(-10deg);
+  }
+
+  .stamp b {
+    display: block;
+    font-size: 13px;
+  }
+
+  @media (max-width: 620px) {
+    .plate {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stamp {
+      display: none;
+    }
+  }
+</style>
