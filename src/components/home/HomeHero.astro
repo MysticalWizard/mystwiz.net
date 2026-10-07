@@ -1,0 +1,364 @@
+---
+// Home's station board, staged in layers: blueprint grid at the back, the route line with a
+// train, the board itself, and floating tags in front.
+import { TRANSFERS } from '../../data/lines';
+import { getStrings } from '../../i18n';
+import Picto from '../Picto.astro';
+import StationBoard from '../StationBoard.astro';
+
+const t = getStrings(Astro.currentLocale);
+---
+
+<mz-hero class="hero">
+  <div class="plane p-back" aria-hidden="true">
+    <div class="hero-grid"></div>
+    <div class="ghost">MZ</div>
+    <div class="ruler"></div>
+  </div>
+
+  <div class="plane p-line" aria-hidden="true">
+    <svg data-hero-svg viewBox="0 0 1440 640" preserveAspectRatio="none">
+      <path
+        class="hero-case"
+        data-case
+        d="M-60 560 H250 L430 380 H1010 L1210 180 H1560"
+      ></path>
+      <path
+        class="hero-route"
+        data-route
+        d="M-60 560 H250 L430 380 H1010 L1210 180 H1560"
+      ></path>
+      <g class="hero-train" data-train>
+        <rect class="body" x="-46" y="-14" width="92" height="28" rx="9"></rect>
+        <rect class="win" x="-36" y="-7" width="14" height="9" rx="2"></rect>
+        <rect class="win" x="-17" y="-7" width="14" height="9" rx="2"></rect>
+        <rect class="win" x="2" y="-7" width="14" height="9" rx="2"></rect>
+        <rect class="win" x="21" y="-7" width="14" height="9" rx="2"></rect>
+      </g>
+      <circle class="hero-stn" data-stn="a" cx="250" cy="560" r="17"></circle>
+      <circle class="hero-stn" data-stn="b" cx="1210" cy="180" r="17"></circle>
+    </svg>
+  </div>
+
+  <div class="wrap hero-in">
+    <div class="hero-board" data-board>
+      <StationBoard id="home" sub={t.home.sub}>
+        <h1 slot="title" class="wordmark" tabindex="-1">
+          {t.stations.home.name}
+        </h1>
+        <span slot="sub">{t.home.formerly}</span>
+        <div slot="side" class="board-xfer">
+          <span class="label" id="transfer-label">
+            {t.board.transfers}
+          </span>
+          <ul class="bx" aria-labelledby="transfer-label">
+            {TRANSFERS.map((line) => (
+              <li>
+                <a href={line.href} target="_blank" rel="noopener noreferrer">
+                  <Picto name={line.picto} />
+                  {line.code} <span class="sr-only">{line.name}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </StationBoard>
+    </div>
+  </div>
+
+  <div class="plane p-front" aria-hidden="true">
+    <span class="tag" style="left: max(18px, 3vw); top: 4px">
+      <b>{t.home.tags.line}</b> {t.home.tags.service}
+    </span>
+  </div>
+</mz-hero>
+
+<script>
+  // Draw the route line around the board: it comes in from the left under the board, climbs at
+  // 45 degrees behind it and leaves along the top right. On phones it runs straight under the board.
+  class MzHero extends HTMLElement {
+    #resize = new ResizeObserver(() => this.layout());
+
+    connectedCallback() {
+      this.#resize.observe(this);
+    }
+
+    disconnectedCallback() {
+      this.#resize.disconnect();
+    }
+
+    layout() {
+      const svg = this.querySelector('[data-hero-svg]');
+      const board = this.querySelector('[data-board]');
+      const route = this.querySelector<SVGPathElement>('[data-route]');
+      const casing = this.querySelector('[data-case]');
+      const train = this.querySelector('[data-train]');
+      const [stnA, stnB] = this.querySelectorAll('[data-stn]');
+      if (!svg || !board || !route || !casing || !train || !stnA || !stnB) {
+        return;
+      }
+
+      const w = this.clientWidth;
+      const h = this.clientHeight;
+      const hero = this.getBoundingClientRect();
+      const rect = board.getBoundingClientRect();
+      const left = rect.left - hero.left;
+      const right = rect.right - hero.left;
+      const top = rect.top - hero.top;
+      const bottom = rect.bottom - hero.top;
+      const low = Math.round(
+        Math.min(h - 22, bottom + Math.max(30, (h - bottom) * 0.5)),
+      );
+      const high = Math.round(Math.max(18, top * 0.45));
+
+      let d: string;
+      let a: [number, number];
+      let b: [number, number];
+      if (w >= 760) {
+        const x1 = Math.round(left + (right - left) * 0.2);
+        const x2 = x1 + (low - high);
+        d = `M-90 ${low} H${x1} L${x2} ${high} H${w + 90}`;
+        a = [Math.round(left + (right - left) * 0.07), low];
+        b = [Math.round(Math.min(w - 70, x2 + (w - x2) * 0.5)), high];
+      } else {
+        d = `M-90 ${low} H${w + 90}`;
+        a = [Math.round(w * 0.18), low];
+        b = [Math.round(w * 0.8), low];
+      }
+
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      route.setAttribute('d', d);
+      casing.setAttribute('d', d);
+      stnA.setAttribute('cx', String(a[0]));
+      stnA.setAttribute('cy', String(a[1]));
+      stnB.setAttribute('cx', String(b[0]));
+      stnB.setAttribute('cy', String(b[1]));
+
+      const p = route.getPointAtLength(120);
+      train.setAttribute('transform', `translate(${p.x} ${p.y})`);
+    }
+  }
+
+  customElements.define('mz-hero', MzHero);
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    display: block;
+    isolation: isolate;
+    overflow-x: clip;
+    padding-block: clamp(56px, 7vw, 104px) clamp(70px, 8vw, 124px);
+    perspective: 1400px;
+  }
+
+  .plane {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .p-back {
+    z-index: -3;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: -80px -6vw;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+      linear-gradient(var(--grid-2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-2) 1px, transparent 1px);
+    background-size:
+      32px 32px,
+      32px 32px,
+      160px 160px,
+      160px 160px;
+    -webkit-mask-image: radial-gradient(
+      90% 80% at 50% 40%,
+      #000 30%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(90% 80% at 50% 40%, #000 30%, transparent 100%);
+  }
+
+  .ghost {
+    position: absolute;
+    right: -1vw;
+    bottom: -14%;
+    font-size: clamp(180px, 34vw, 560px);
+    font-weight: 900;
+    font-stretch: 62%;
+    line-height: 0.78;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--rule-2);
+    user-select: none;
+  }
+
+  .ruler {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: max(6px, 1vw);
+    width: 22px;
+    background: repeating-linear-gradient(
+      180deg,
+      var(--rule-2) 0 1px,
+      transparent 1px 16px
+    );
+    -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 41%);
+    mask-image: linear-gradient(90deg, #000 40%, transparent 41%);
+    opacity: 0.8;
+  }
+
+  .p-line {
+    z-index: -2;
+  }
+
+  .p-line svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .hero-case {
+    fill: none;
+    stroke: var(--rule-2);
+    stroke-width: 26;
+    stroke-linejoin: round;
+  }
+
+  .hero-route {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 18;
+    stroke-linejoin: round;
+  }
+
+  .hero-stn {
+    fill: var(--panel);
+    stroke: var(--fg);
+    stroke-width: 5;
+  }
+
+  .hero-train .body {
+    fill: var(--fg);
+  }
+
+  .hero-train .win {
+    fill: var(--bg);
+  }
+
+  .hero-in {
+    position: relative;
+  }
+
+  .hero-board {
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  .p-front {
+    z-index: 2;
+  }
+
+  .tag {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--rule-2);
+    border-radius: 4px;
+    background: var(--panel);
+    box-shadow: 0 14px 30px -14px rgb(0 0 0 / 0.7);
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+
+  .tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--line);
+  }
+
+  .tag b {
+    font-weight: 500;
+    color: var(--fg);
+  }
+
+  /* The wordmark is fitted to the board's width (the .board-name container), up to 240px.
+     --wm-ratio is the word's width per 1px of font size. */
+  .wordmark {
+    --wm-ratio: 4.684;
+    display: inline-flex;
+    align-self: flex-start;
+    padding-bottom: 0.12em;
+    font-size: min(240px, calc(97cqi / var(--wm-ratio)));
+    font-weight: 820;
+    font-stretch: 114%;
+    line-height: 0.84;
+    letter-spacing: -0.012em;
+    white-space: nowrap;
+  }
+
+  .board-xfer {
+    display: grid;
+    align-content: center;
+    align-self: stretch;
+    gap: 10px;
+    padding-left: clamp(16px, 2vw, 28px);
+    border-left: 1px solid var(--rule);
+  }
+
+  .bx {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 8px;
+  }
+
+  .bx a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px 6px 8px;
+    border: 1px solid var(--rule-2);
+    border-radius: 6px;
+    background: var(--panel-2);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  .bx a:hover {
+    border-color: var(--fg);
+  }
+
+  .bx :global(.picto) {
+    width: 18px;
+    height: 18px;
+  }
+
+  @media (max-width: 1100px) {
+    .board-xfer {
+      display: none;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .tag {
+      display: none;
+    }
+  }
+</style>
