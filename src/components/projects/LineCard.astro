@@ -51,9 +51,7 @@ const s = t.projects;
         </LinkButton>
       ))
     ) : (
-      <span class="label">
-        {p.status === 'building' ? s.noLinks.building : s.noLinks.private}
-      </span>
+      <span class="label">{s.noLinks[p.status as keyof typeof s.noLinks]}</span>
     )}
   </footer>
 </article>
@@ -134,6 +132,11 @@ const s = t.projects;
       color-mix(in srgb, var(--line) 70%, #000) 6px 12px
     );
     color: var(--on-line);
+  }
+
+  /* Out of service: a dashed border, like a line that is no longer drawn solid. */
+  .pill.suspended {
+    border-style: dashed;
   }
 
   .pill.here {

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { lineCounts, NETWORK, PROJECTS } from './projects';
 
 describe('project lines', () => {
-  it('counts lines for the Projects board: 4 lines, 3 in service, 1 under construction', () => {
-    expect(lineCounts()).toEqual({ lines: 4, inService: 3, building: 1 });
+  it('counts lines for the Projects board: 4 lines, 2 in service, 1 under construction', () => {
+    expect(lineCounts()).toEqual({ lines: 4, inService: 2, building: 1 });
   });
 
   it('marks every shared stop as a transfer on each line that has it', () => {

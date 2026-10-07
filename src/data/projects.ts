@@ -1,7 +1,8 @@
 // Projects are lines on the network map; each stop is something the project is built with.
 // A stop marked "transfer" is shared with another line. Descriptions live in src/i18n.
 
-export type ProjectStatus = 'building' | 'service' | 'here' | 'private';
+export type ProjectStatus =
+  'building' | 'service' | 'here' | 'private' | 'suspended';
 
 export interface Stop {
   name: string;
@@ -43,9 +44,9 @@ export const PROJECTS: Project[] = [
     links: [],
   },
   {
-    id: 'ww',
-    code: 'WW',
-    name: 'Waveworn',
+    id: 'ew',
+    code: 'EW',
+    name: 'ElectricalWizard',
     tone: 'var(--fg)',
     status: 'service',
     stops: [
@@ -55,7 +56,7 @@ export const PROJECTS: Project[] = [
       { name: 'TypeScript', transfer: true },
       { name: 'Tailwind', transfer: true },
     ],
-    links: [{ kind: 'visit', href: 'https://wuwa.mystwiz.net/' }],
+    links: [{ kind: 'visit', href: 'https://elecwiz.mystwiz.net/' }],
   },
   {
     id: 'mz',
@@ -73,11 +74,11 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
-    id: 'ew',
-    code: 'EW',
-    name: 'ElectricalWizard',
+    id: 'ww',
+    code: 'WW',
+    name: 'Waveworn',
     tone: 'var(--dim)',
-    status: 'private',
+    status: 'suspended',
     stops: [
       { name: 'JavaScript' },
       { name: 'Node.js' },
@@ -89,11 +90,12 @@ export const PROJECTS: Project[] = [
 
 /** Counts for the Projects board: lines, lines in service, lines under construction. */
 export function lineCounts(projects: Project[] = PROJECTS) {
-  const building = projects.filter((p) => p.status === 'building').length;
+  const count = (...statuses: ProjectStatus[]) =>
+    projects.filter((p) => statuses.includes(p.status)).length;
   return {
     lines: projects.length,
-    inService: projects.length - building,
-    building,
+    inService: count('service', 'here', 'private'),
+    building: count('building'),
   };
 }
 
@@ -116,31 +118,31 @@ export const NETWORK = {
   viewBox: '0 30 1080 420',
   lines: [
     { id: 'yr', d: 'M90 80 H440', extension: 'M440 80 H600' },
-    { id: 'ew', d: 'M70 400 H300 L420 280' },
-    { id: 'ww', d: 'M330 280 H1050' },
+    { id: 'ww', d: 'M70 400 H300 L420 280' },
+    { id: 'ew', d: 'M330 280 H1050' },
     { id: 'mz', d: 'M540 150 H600 L714 264 H900 L950 214 H1050' },
   ] as { id: Project['id']; d: string; extension?: string }[],
   stations: [
     { name: 'Anime', x: 210, y: 80, lines: ['yr'], label: 'above' },
     { name: 'Recommendations', x: 360, y: 80, lines: ['yr'], label: 'above' },
     { name: '', x: 560, y: 80, lines: ['yr'], label: 'above', tba: true },
-    { name: 'JavaScript', x: 150, y: 400, lines: ['ew'], label: 'below' },
-    { name: 'Node.js', x: 250, y: 400, lines: ['ew'], label: 'below' },
+    { name: 'JavaScript', x: 150, y: 400, lines: ['ww'], label: 'below' },
+    { name: 'Node.js', x: 250, y: 400, lines: ['ww'], label: 'below' },
     {
       name: 'Discord.js',
       x: 420,
       y: 280,
-      lines: ['ew', 'ww'],
+      lines: ['ww', 'ew'],
       label: 'below',
       shape: 'junction',
     },
-    { name: 'React', x: 530, y: 280, lines: ['ww'], label: 'below' },
-    { name: 'Next.js', x: 640, y: 280, lines: ['ww'], label: 'below' },
+    { name: 'React', x: 530, y: 280, lines: ['ew'], label: 'below' },
+    { name: 'Next.js', x: 640, y: 280, lines: ['ew'], label: 'below' },
     {
       name: 'TypeScript',
       x: 770,
       y: 272,
-      lines: ['ww', 'mz'],
+      lines: ['ew', 'mz'],
       label: 'below',
       shape: 'capsule',
     },
@@ -148,7 +150,7 @@ export const NETWORK = {
       name: 'Tailwind',
       x: 860,
       y: 272,
-      lines: ['ww', 'mz'],
+      lines: ['ew', 'mz'],
       label: 'below',
       shape: 'capsule',
     },
@@ -157,13 +159,13 @@ export const NETWORK = {
   /** Line badges sit at the start of each line. */
   badges: [
     { id: 'yr', x: 90, y: 80 },
-    { id: 'ew', x: 70, y: 400 },
-    { id: 'ww', x: 330, y: 280 },
+    { id: 'ww', x: 70, y: 400 },
+    { id: 'ew', x: 330, y: 280 },
     { id: 'mz', x: 540, y: 150 },
   ] as { id: Project['id']; x: number; y: number }[],
   /** Termini are labeled with the project's domain. */
   termini: [
-    { id: 'ww', x: 1050, y: 314, text: 'wuwa.mystwiz.net' },
+    { id: 'ew', x: 1050, y: 314, text: 'elecwiz.mystwiz.net' },
     { id: 'mz', x: 1050, y: 194, text: 'mystwiz.net' },
   ] as { id: Project['id']; x: number; y: number; text: string }[],
 };
