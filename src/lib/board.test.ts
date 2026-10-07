@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import en from '../i18n/en';
-import { formatAge, formatBoard, sampleBoard, type BoardData } from './board';
+import { formatAge, formatBoard, rowLabel, type BoardData } from './board';
 
 const now = new Date('2026-10-07T12:00:00Z');
 const ago = (ms: number) => new Date(now.getTime() - ms).toISOString();
@@ -73,6 +73,7 @@ describe('formatBoard', () => {
     );
     expect(rows.tw).toEqual({
       live: true,
+      empty: false,
       states: ['On air now', 'Building the MZ Line'],
     });
     expect(rows.yt.live).toBe(false);
@@ -87,14 +88,25 @@ describe('formatBoard', () => {
     expect(rows.st.states).toEqual(['Online', 'Playing osu!']);
   });
 
-  it('keeps a row readable when a source has never answered', () => {
+  it('reads no data when a source has not answered, or has nothing to show', () => {
     const rows = formatBoard(
-      { ...data, osu: null, youtube: null },
+      { ...data, youtube: null, osu: { updatedAt: ago(0) } },
       now,
       en.departures,
     );
-    expect(rows.osu.states).toEqual(['No signal', 'Check back soon']);
-    expect(rows.yt.states).toEqual(['No signal', 'Check back soon']);
+    const noData = { live: false, empty: true, states: ['No data', 'No data'] };
+    expect(rows.yt).toEqual(noData);
+    expect(rows.osu).toEqual(noData);
+    expect(rows.gh.empty).toBe(false);
+  });
+
+  it('reads not connected when a source has no API key', () => {
+    const rows = formatBoard({ ...data, steam: undefined }, now, en.departures);
+    expect(rows.st).toEqual({
+      live: false,
+      empty: true,
+      states: ['No data', 'Not connected'],
+    });
   });
 
   it('falls back to the other half of a row when one value is missing', () => {
@@ -128,13 +140,17 @@ describe('formatBoard without commit counts', () => {
   });
 });
 
-describe('sampleBoard', () => {
-  it('matches the prototype board', () => {
-    const rows = formatBoard(sampleBoard(now), now, en.departures);
-    expect(rows.yt.states).toEqual([
-      '1,284 subscribers',
-      'Latest upload 3d ago',
-    ]);
-    expect(rows.tw.live).toBe(false);
+describe('rowLabel', () => {
+  it('reads both states, or one when they match', () => {
+    expect(
+      rowLabel({
+        live: false,
+        empty: false,
+        states: ['Off air', 'Last stream 2d ago'],
+      }),
+    ).toBe('Off air, Last stream 2d ago');
+    expect(
+      rowLabel({ live: false, empty: true, states: ['No data', 'No data'] }),
+    ).toBe('No data');
   });
 });

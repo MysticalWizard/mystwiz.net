@@ -160,12 +160,10 @@ const en = {
     label: 'Live board',
     heading: 'Departures and transfers',
     title: 'Departures',
-    sample: 'Sample data',
     columns: { line: 'Line', destination: 'Destination', now: 'Now' },
     footer: {
       live: 'Updates every minute',
       snapshot: 'Updated {age}',
-      sample: 'Live feed not connected',
       tap: 'Tap a row to transfer',
     },
     numberLocale: 'en-US',
@@ -193,7 +191,9 @@ const en = {
         offline: 'Offline',
         lastOnline: 'Last online {age}',
       },
-      noSignal: ['No signal', 'Check back soon'],
+      // Rows with nothing real to show. A row without an API key alternates the two.
+      noData: 'No data',
+      notConnected: 'Not connected',
     },
     ago: {
       now: 'just now',

@@ -52,8 +52,9 @@ TikTok, Discord...), add an entry to `ARRIVALS` in `src/data/lines.ts` and its w
 ## Live departure board
 
 `/api/board.json` fetches Twitch, YouTube, osu!, GitHub and Steam in parallel, caches each source
-separately, and always answers with the last good values. The board polls it every minute. Rows
-without a key show "No signal"; with no keys at all the board shows labelled sample data.
+separately, and always answers with the last good values. The board polls it every minute. It
+never makes values up: a row without a key reads "Not connected", and a source that hasn't
+answered reads "No data". Both are dimmed.
 
 Keys are listed in `.env.example`. All are optional; GitHub works without one.
 
@@ -62,8 +63,8 @@ Keys are listed in `.env.example`. All are optional; GitHub works without one.
   `pnpm wrangler secret put TWITCH_CLIENT_ID`, or in the Cloudflare dashboard under the Worker's
   Settings > Variables and Secrets.
 - **Build:** Home is prerendered with the board's values at build time, so also set the keys as
-  build variables (Workers Builds: Settings > Build > Variables and secrets). Otherwise the
-  board starts from sample data until the first poll.
+  build variables (Workers Builds: Settings > Build > Variables and secrets). Otherwise those
+  rows read "Not connected" until the first poll.
 
 ## Deploying
 

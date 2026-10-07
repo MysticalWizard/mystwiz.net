@@ -38,13 +38,16 @@ export interface SteamData extends Stamped {
   lastOnlineAt?: string;
 }
 
-/** Last good value per source; null until a source has answered at least once. */
+/**
+ * Last good value per source. A source with no API key is left out (its row reads "Not
+ * connected"); one with a key is null until it has answered at least once ("No data").
+ */
 export interface BoardData {
-  twitch: TwitchData | null;
-  youtube: YouTubeData | null;
-  github: GitHubData | null;
-  osu: OsuData | null;
-  steam: SteamData | null;
+  twitch?: TwitchData | null;
+  youtube?: YouTubeData | null;
+  github?: GitHubData | null;
+  osu?: OsuData | null;
+  steam?: SteamData | null;
 }
 
 export type BoardLineId = 'yr' | 'tw' | 'yt' | 'gh' | 'osu' | 'st';
@@ -53,11 +56,11 @@ export interface BoardRow {
   states: [string, string];
   /** Something is live right now: the row lights up. */
   live: boolean;
+  /** Nothing real to show: the row is dimmed. */
+  empty: boolean;
 }
 
 const MINUTE = 60_000;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
 
 export function fill(
   template: string,
@@ -88,22 +91,30 @@ export function formatBoard(
   const r = s.rows;
   const num = (n: number) => Math.round(n).toLocaleString(s.numberLocale);
   const age = (at: string) => formatAge(at, now, s.ago);
-  const noSignal: BoardRow = {
+  const noData: BoardRow = {
     live: false,
-    states: [r.noSignal[0], r.noSignal[1]],
+    empty: true,
+    states: [r.noData, r.noData],
   };
+  // A source with nothing to show: null if it has an API key, left out if it hasn't.
+  const missing = (value: null | undefined): BoardRow =>
+    value === null
+      ? noData
+      : { live: false, empty: true, states: [r.noData, r.notConnected] };
   // Two states; if one is unknown the row shows the other in both slots.
   const row = (a?: string, b?: string, live = false): BoardRow => {
     const first = a ?? b;
     const second = b ?? a;
-    return first && second ? { live, states: [first, second] } : noSignal;
+    return first && second
+      ? { live, empty: false, states: [first, second] }
+      : noData;
   };
 
   const { twitch, youtube, github, osu, steam } = data;
   return {
     yr: row(r.yr[0], r.yr[1]),
     tw: !twitch
-      ? noSignal
+      ? missing(twitch)
       : twitch.live
         ? row(r.twitch.live, twitch.title || r.twitch.watch, true)
         : row(
@@ -112,7 +123,7 @@ export function formatBoard(
               fill(r.twitch.lastStream, { age: age(twitch.lastStreamAt) }),
           ),
     yt: !youtube
-      ? noSignal
+      ? missing(youtube)
       : row(
           youtube.subscribers === undefined
             ? undefined
@@ -121,7 +132,7 @@ export function formatBoard(
             fill(r.youtube.latest, { age: age(youtube.latestUploadAt) }),
         ),
     gh: !github
-      ? noSignal
+      ? missing(github)
       : row(
           github.lastPushAt &&
             fill(r.github.push, { age: age(github.lastPushAt) }),
@@ -130,7 +141,7 @@ export function formatBoard(
             : github.repo && fill(r.github.repo, { repo: github.repo }),
         ),
     osu: !osu
-      ? noSignal
+      ? missing(osu)
       : row(
           osu.globalRank === undefined
             ? undefined
@@ -138,7 +149,7 @@ export function formatBoard(
           osu.pp === undefined ? undefined : fill(r.osu.pp, { n: num(osu.pp) }),
         ),
     st: !steam
-      ? noSignal
+      ? missing(steam)
       : steam.online
         ? row(
             r.steam.online,
@@ -152,15 +163,8 @@ export function formatBoard(
   };
 }
 
-/** The prototype's sample values, until the live endpoint is connected. */
-export function sampleBoard(now: Date): BoardData {
-  const at = now.toISOString();
-  const ago = (ms: number) => new Date(now.getTime() - ms).toISOString();
-  return {
-    twitch: { live: false, lastStreamAt: ago(2 * DAY), updatedAt: at },
-    youtube: { subscribers: 1284, latestUploadAt: ago(3 * DAY), updatedAt: at },
-    github: { lastPushAt: ago(2 * HOUR), commitsThisYear: 312, updatedAt: at },
-    osu: { globalRank: 48213, pp: 6912, updatedAt: at },
-    steam: { online: false, lastOnlineAt: ago(5 * HOUR), updatedAt: at },
-  };
+/** A row's accessible name: both states (the flips are hidden), or one when they match. */
+export function rowLabel(row: BoardRow): string {
+  const [first, second] = row.states;
+  return first === second ? first : `${first}, ${second}`;
 }

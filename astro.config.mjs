@@ -25,8 +25,8 @@ export default defineConfig({
   redirects: Object.fromEntries(
     Object.entries(ARRIVALS).map(([via, { path }]) => [path, `/?via=${via}`]),
   ),
-  // API keys for the live departure board (see .env.example). All optional: rows without a
-  // key stay empty, and with no keys at all the board shows sample data.
+  // API keys for the live departure board (see .env.example). All optional: a row without
+  // its key reads "Not connected".
   env: {
     schema: {
       TWITCH_CLIENT_ID: secret(),

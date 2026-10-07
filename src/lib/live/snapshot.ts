@@ -1,22 +1,23 @@
 // What the departure board shows right now, assembled from every source in parallel.
 //
 // mode "live":     served on request by the board endpoint; the browser keeps polling it.
-// mode "snapshot": taken at build time (no server); it can't know about a stream that starts
-//                  later, so it never says the Twitch line is on air.
-// mode "sample":   no API keys are configured yet; the board shows the prototype's sample data.
-import {
-  sampleBoard,
-  type BoardData,
-  type GitHubData,
-  type OsuData,
-  type SteamData,
-  type TwitchData,
-  type YouTubeData,
+// mode "snapshot": taken at build time (no server). A stream that was on air during the build
+//                  may be over by the time the page is read, so that row has no data.
+//
+// Nothing is made up: a source without an API key is left out of the data, and the board
+// says so instead of showing values.
+import type {
+  BoardData,
+  GitHubData,
+  OsuData,
+  SteamData,
+  TwitchData,
+  YouTubeData,
 } from '../board';
 import type { SourceCache } from './cache';
 import type { Source, SourceContext } from './sources';
 
-export type BoardMode = 'live' | 'snapshot' | 'sample';
+export type BoardMode = 'live' | 'snapshot';
 
 export interface BoardSnapshot {
   mode: BoardMode;
@@ -50,18 +51,12 @@ export async function boardSnapshot(options: {
   live: boolean;
 }): Promise<BoardSnapshot> {
   const { sources, cache, ctx, live } = options;
-  const now = ctx.now();
-  const generatedAt = now.toISOString();
-
-  // GitHub works without a key; the board goes live once any keyed source is set up.
-  if (!sources.twitch && !sources.youtube && !sources.osu && !sources.steam) {
-    return { mode: 'sample', generatedAt, data: sampleBoard(now) };
-  }
+  const generatedAt = ctx.now().toISOString();
 
   const load = <T>(key: keyof typeof TTL, source: Source<T> | undefined) =>
     source
       ? cache.get(key, TTL[key], () => source(ctx))
-      : Promise.resolve(null);
+      : Promise.resolve(undefined);
 
   const [twitch, youtube, osu, github, steam] = await Promise.all([
     load('twitch', sources.twitch),
@@ -75,8 +70,7 @@ export async function boardSnapshot(options: {
     mode: live ? 'live' : 'snapshot',
     generatedAt,
     data: {
-      twitch:
-        twitch && !live ? { ...twitch, live: false, title: undefined } : twitch,
+      twitch: !live && twitch?.live ? null : twitch,
       youtube,
       osu,
       github,

@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import { sampleBoard } from '../board';
 import { createCache } from './cache';
 import { boardSnapshot, type BoardSources } from './snapshot';
 import type { SourceContext } from './sources';
@@ -18,7 +17,7 @@ const sources = (overrides: Partial<BoardSources> = {}): BoardSources => ({
 });
 
 describe('board snapshot', () => {
-  it('shows sample data until API keys are configured', async () => {
+  it('leaves out sources without API keys instead of making data up', async () => {
     const snapshot = await boardSnapshot({
       sources: { github: sources().github },
       cache: createCache(),
@@ -26,9 +25,9 @@ describe('board snapshot', () => {
       live: true,
     });
     expect(snapshot).toEqual({
-      mode: 'sample',
+      mode: 'live',
       generatedAt: at,
-      data: sampleBoard(NOW),
+      data: { github: { lastPushAt: at, updatedAt: at } },
     });
   });
 
@@ -52,7 +51,7 @@ describe('board snapshot', () => {
     });
   });
 
-  it('never claims to be on air in a snapshot taken at build time', async () => {
+  it('has no Twitch data in a build-time snapshot that caught the stream on air', async () => {
     const snapshot = await boardSnapshot({
       sources: sources(),
       cache: createCache(),
@@ -60,11 +59,21 @@ describe('board snapshot', () => {
       live: false,
     });
     expect(snapshot.mode).toBe('snapshot');
-    expect(snapshot.data.twitch?.live).toBe(false);
-    expect(snapshot.data.twitch?.title).toBeUndefined();
+    expect(snapshot.data.twitch).toBeNull();
   });
 
-  it('leaves a row empty when its source is not configured or has never answered', async () => {
+  it('keeps an off-air Twitch row in a build-time snapshot', async () => {
+    const twitch = { live: false, lastStreamAt: at, updatedAt: at };
+    const snapshot = await boardSnapshot({
+      sources: sources({ twitch: async () => twitch }),
+      cache: createCache(),
+      ctx,
+      live: false,
+    });
+    expect(snapshot.data.twitch).toEqual(twitch);
+  });
+
+  it('tells a source without a key apart from one that has never answered', async () => {
     const snapshot = await boardSnapshot({
       sources: sources({
         steam: undefined,
@@ -74,7 +83,7 @@ describe('board snapshot', () => {
       ctx,
       live: true,
     });
-    expect(snapshot.data.steam).toBeNull();
+    expect(snapshot.data.steam).toBeUndefined();
     expect(snapshot.data.osu).toBeNull();
     expect(snapshot.data.youtube).not.toBeNull();
   });

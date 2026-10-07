@@ -7,7 +7,7 @@
 // with whatever src/scripts/live.ts hears from the board endpoint.
 import { BOARD_LINES } from '../../data/lines';
 import { getStrings } from '../../i18n';
-import { fill, formatAge, formatBoard } from '../../lib/board';
+import { fill, formatAge, formatBoard, rowLabel } from '../../lib/board';
 import { getBoardSnapshot } from '../../lib/live';
 import Picto from '../Picto.astro';
 import SectionHeading from '../SectionHeading.astro';
@@ -20,11 +20,9 @@ const rows = formatBoard(snapshot.data, at, s);
 const footer =
   snapshot.mode === 'live'
     ? s.footer.live
-    : snapshot.mode === 'sample'
-      ? s.footer.sample
-      : fill(s.footer.snapshot, {
-          age: formatAge(snapshot.generatedAt, at, s.ago),
-        });
+    : fill(s.footer.snapshot, {
+        age: formatAge(snapshot.generatedAt, at, s.ago),
+      });
 ---
 
 <section class="rise" style="--i: 2" aria-labelledby="departures-heading">
@@ -39,9 +37,6 @@ const footer =
     <div class="led-head">
       <span>{s.title}</span>
       <span class="grow"></span>
-      <span class="sample" hidden={snapshot.mode !== 'sample'} data-sample>
-        {s.sample}
-      </span>
       <span class="clock" data-clock aria-hidden="true">
         --<i>:</i>--
       </span>
@@ -58,7 +53,10 @@ const footer =
         return (
           <li data-row-item={line.id}>
             <a
-              class:list={['led-row', { 'is-live': row.live }]}
+              class:list={[
+                'led-row',
+                { 'is-live': row.live, 'is-empty': row.empty },
+              ]}
               href={line.href}
               target={line.internal ? undefined : '_blank'}
               rel={line.internal ? undefined : 'noopener noreferrer'}
@@ -77,7 +75,7 @@ const footer =
                 </span>
               </span>
               <span class="sr-only" data-both>
-                {row.states.join(', ')}
+                {rowLabel(row)}
               </span>
               <span class="came-from" data-from>
                 {t.arrivals.cameFrom}
@@ -101,6 +99,7 @@ const footer =
     fill,
     formatAge,
     formatBoard,
+    rowLabel,
     type BoardLineId,
   } from '../../lib/board';
   import type { BoardSnapshot } from '../../lib/live/snapshot';
@@ -153,22 +152,19 @@ const footer =
         if (!row) continue;
         el.dataset.states = JSON.stringify(row.states);
         el.classList.toggle('is-live', row.live);
+        el.classList.toggle('is-empty', row.empty);
         this.write(el, row.states[this.#phase]);
         const both = el.querySelector('[data-both]');
-        if (both) both.textContent = row.states.join(', ');
+        if (both) both.textContent = rowLabel(row);
       }
-      const sample = this.querySelector<HTMLElement>('[data-sample]');
-      if (sample) sample.hidden = snapshot.mode !== 'sample';
       const footer = this.querySelector('[data-footer]');
       if (footer) {
         footer.textContent =
           snapshot.mode === 'live'
             ? s.footer.live
-            : snapshot.mode === 'sample'
-              ? s.footer.sample
-              : fill(s.footer.snapshot, {
-                  age: formatAge(snapshot.generatedAt, now, s.ago),
-                });
+            : fill(s.footer.snapshot, {
+                age: formatAge(snapshot.generatedAt, now, s.ago),
+              });
       }
     }
 
@@ -200,13 +196,13 @@ const footer =
       this.show(this.#snapshot);
     }
 
-    /** Every row switches to its other state with a stepped wipe. */
+    /** Every row switches to its other state with a stepped wipe; one-state rows stay put. */
     flip() {
       this.#phase ^= 1;
       for (const row of this.querySelectorAll<HTMLElement>('[data-row]')) {
         const states = JSON.parse(row.dataset.states ?? '[]') as string[];
         const now = row.querySelector<HTMLElement>('[data-now]');
-        if (!now || states.length < 2) continue;
+        if (!now || states.length < 2 || states[0] === states[1]) continue;
         this.write(row, states[this.#phase]);
         if (!reducedMotion.matches) {
           now.classList.remove('flip');
@@ -264,17 +260,6 @@ const footer =
 
   .grow {
     flex: 1;
-  }
-
-  .sample {
-    padding: 3px 7px;
-    border: 1px solid currentColor;
-    border-radius: 3px;
-    font-family: var(--f-mono);
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    opacity: 0.7;
   }
 
   .clock {
@@ -378,6 +363,11 @@ const footer =
   .led-row.is-live .lr-now {
     color: var(--lit);
     text-shadow: 0 0 12px rgb(var(--lit-rgb) / 0.75);
+  }
+
+  /* Rows with nothing real to show stay dim (0.6 keeps the text at 4.5:1). */
+  .led-row.is-empty .lr-now {
+    opacity: 0.6;
   }
 
   /* For visitors who arrived from this line's bio link (src/data/arrivals.ts). */
