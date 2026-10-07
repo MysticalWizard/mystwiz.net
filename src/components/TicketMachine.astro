@@ -40,8 +40,9 @@ const fareTo = (id: StationId) => (station ? fare(station, id) : 140);
       <span id="tm-title">{s.title}</span>
       <small>{s.from(fromCode)}</small>
     </div>
-    <button type="button" class="tm-close" aria-label={s.closeLabel} data-close>
+    <button type="button" class="tm-close" data-close>
       {s.close}
+      <span class="sr-only">, {s.closeLabel}</span>
     </button>
   </div>
 

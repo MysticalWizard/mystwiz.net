@@ -12,13 +12,8 @@ const s = t.about.pass;
 ---
 
 <mz-pass class="pass-wrap rise" style="--i: 0">
-  <button
-    class="pass"
-    type="button"
-    aria-label={s.label}
-    aria-describedby="pass-details"
-    data-pass
-  >
+  <button class="pass" type="button" aria-describedby="pass-details" data-pass>
+    <span class="sr-only">{s.label}</span>
     <span class="pass-in" data-pass-in>
       <span class="face face-front" aria-hidden="true">
         <span class="pf">

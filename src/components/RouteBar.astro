@@ -20,11 +20,12 @@ const twitch = TRANSFERS.find((line) => line.id === 'tw')!;
 
 <header class="vision" transition:persist="route-bar">
   <div class="vision-in wrap">
-    <a class="brand" href="/" aria-label={t.routeBar.home} data-brand>
-      <StationBadge no={current >= 0 ? STATIONS[current].no : '??'} />
-      <span class="brand-word" aria-hidden="true">
-        mystwiz
+    <a class="brand" href="/" data-brand>
+      <span aria-hidden="true">
+        <StationBadge no={current >= 0 ? STATIONS[current].no : '??'} />
       </span>
+      <span class="brand-word">mystwiz</span>
+      <span class="sr-only">{t.routeBar.homeSuffix}</span>
     </a>
 
     <nav class="route" aria-label={t.routeBar.nav}>
@@ -194,6 +195,10 @@ const twitch = TRANSFERS.find((line) => line.id === 'tw')!;
     height: var(--bar);
     padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
     padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+  }
+
+  .brand > span[aria-hidden] {
+    display: contents;
   }
 
   .brand {
@@ -424,8 +429,14 @@ const twitch = TRANSFERS.find((line) => line.id === 'tw')!;
       gap: 10px;
     }
 
+    /* Off screen on phones, but still the link's name. */
     .brand-word {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
   }
 </style>

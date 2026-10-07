@@ -19,7 +19,6 @@ const FIRST = 4;
         class:list={['car', { front: i === 0, rear: i === CARS.length - 1 }]}
         aria-pressed={i === FIRST ? 'true' : 'false'}
         aria-controls="builders-plate"
-        aria-label={s.carLabel(i + 1, car.type)}
         data-car={i}
       >
         <span class="stripe" />

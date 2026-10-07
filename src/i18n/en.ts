@@ -97,7 +97,7 @@ const en = {
   },
 
   routeBar: {
-    home: 'mystwiz, home',
+    homeSuffix: ', home',
     nav: 'MZ Line stations',
     tickets: 'Tickets',
     live: 'Live',
@@ -117,7 +117,7 @@ const en = {
     title: 'Where to?',
     from: (station: string) => `From ${station}`,
     close: 'Esc',
-    closeLabel: 'Close the ticket machine',
+    closeLabel: 'close the ticket machine',
     stations: 'Stations',
     here: 'You are here',
     transfers: 'Transfers to other lines',
@@ -314,7 +314,7 @@ const en = {
       heading: "Every project is a line. Every stop is what it's built with.",
       description:
         'Network map of projects. Waveworn shares Discord.js with ElectricalWizard, and TypeScript and Tailwind with mystwiz.net. Yorimichi is under construction.',
-      badge: (name: string) => `${name} line`,
+      badge: (code: string, name: string) => `${code}, ${name} line`,
       legend: {
         station: 'Station',
         transfer: 'Transfer: shared tech',
@@ -358,7 +358,6 @@ const en = {
         `Series ${series}, ${cars} cars`,
     },
     car: (n: number) => `Car ${n}`,
-    carLabel: (n: number, type: string) => `Car ${n}, ${type}`,
     formation: 'Train formation. Each car is a PC part.',
     plate: {
       title: "Builder's plate",
