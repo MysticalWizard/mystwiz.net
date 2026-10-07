@@ -237,6 +237,11 @@ const current = station ? stationIndex(station) : -1;
     transition: left 0.7s var(--brake);
   }
 
+  /* While someone holds to depart, the train follows the hold directly. */
+  .train-mark:global(.creep) {
+    transition: none;
+  }
+
   .train-mark::before {
     content: '';
     position: absolute;

@@ -1,0 +1,79 @@
+---
+// Bottom-center readout while someone holds to depart: destination, km/h and progress.
+// Decorative: the hold button itself carries the accessible name.
+---
+
+<div class="hud" data-hud aria-hidden="true" transition:persist="hud">
+  <div class="hud-row">
+    <span data-hud-to></span>
+    <b data-hud-speed>000</b>
+  </div>
+  <div class="hud-bar">
+    <i></i>
+  </div>
+</div>
+
+<style>
+  .hud {
+    position: fixed;
+    left: 50%;
+    bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+    z-index: 75;
+    display: grid;
+    gap: 6px;
+    min-width: min(340px, calc(100vw - 32px));
+    padding: 12px 16px;
+    border: 1px solid #2a2a24;
+    border-radius: 10px;
+    background: var(--led-bg);
+    color: var(--led-ink);
+    font-family: var(--f-led);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 16px);
+    transition:
+      opacity 0.2s,
+      transform 0.3s var(--brake);
+  }
+
+  .hud:global(.on) {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .hud-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  .hud-row span {
+    font-size: 16px;
+  }
+
+  .hud-row b {
+    color: var(--lit);
+    font-size: 34px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-shadow: 0 0 12px rgb(var(--lit-rgb) / 0.6);
+  }
+
+  .hud-bar {
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: #22221c;
+  }
+
+  .hud-bar i {
+    display: block;
+    width: calc(var(--p, 0) * 100%);
+    height: 100%;
+    background: var(--lit);
+  }
+</style>

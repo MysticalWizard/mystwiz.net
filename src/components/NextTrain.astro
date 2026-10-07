@@ -1,5 +1,6 @@
 ---
-// "Next train" block at the bottom of every station: where the line goes next.
+// "Next train" block at the bottom of every station: where the line goes next, and the hold
+// button to depart (src/scripts/hold.ts). "Go now instead" is the plain path.
 import { nextStation, type StationId } from '../data/stations';
 import { getStrings } from '../i18n';
 import StationBadge from './StationBadge.astro';
@@ -10,27 +11,49 @@ interface Props {
 
 const { from } = Astro.props;
 const t = getStrings(Astro.currentLocale);
+const s = t.nextTrain;
 const next = nextStation(from);
 const nextName = t.stations[next.id].short;
 ---
 
-<section class="next-train" aria-labelledby="next-train-label">
+<section class="next-train" aria-labelledby="next-train-label" data-next-train>
   <div class="nt-info">
     <span class="label" id="next-train-label">
-      {t.nextTrain.label}
-      {next.id === 'home' && ` · ${t.nextTrain.loops}`}
+      {s.label}
+      {next.id === 'home' && ` · ${s.loops}`}
     </span>
     <div class="nt-dest">
       <StationBadge no={next.no} />
       <b>{nextName}</b>
     </div>
     <p>
+      <span class="hint-fine">{s.hint.fine}</span>
+      <span class="hint-coarse">{s.hint.coarse}</span>{' '}
       <a class="go" href={next.href}>
-        {t.nextTrain.depart(nextName)}
+        {s.goNow}
       </a>
     </p>
   </div>
+  <button
+    class="hold"
+    type="button"
+    data-hold
+    data-hud-text={s.departing(next.no, nextName)}
+    data-nudge={s.keepHolding}
+    aria-label={s.holdLabel(nextName)}
+  >
+    <span class="hold-ring"></span>
+    <span class="hold-core">{s.hold}</span>
+  </button>
+  <div class="speedo" aria-hidden="true">
+    <b data-speed>000</b>
+    <small>{s.kmh}</small>
+  </div>
 </section>
+
+<script>
+  import '../scripts/hold';
+</script>
 
 <style>
   .next-train {
@@ -64,15 +87,126 @@ const nextName = t.stations[next.id].short;
     color: var(--muted);
   }
 
+  .hint-coarse {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .hint-fine {
+      display: none;
+    }
+
+    .hint-coarse {
+      display: inline;
+    }
+  }
+
   .go {
     color: var(--fg);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
+  /* The hold button: a line-color disc with an osu! approach circle that closes in on it. */
+  .hold {
+    --p: 0;
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+
+  .hold-core {
+    position: absolute;
+    inset: 16px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--line);
+    box-shadow: inset 0 -5px 0 rgb(0 0 0 / 0.22);
+    color: var(--on-line);
+    font-family: var(--f-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: background 0.2s;
+  }
+
+  .hold-ring {
+    position: absolute;
+    inset: 16px;
+    border: 3px solid var(--fg);
+    border-radius: 50%;
+    opacity: calc(0.22 + 0.78 * var(--p));
+    pointer-events: none;
+    transform: scale(calc(2 - var(--p)));
+  }
+
+  .hold:global(.holding) .hold-core {
+    background: var(--lit);
+    box-shadow:
+      inset 0 -5px 0 rgb(0 0 0 / 0.2),
+      0 0 calc(40px * var(--p)) rgb(var(--lit-rgb) / 0.7);
+    color: #0b0b0a;
+  }
+
+  .hold:global(.nudge) {
+    animation: nudge 0.35s;
+  }
+
+  @keyframes nudge {
+    25% {
+      transform: translateX(-5px);
+    }
+    75% {
+      transform: translateX(5px);
+    }
+  }
+
+  .speedo {
+    display: grid;
+    justify-items: end;
+    min-width: 120px;
+  }
+
+  .speedo b {
+    color: var(--line-ink);
+    font-family: var(--f-led);
+    font-size: 56px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .speedo small {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  @media (max-width: 860px) {
+    .next-train {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .speedo {
+      display: none;
+    }
+  }
+
   @media (max-width: 620px) {
     .next-train {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hold {
+      justify-self: center;
     }
   }
 </style>

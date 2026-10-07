@@ -1,0 +1,39 @@
+---
+// Status messages ("Keep holding to depart"); see src/scripts/toast.ts.
+---
+
+<div
+  class="toast"
+  role="status"
+  aria-live="polite"
+  data-toast
+  transition:persist="toast"
+></div>
+
+<style>
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+    z-index: 96;
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: var(--fg);
+    color: var(--bg);
+    font-family: var(--f-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 20px);
+    transition:
+      opacity 0.2s,
+      transform 0.3s var(--brake);
+  }
+
+  .toast:global(.show) {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+</style>

@@ -153,7 +153,17 @@ const en = {
   nextTrain: {
     label: 'Next train',
     loops: 'this line loops',
-    depart: (station: string) => `Depart for ${station}`,
+    hint: {
+      fine: 'Hold the button, or hold Space, to depart.',
+      coarse: 'Press and hold to depart, or swipe sideways.',
+    },
+    goNow: 'Go now instead',
+    hold: 'Hold',
+    holdLabel: (station: string) => `Hold to depart for ${station}`,
+    keepHolding: 'Keep holding to depart',
+    departing: (no: string, station: string) =>
+      `Departing for MZ${no} ${station}`,
+    kmh: 'km/h',
   },
 
   home: {
