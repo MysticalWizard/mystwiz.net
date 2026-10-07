@@ -1,46 +1,81 @@
-# Astro Starter Kit: Basics
+# mystwiz.net
+
+Wonsik Shin's site, built as the **MZ Line**: a loop line styled after Tokyo station wayfinding.
+Every page is a station with a station name board, moving between pages is a ride (doors close,
+tunnel lights rush past, doors open), anything live sits on an LED departure board, and the site
+is a toy: hold to depart, click to the beat, print a ticket, stretch the name.
+
+Built with Astro 7 and Tailwind 4, hosted on Cloudflare Workers. Pages are prerendered; the live
+board endpoint runs on request.
+
+## Commands
+
+| Command        | What it does                                                    |
+| -------------- | --------------------------------------------------------------- |
+| `pnpm dev`     | Dev server at `localhost:4321` (runs in Cloudflare's `workerd`) |
+| `pnpm build`   | Build to `dist/` (`dist/client` assets, `dist/server` Worker)   |
+| `pnpm preview` | Run the built Worker locally                                    |
+| `pnpm check`   | Type-check `.astro` and `.ts` files                             |
+| `pnpm test`    | Unit tests (Vitest)                                             |
+| `pnpm lint`    | ESLint                                                          |
+| `pnpm format`  | Prettier                                                        |
+
+## Where things live
+
+- **Copy:** every visible string is in `src/i18n/en.ts`. Korean or Japanese can be added as new
+  files next to it once Astro i18n routing is set up.
+- **Stations:** `src/data/stations.ts` (order, numbers, paths, departure melodies, fares).
+- **Lines and transfers:** `src/data/lines.ts` (accounts, transfer links, departure board rows,
+  platforms, bio-link arrivals).
+- **Projects and the network map:** `src/data/projects.ts`. Adding a project is a data change: add
+  it to `PROJECTS`, give it a line and stations in `NETWORK`, and add its description to
+  `projects.lines` in `src/i18n/en.ts`. A test checks the map matches each project's stops.
+- **PC specs:** `src/data/specs.ts` (the 8 cars and the cab equipment).
+- **Pictograms:** `src/assets/pictos/*.svg`, 16 × 16 pixel art, one path each.
+- **Design tokens:** `src/styles/global.css` (colors for night and day service, fonts, motion).
+  Components keep their own styles in their `<style>` blocks.
+
+Layouts: `src/layouts/Base.astro` is the document shell (route bar, doors, footer, effects);
+`src/layouts/Station.astro` adds a station's board and its "Next train" block.
+
+Interactive parts are custom elements or small modules in `src/scripts/`, written for Astro's
+client router: rides (`ride.ts`), hold to depart (`hold.ts`), effects (`fx.ts`, `parallax.ts`),
+sound (`sound.ts`), the ticket machine (`tickets.ts`) and live data (`live.ts`).
+
+## Bio links
+
+Each platform's bio links to its own short path, so visitors get a welcome and their platform first:
+`/gh`, `/yt`, `/tw` and `/osu` redirect to `/?via=github` (and so on). To add one (X, Instagram,
+TikTok, Discord...), add an entry to `ARRIVALS` in `src/data/lines.ts` and its welcome message to
+`arrivals.messages` in `src/i18n/en.ts`.
+
+## Live departure board
+
+`/api/board.json` fetches Twitch, YouTube, osu!, GitHub and Steam in parallel, caches each source
+separately, and always answers with the last good values. The board polls it every minute. Rows
+without a key show "No signal"; with no keys at all the board shows labelled sample data.
+
+Keys are listed in `.env.example`. All are optional; GitHub works without one.
+
+- **Local:** copy `.env.example` to `.env` and fill in what you have.
+- **Production:** add each key as a Worker secret, for example
+  `pnpm wrangler secret put TWITCH_CLIENT_ID`, or in the Cloudflare dashboard under the Worker's
+  Settings > Variables and Secrets.
+- **Build:** Home is prerendered with the board's values at build time, so also set the keys as
+  build variables (Workers Builds: Settings > Build > Variables and secrets). Otherwise the
+  board starts from sample data until the first poll.
+
+## Deploying
+
+The Cloudflare adapter generates the Worker config at build time, so there is no `wrangler.jsonc`
+to keep in sync. The Worker is named after `package.json` (`mystwiz-net`); to deploy over an
+existing Worker with another name, add a `wrangler.jsonc` containing just `{ "name": "..." }`.
 
 ```sh
-pnpm create astro@latest -- --template basics
+pnpm build
+pnpm wrangler deploy
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
-
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                | Action                                           |
-| :--------------------- | :----------------------------------------------- |
-| `pnpm install`         | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+With Workers Builds (Git integration), use `pnpm build` as the build command and
+`npx wrangler deploy` as the deploy command. Open Graph images are rendered during the build with
+fonts fetched from Google Fonts (cached in `node_modules/.cache`), so the build needs network access.
