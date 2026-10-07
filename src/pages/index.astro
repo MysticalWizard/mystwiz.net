@@ -2,11 +2,15 @@
 import Departures from '../components/home/Departures.astro';
 import HomeHero from '../components/home/HomeHero.astro';
 import Intro from '../components/home/Intro.astro';
+import Platforms from '../components/home/Platforms.astro';
 import Station from '../layouts/Station.astro';
 ---
 
 <Station id="home">
   <HomeHero slot="hero" />
   <Intro />
-  <Departures />
+  <div class="grid items-start gap-[clamp(20px,3vw,40px)] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <Platforms />
+    <Departures />
+  </div>
 </Station>

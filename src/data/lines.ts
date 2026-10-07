@@ -1,6 +1,6 @@
 import type { PictoName } from '../assets/pictos';
 import type { BoardLineId } from '../lib/board';
-import { station } from './stations';
+import { station, type StationId } from './stations';
 
 export interface Line {
   id: BoardLineId;
@@ -52,6 +52,9 @@ export const TRANSFERS = [
   },
 ] as const satisfies readonly Line[];
 
+const transfer = (id: (typeof TRANSFERS)[number]['id']) =>
+  TRANSFERS.find((line) => line.id === id)!;
+
 /** Rows of the departure board: what is being built, then every transfer. */
 export const BOARD_LINES: readonly Line[] = [
   {
@@ -64,3 +67,29 @@ export const BOARD_LINES: readonly Line[] = [
   },
   ...TRANSFERS,
 ];
+
+export type Platform = {
+  no: number;
+  id: 'code' | 'stream' | 'video' | 'play';
+  /** Platform 4 is visibly smaller: gaming is present but quieter. */
+  minor?: boolean;
+} & ({ station: StationId } | { line: (typeof TRANSFERS)[number]['id'] });
+
+/** Platforms in priority order: code first, then streaming, video and play. */
+export const PLATFORMS: readonly Platform[] = [
+  { no: 1, id: 'code', station: 'projects' },
+  { no: 2, id: 'stream', line: 'tw' },
+  { no: 3, id: 'video', line: 'yt' },
+  { no: 4, id: 'play', line: 'osu', minor: true },
+];
+
+/** Where a platform goes: a station on the MZ Line, or another line. */
+export function platformTarget(p: Platform): {
+  href: string;
+  internal: boolean;
+  name?: string;
+} {
+  if ('station' in p) return { href: station(p.station).href, internal: true };
+  const line = transfer(p.line);
+  return { href: line.href, internal: false, name: line.name };
+}

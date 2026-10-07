@@ -164,6 +164,17 @@ const en = {
       service: 'Loop service',
     },
     intro,
+    platforms: {
+      label: 'Platforms',
+      heading: 'What runs from here',
+      onAir: 'On air',
+      rows: {
+        code: { name: 'Code', text: 'Web apps, Discord bots and tools' },
+        stream: { name: 'Stream', text: 'Live on Twitch as mystclwzrd' },
+        video: { name: 'Video', text: 'YouTube @mysticalwizard' },
+        play: { name: 'Play', text: 'osu! and whatever is on Steam' },
+      },
+    },
   },
 
   about: {

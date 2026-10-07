@@ -1,0 +1,154 @@
+---
+// Platforms: what runs from this station, in priority order. Platform 4 is visibly smaller.
+import { PLATFORMS, platformTarget } from '../../data/lines';
+import { getStrings } from '../../i18n';
+import SectionHeading from '../SectionHeading.astro';
+
+const t = getStrings(Astro.currentLocale);
+const s = t.home.platforms;
+---
+
+<section class="rise" style="--i: 1" aria-labelledby="platforms-heading">
+  <SectionHeading id="platforms-heading" label={s.label}>
+    {s.heading}
+  </SectionHeading>
+  <ol class="plat-list">
+    {PLATFORMS.map((p) => {
+      const target = platformTarget(p);
+      const dest = 'station' in p ? t.stations[p.station].short : target.name;
+      return (
+        <li class:list={['plat', { minor: p.minor }]} data-platform={p.id}>
+          <a
+            href={target.href}
+            target={target.internal ? undefined : '_blank'}
+            rel={target.internal ? undefined : 'noopener noreferrer'}
+          >
+            <span class="plat-no">{p.no}</span>
+            <span class="plat-body">
+              <b>
+                {s.rows[p.id].name}
+                {p.id === 'stream' && <span class="onair tag">{s.onAir}</span>}
+              </b>{' '}
+              <small>{s.rows[p.id].text}</small>
+            </span>{' '}
+            <span class="plat-dest">
+              {dest}
+              <span class="tri" aria-hidden="true" />
+            </span>
+          </a>
+        </li>
+      );
+    })}
+  </ol>
+</section>
+
+<style>
+  .plat-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .plat a {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px 12px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--panel);
+    text-decoration: none;
+    transition:
+      border-color 0.2s,
+      transform 0.25s var(--brake);
+  }
+
+  .plat a:hover {
+    border-color: var(--fg);
+    transform: translateX(6px);
+  }
+
+  /* Platform numbers: inverted squares in condensed type. */
+  .plat-no {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 6px;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: 34px;
+    font-weight: 850;
+    font-stretch: 70%;
+    line-height: 1;
+  }
+
+  .plat-body {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .plat-body b {
+    font-size: 22px;
+    font-weight: 760;
+    font-stretch: 116%;
+    line-height: 1.1;
+  }
+
+  .plat-body small {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .plat-dest {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .plat.minor a {
+    padding-block: 8px;
+  }
+
+  .plat.minor .plat-no {
+    width: 40px;
+    height: 40px;
+    background: var(--dim);
+    font-size: 26px;
+  }
+
+  .plat.minor .plat-body b {
+    font-size: 18px;
+  }
+
+  .tag {
+    display: none;
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    font-stretch: 100%;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    vertical-align: 3px;
+  }
+
+  /* Shown while the Twitch line is live (data-on-air on <html>). */
+  .onair {
+    background: var(--lit);
+    color: #0b0b0a;
+    box-shadow: 0 0 12px rgb(var(--lit-rgb) / 0.6);
+  }
+
+  :global(:root[data-on-air]) .onair {
+    display: inline-block;
+  }
+</style>
