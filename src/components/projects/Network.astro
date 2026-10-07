@@ -1,0 +1,415 @@
+---
+// The network map and its line cards. Every project is a line, every stop is what it is built
+// with, and shared technologies are transfer stations. Hover or tap a line (or focus its badge)
+// to light it; click pins it and brings its card into view.
+import { NETWORK, PROJECTS, type MapStation } from '../../data/projects';
+import { getStrings } from '../../i18n';
+import LineCard from './LineCard.astro';
+
+const t = getStrings(Astro.currentLocale);
+const s = t.projects.map;
+const project = (id: string) => PROJECTS.find((p) => p.id === id)!;
+
+function labelY(station: MapStation) {
+  if (station.label === 'above') return -22;
+  if (station.shape === 'capsule') return 40;
+  return station.shape === 'junction' ? 34 : 30;
+}
+---
+
+<mz-network>
+  <div class="map rise" style="--i: 0" data-map>
+    <div class="map-grid"></div>
+    <div class="map-scroll" data-noswipe>
+      <svg viewBox={NETWORK.viewBox} role="group" aria-label={s.description}>
+        {NETWORK.lines.map((line) => (
+          <g
+            class="mline"
+            data-line={line.id}
+            style={`--tone: ${project(line.id).tone}`}
+          >
+            <path
+              class="m-hit"
+              d={line.extension ? `${line.d} ${line.extension}` : line.d}
+            />
+            <path class="m-path" d={line.d} />
+            {line.extension && <path class="m-path m-ext" d={line.extension} />}
+          </g>
+        ))}
+        {NETWORK.termini.map((terminus) => (
+          <g class="mst mterm" data-lines={terminus.id} aria-hidden="true">
+            <text x={terminus.x} y={terminus.y}>
+              {terminus.text}
+            </text>
+          </g>
+        ))}
+        {NETWORK.stations.map((station) => (
+          <g
+            class:list={[
+              'mst',
+              { tba: station.tba, ix: station.shape !== undefined },
+            ]}
+            data-lines={station.lines.join(' ')}
+            transform={`translate(${station.x} ${station.y})`}
+          >
+            {station.shape === 'capsule' ? (
+              <rect
+                class="s-shape"
+                x="-11"
+                y="-17"
+                width="22"
+                height="34"
+                rx="11"
+              />
+            ) : station.shape === 'junction' ? (
+              <>
+                <circle class="s-shape" r="12" />
+                <circle class="s-core" r="5" />
+              </>
+            ) : (
+              <circle class="s-shape" r="9" />
+            )}
+            <text y={labelY(station)}>
+              {station.tba ? t.projects.stationsTba : station.name}
+            </text>
+          </g>
+        ))}
+        {NETWORK.badges.map((badge) => {
+          const p = project(badge.id);
+          return (
+            <g
+              class="mbadge"
+              data-line={badge.id}
+              style={`--tone: ${p.tone}`}
+              transform={`translate(${badge.x} ${badge.y})`}
+              tabindex="0"
+              role="button"
+              aria-pressed="false"
+              aria-label={s.badge(p.name)}
+            >
+              <circle class="ring" r="29" />
+              <circle class="disc" r="22" />
+              <text>{p.code}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+    <div class="map-legend">
+      <span>
+        <i class="lg-st"></i>
+        {s.legend.station}
+      </span>
+      <span>
+        <i class="lg-xfer"></i>
+        {s.legend.transfer}
+      </span>
+      <span>
+        <i class="lg-tba"></i>
+        {s.legend.building}
+      </span>
+      <span>{s.legend.hover}</span>
+      <span class="map-hint">{s.legend.drag}</span>
+    </div>
+  </div>
+
+  <div class="cards">
+    {PROJECTS.map((p) => (
+      <LineCard project={p} />
+    ))}
+  </div>
+</mz-network>
+
+<script>
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  class MzNetwork extends HTMLElement {
+    #pinned = '';
+
+    connectedCallback() {
+      const map = this.querySelector<HTMLElement>('[data-map]');
+      if (!map) return;
+      const lineOf = (event: Event) =>
+        (event.target as Element).closest<SVGElement>('.mline, .mbadge')
+          ?.dataset.line;
+
+      map.addEventListener('pointerover', (event) => {
+        const id = lineOf(event);
+        if (id) this.light(id);
+      });
+      map.addEventListener('pointerleave', () => this.light(this.#pinned));
+      map.addEventListener('click', (event) => {
+        const id = lineOf(event);
+        if (id) this.pin(id);
+      });
+      map.addEventListener('keydown', (event) => {
+        const id = (event.target as Element).closest<SVGElement>('.mbadge')
+          ?.dataset.line;
+        if (id && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          this.pin(id);
+        }
+      });
+      map.addEventListener('focusin', (event) => {
+        const id = (event.target as Element).closest<SVGElement>('.mbadge')
+          ?.dataset.line;
+        if (id) this.light(id);
+      });
+      map.addEventListener('focusout', () => this.light(this.#pinned));
+
+      for (const card of this.querySelectorAll<HTMLElement>('[data-card]')) {
+        card.addEventListener('pointerenter', () =>
+          this.light(card.dataset.line ?? ''),
+        );
+        card.addEventListener('pointerleave', () => this.light(this.#pinned));
+      }
+    }
+
+    /** Clicking a line pins it (or unpins it) and brings its card into view. */
+    pin(id: string) {
+      this.#pinned = this.#pinned === id ? '' : id;
+      this.light(this.#pinned);
+      for (const badge of this.querySelectorAll('.mbadge')) {
+        badge.setAttribute(
+          'aria-pressed',
+          String(badge.getAttribute('data-line') === this.#pinned),
+        );
+      }
+      if (this.#pinned) {
+        this.querySelector(`[data-card][data-line="${id}"]`)?.scrollIntoView({
+          behavior: reducedMotion.matches ? 'auto' : 'smooth',
+          block: 'nearest',
+        });
+      }
+    }
+
+    /** Lights one line (and its stations and card); the rest fade back. */
+    light(id: string) {
+      const map = this.querySelector<HTMLElement>('[data-map]');
+      map?.toggleAttribute('data-focus', Boolean(id));
+      for (const el of this.querySelectorAll<HTMLElement | SVGElement>(
+        '.mline, .mbadge, [data-card]',
+      )) {
+        el.classList.toggle('on', el.dataset.line === id);
+      }
+      for (const el of this.querySelectorAll<SVGElement>('.mst')) {
+        el.classList.toggle(
+          'on',
+          Boolean(id) && (el.dataset.lines ?? '').split(' ').includes(id),
+        );
+      }
+    }
+  }
+
+  customElements.define('mz-network', MzNetwork);
+</script>
+
+<style>
+  mz-network {
+    display: block;
+  }
+
+  .map {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--panel);
+  }
+
+  .map-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .map-scroll {
+    position: relative;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  svg {
+    display: block;
+    width: 100%;
+    min-width: 820px;
+    height: auto;
+  }
+
+  .mline,
+  .mbadge,
+  .mst {
+    transition: opacity 0.25s;
+  }
+
+  .m-path {
+    fill: none;
+    stroke: var(--tone);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.25s;
+  }
+
+  /* Under construction: the line continues as dots. */
+  .m-ext {
+    stroke-dasharray: 0.1 16;
+  }
+
+  .m-hit {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 36;
+    pointer-events: stroke;
+    cursor: pointer;
+  }
+
+  .mline:global(.on) .m-path {
+    stroke: var(--lit);
+    filter: drop-shadow(0 0 7px rgb(var(--lit-rgb) / 0.65));
+  }
+
+  [data-focus] .mline:not(:global(.on)),
+  [data-focus] .mbadge:not(:global(.on)) {
+    opacity: 0.14;
+  }
+
+  [data-focus] .mst:not(:global(.on)) {
+    opacity: 0.25;
+  }
+
+  .s-shape {
+    fill: var(--panel);
+    stroke: var(--fg);
+    stroke-width: 3.5;
+  }
+
+  .s-core {
+    fill: var(--fg);
+  }
+
+  .mst.tba .s-shape {
+    stroke-dasharray: 4 4;
+  }
+
+  .mst text {
+    font-family: var(--f-mono);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-anchor: middle;
+    fill: var(--fg);
+  }
+
+  .mst.ix text {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .mterm text {
+    font-size: 12px;
+    text-anchor: end;
+    fill: var(--muted);
+  }
+
+  .mbadge {
+    cursor: pointer;
+    outline: none;
+  }
+
+  .mbadge .disc {
+    fill: var(--panel);
+    stroke: var(--tone);
+    stroke-width: 6;
+  }
+
+  .mbadge:global(.on) .disc {
+    stroke: var(--lit);
+  }
+
+  .mbadge .ring {
+    fill: none;
+    stroke: var(--lit);
+    stroke-width: 2;
+    opacity: 0;
+  }
+
+  .mbadge:focus-visible .ring {
+    opacity: 1;
+  }
+
+  .mbadge text {
+    font-family: var(--f-sign);
+    font-size: 15px;
+    font-weight: 800;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: var(--fg);
+  }
+
+  .map-legend {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+
+  .map-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .lg-st {
+    width: 12px;
+    height: 12px;
+    border: 2.5px solid var(--fg);
+    border-radius: 50%;
+  }
+
+  .lg-xfer {
+    width: 22px;
+    height: 12px;
+    border: 2.5px solid var(--fg);
+    border-radius: 6px;
+  }
+
+  .lg-tba {
+    width: 30px;
+    height: 4px;
+    background: radial-gradient(circle, var(--line-ink) 2px, transparent 2.5px)
+      0 0 / 10px 4px;
+  }
+
+  .map-legend .map-hint {
+    display: none;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  @media (max-width: 860px) {
+    .map-legend .map-hint {
+      display: inline-flex;
+    }
+
+    .cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

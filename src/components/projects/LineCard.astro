@@ -1,0 +1,208 @@
+---
+// One card per project line: badge, name, status, description, its stops as a mini route
+// strip, and links.
+import type { Project } from '../../data/projects';
+import { getStrings } from '../../i18n';
+import LinkButton from '../LinkButton.astro';
+import Picto from '../Picto.astro';
+
+interface Props {
+  project: Project;
+}
+
+const { project: p } = Astro.props;
+const t = getStrings(Astro.currentLocale);
+const s = t.projects;
+---
+
+<article
+  class="lcard"
+  id={`line-${p.id}`}
+  data-card
+  data-line={p.id}
+  style={`--tone: ${p.tone}`}
+>
+  <header>
+    <span class="lbadge" aria-hidden="true">
+      {p.code}
+    </span>
+    <h3>
+      {p.name}
+      {p.jp && <span lang="ja">{p.jp}</span>}
+    </h3>
+    <span class:list={['pill', p.status]}>{s.status[p.status]}</span>
+  </header>
+  <p>{s.lines[p.id]}</p>
+  <ol class="strip">
+    {p.stops.map((stop) => (
+      <li class:list={{ x: stop.transfer, tba: stop.tba }}>
+        {stop.tba ? s.stationsTba : stop.name}
+      </li>
+    ))}
+  </ol>
+  <footer>
+    {p.links.length ? (
+      p.links.map((link) => (
+        <LinkButton href={link.href} target="_blank" rel="noopener noreferrer">
+          {link.kind === 'visit'
+            ? s.links.visit(new URL(link.href).host)
+            : s.links.source}
+          <Picto name="external" />
+        </LinkButton>
+      ))
+    ) : (
+      <span class="label">
+        {p.status === 'building' ? s.noLinks.building : s.noLinks.private}
+      </span>
+    )}
+  </footer>
+</article>
+
+<style>
+  .lcard {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    padding: 20px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--panel);
+    transition: border-color 0.2s;
+  }
+
+  .lcard:global(.on) {
+    border-color: var(--lit);
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .lbadge {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 6px solid var(--tone);
+    border-radius: 50%;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  h3 {
+    flex: 1 1 auto;
+    font-size: 28px;
+    font-weight: 800;
+    font-stretch: 118%;
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  h3 span {
+    margin-left: 4px;
+    font-family: var(--f-jp);
+    font-size: 0.6em;
+    color: var(--muted);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border: 1px solid var(--rule-2);
+    border-radius: 3px;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+
+  /* Under construction: hazard stripes. */
+  .pill.building {
+    border: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--line) 0 6px,
+      color-mix(in srgb, var(--line) 70%, #000) 6px 12px
+    );
+    color: var(--on-line);
+  }
+
+  .pill.here {
+    border-color: var(--line);
+    color: var(--line-ink);
+  }
+
+  p {
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  /* The line's stops as a short stretch of route. Transfers are capsules. */
+  .strip {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .strip li {
+    position: relative;
+    flex: 1 0 auto;
+    min-width: 76px;
+    padding: 22px 14px 0 0;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .strip li::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--tone);
+  }
+
+  .strip li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 15px;
+    height: 15px;
+    border: 3px solid var(--fg);
+    border-radius: 50%;
+    background: var(--panel);
+  }
+
+  .strip li.x::after {
+    width: 24px;
+    border-radius: 8px;
+  }
+
+  .strip li.tba {
+    color: var(--muted);
+  }
+
+  .strip li.tba::before {
+    background: radial-gradient(circle, var(--tone) 2.5px, transparent 3px) 0
+      0 / 12px 5px;
+  }
+
+  footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+  }
+</style>

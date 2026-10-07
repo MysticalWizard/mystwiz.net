@@ -96,3 +96,74 @@ export function lineCounts(projects: Project[] = PROJECTS) {
     building,
   };
 }
+
+// The network map (Projects): a schematic, octilinear map where every project is a line and
+// every stop is what it is built with. Coordinates are in the map's SVG units.
+
+export interface MapStation {
+  /** Stop name; empty for the "stations TBA" stop of a line under construction. */
+  name: string;
+  x: number;
+  y: number;
+  lines: Project['id'][];
+  label: 'above' | 'below';
+  tba?: boolean;
+  /** Where lines meet at one point (a junction) or run side by side (a capsule). */
+  shape?: 'junction' | 'capsule';
+}
+
+export const NETWORK = {
+  viewBox: '0 30 1080 420',
+  lines: [
+    { id: 'yr', d: 'M90 80 H440', extension: 'M440 80 H600' },
+    { id: 'ew', d: 'M70 400 H300 L420 280' },
+    { id: 'ww', d: 'M330 280 H1050' },
+    { id: 'mz', d: 'M540 150 H600 L714 264 H900 L950 214 H1050' },
+  ] as { id: Project['id']; d: string; extension?: string }[],
+  stations: [
+    { name: 'Anime', x: 210, y: 80, lines: ['yr'], label: 'above' },
+    { name: 'Recommendations', x: 360, y: 80, lines: ['yr'], label: 'above' },
+    { name: '', x: 560, y: 80, lines: ['yr'], label: 'above', tba: true },
+    { name: 'JavaScript', x: 150, y: 400, lines: ['ew'], label: 'below' },
+    { name: 'Node.js', x: 250, y: 400, lines: ['ew'], label: 'below' },
+    {
+      name: 'Discord.js',
+      x: 420,
+      y: 280,
+      lines: ['ew', 'ww'],
+      label: 'below',
+      shape: 'junction',
+    },
+    { name: 'React', x: 530, y: 280, lines: ['ww'], label: 'below' },
+    { name: 'Next.js', x: 640, y: 280, lines: ['ww'], label: 'below' },
+    {
+      name: 'TypeScript',
+      x: 770,
+      y: 272,
+      lines: ['ww', 'mz'],
+      label: 'below',
+      shape: 'capsule',
+    },
+    {
+      name: 'Tailwind',
+      x: 860,
+      y: 272,
+      lines: ['ww', 'mz'],
+      label: 'below',
+      shape: 'capsule',
+    },
+    { name: 'Astro', x: 600, y: 150, lines: ['mz'], label: 'above' },
+  ] as MapStation[],
+  /** Line badges sit at the start of each line. */
+  badges: [
+    { id: 'yr', x: 90, y: 80 },
+    { id: 'ew', x: 70, y: 400 },
+    { id: 'ww', x: 330, y: 280 },
+    { id: 'mz', x: 540, y: 150 },
+  ] as { id: Project['id']; x: number; y: number }[],
+  /** Termini are labeled with the project's domain. */
+  termini: [
+    { id: 'ww', x: 1050, y: 314, text: 'wuwa.mystwiz.net' },
+    { id: 'mz', x: 1050, y: 194, text: 'mystwiz.net' },
+  ] as { id: Project['id']; x: number; y: number; text: string }[],
+};

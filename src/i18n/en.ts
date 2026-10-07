@@ -233,6 +233,16 @@ const en = {
     map: {
       label: 'Network map',
       heading: "Every project is a line. Every stop is what it's built with.",
+      description:
+        'Network map of projects. Waveworn shares Discord.js with ElectricalWizard, and TypeScript and Tailwind with mystwiz.net. Yorimichi is under construction.',
+      badge: (name: string) => `${name} line`,
+      legend: {
+        station: 'Station',
+        transfer: 'Transfer: shared tech',
+        building: 'Under construction',
+        hover: 'Hover or tap a line to light it',
+        drag: 'Drag the map sideways',
+      },
     },
     status: {
       building: 'Under construction',
