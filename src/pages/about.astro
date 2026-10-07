@@ -10,7 +10,7 @@ const t = getStrings(Astro.currentLocale);
 const { about } = t;
 ---
 
-<Station id="about" sub={about.sub}>
+<Station id="about">
   <section class="grid items-start gap-[clamp(24px,4vw,64px)] py-sec lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
     <MzPass />
     <div class="about-body rise" style="--i: 1">

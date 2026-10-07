@@ -1,17 +1,14 @@
 ---
 import Network from '../components/projects/Network.astro';
 import SectionHeading from '../components/SectionHeading.astro';
-import { lineCounts } from '../data/projects';
 import { getStrings } from '../i18n';
 import Station from '../layouts/Station.astro';
 
 const t = getStrings(Astro.currentLocale);
 const { projects } = t;
-const counts = lineCounts();
-const sub = projects.sub(counts.lines, counts.inService, counts.building);
 ---
 
-<Station id="projects" sub={sub}>
+<Station id="projects">
   <section class="py-sec" aria-labelledby="map-heading">
     <SectionHeading id="map-heading" label={projects.map.label}>
       {projects.map.heading}

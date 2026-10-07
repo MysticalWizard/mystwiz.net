@@ -3,7 +3,7 @@ import SectionHeading from '../components/SectionHeading.astro';
 import Cab from '../components/specs/Cab.astro';
 import Formation from '../components/specs/Formation.astro';
 import TapTest from '../components/specs/TapTest.astro';
-import { CARS, INSPECTED, SERIES } from '../data/specs';
+import { CARS, SERIES } from '../data/specs';
 import { getStrings } from '../i18n';
 import Station from '../layouts/Station.astro';
 
@@ -11,7 +11,7 @@ const t = getStrings(Astro.currentLocale);
 const { specs } = t;
 ---
 
-<Station id="specs" sub={specs.sub(INSPECTED)}>
+<Station id="specs">
   <section class="py-sec" aria-labelledby="rolling-heading">
     <SectionHeading id="rolling-heading" label={specs.rolling.label}>
       {specs.rolling.heading(SERIES, CARS.length)}

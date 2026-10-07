@@ -12,7 +12,11 @@ const t = getStrings(Astro.currentLocale);
 const s = t.notFound;
 ---
 
-<Base title={t.meta.title(s.title)} description={s.description}>
+<Base
+  title={t.meta.title(s.title)}
+  description={s.description}
+  ogImage="/og/not-in-service.png"
+>
   <StationHead sub={s.sub} title={s.title} />
   <div class="wrap">
     <section class="py-sec">
