@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig, envField, fontProviders } from 'astro/config';
 
+import cloudflare from '@astrojs/cloudflare';
 import tailwindcss from '@tailwindcss/vite';
 import { ARRIVALS } from './src/data/lines.ts';
 
@@ -10,6 +11,16 @@ const secret = () =>
 // https://astro.build/config
 export default defineConfig({
   site: 'https://mystwiz.net',
+  // Hosted on Cloudflare Workers. Pages are prerendered; only the live board endpoint
+  // (src/pages/api/board.json.ts) runs on request.
+  adapter: cloudflare({
+    // Open Graph images and the touch icon are drawn with sharp at build time, in Node.
+    prerenderEnvironment: 'node',
+    // Images are optimized at build time (every page is prerendered).
+    imageService: 'compile',
+  }),
+  // No sessions, so the Worker needs no KV namespace for them.
+  session: false,
   // Bio links: each platform's bio points at its own short path, e.g. /yt -> /?via=youtube.
   redirects: Object.fromEntries(
     Object.entries(ARRIVALS).map(([via, { path }]) => [path, `/?via=${via}`]),
