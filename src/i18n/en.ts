@@ -167,11 +167,15 @@ const en = {
   },
 
   home: {
-    sub: ['Wonsik Shin', 'Developer'],
+    sub: ['Wonsik Shin', 'Student', 'Developer'],
     formerly: 'Formerly MysticalWizard',
+    oldName: 'MysticalWizard',
+    oldNameTitle: 'Show the old name',
     tags: {
       line: 'MZ Line',
       service: 'Loop service',
+      provider: 'Service provided by mystwiz network',
+      hold: ['Hold', 'Space', 'to depart'],
     },
     intro,
     platforms: {

@@ -1,22 +1,25 @@
 ---
 // Home's station board, staged in layers: blueprint grid at the back, the route line with a
-// train, the board itself, and floating tags in front.
+// train, the board itself, and floating tags in front. The planes move with the cursor and
+// scroll (src/scripts/parallax.ts), the train runs along the line, and the name is a toy:
+// letters near the cursor stretch, and tapping it shows the old name.
 import { TRANSFERS } from '../../data/lines';
 import { getStrings } from '../../i18n';
 import Picto from '../Picto.astro';
 import StationBoard from '../StationBoard.astro';
 
 const t = getStrings(Astro.currentLocale);
+const name = t.stations.home.name;
 ---
 
-<mz-hero class="hero">
-  <div class="plane p-back" aria-hidden="true">
+<mz-hero class="hero" data-old-name={t.home.oldName}>
+  <div class="plane p-back" aria-hidden="true" data-plane="back">
     <div class="hero-grid"></div>
     <div class="ghost">MZ</div>
     <div class="ruler"></div>
   </div>
 
-  <div class="plane p-line" aria-hidden="true">
+  <div class="plane p-line" aria-hidden="true" data-plane="line">
     <svg data-hero-svg viewBox="0 0 1440 640" preserveAspectRatio="none">
       <path
         class="hero-case"
@@ -41,12 +44,26 @@ const t = getStrings(Astro.currentLocale);
   </div>
 
   <div class="wrap hero-in">
-    <div class="hero-board" data-board>
+    <div class="hero-board" data-board data-plane="board">
       <StationBoard id="home" sub={t.home.sub}>
-        <h1 slot="title" class="wordmark" tabindex="-1">
-          {t.stations.home.name}
+        <h1 slot="title" class="wordmark" tabindex="-1" data-wordmark>
+          <span class="sr-only">{name}</span>
+          <span class="chars" aria-hidden="true" data-chars>
+            {[...name].map((ch) => (
+              <span class="ch">{ch}</span>
+            ))}
+          </span>
         </h1>
-        <span slot="sub">{t.home.formerly}</span>
+        <button
+          slot="sub"
+          type="button"
+          class="old-name"
+          title={t.home.oldNameTitle}
+          data-show-old
+        >
+          {t.home.formerly}
+          <Picto name="cycle" />
+        </button>
         <div slot="side" class="board-xfer">
           <span class="label" id="transfer-label">
             {t.board.transfers}
@@ -66,37 +83,68 @@ const t = getStrings(Astro.currentLocale);
     </div>
   </div>
 
-  <div class="plane p-front" aria-hidden="true">
+  <div class="plane p-front" aria-hidden="true" data-plane="front">
     <span class="tag" style="left: max(18px, 3vw); top: 4px">
       <b>{t.home.tags.line}</b> {t.home.tags.service}
+    </span>
+    <span class="tag opt" style="left: max(18px, 3vw); bottom: 10px">
+      {t.home.tags.provider}
+    </span>
+    <span class="tag opt" style="right: max(18px, 6vw); bottom: 10px">
+      {t.home.tags.hold[0]} <b>{t.home.tags.hold[1]}</b>
+      {t.home.tags.hold[2]}
     </span>
   </div>
 </mz-hero>
 
 <script>
-  // Draw the route line around the board: it comes in from the left under the board, climbs at
-  // 45 degrees behind it and leaves along the top right. On phones it runs straight under the board.
+  import '../../scripts/parallax';
+  import { onFrame } from '../../scripts/frame';
+  import { speed } from '../../scripts/speed';
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+  const GLYPHS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  /** How long the old name stays up before the board scrambles back. */
+  const OLD_NAME_MS = 1700;
+
   class MzHero extends HTMLElement {
     #resize = new ResizeObserver(() => this.layout());
+    #stopTrain?: () => void;
+    /** Distance of the hero train along the route. */
+    #trainAt = 120;
+    #routeLength = 0;
+    #morphing = false;
 
     connectedCallback() {
       this.#resize.observe(this);
+      this.#stopTrain = onFrame((_, dt) => this.drive(dt));
+
+      const wordmark = this.querySelector<HTMLElement>('[data-wordmark]');
+      wordmark?.addEventListener('pointermove', (event) => this.stretch(event));
+      wordmark?.addEventListener('pointerleave', () => this.relax());
+      wordmark?.addEventListener('click', () => this.showOldName());
+      this.querySelector('[data-show-old]')?.addEventListener('click', () =>
+        this.showOldName(),
+      );
     }
 
     disconnectedCallback() {
       this.#resize.disconnect();
+      this.#stopTrain?.();
     }
 
+    /* ---------- the route line and its train ---------- */
+
+    // The line comes in from the left under the board, climbs at 45 degrees behind it and
+    // leaves along the top right. On phones it runs straight under the board.
     layout() {
       const svg = this.querySelector('[data-hero-svg]');
       const board = this.querySelector('[data-board]');
       const route = this.querySelector<SVGPathElement>('[data-route]');
       const casing = this.querySelector('[data-case]');
-      const train = this.querySelector('[data-train]');
       const [stnA, stnB] = this.querySelectorAll('[data-stn]');
-      if (!svg || !board || !route || !casing || !train || !stnA || !stnB) {
-        return;
-      }
+      if (!svg || !board || !route || !casing || !stnA || !stnB) return;
 
       const w = this.clientWidth;
       const h = this.clientHeight;
@@ -134,8 +182,96 @@ const t = getStrings(Astro.currentLocale);
       stnB.setAttribute('cx', String(b[0]));
       stnB.setAttribute('cy', String(b[1]));
 
-      const p = route.getPointAtLength(120);
-      train.setAttribute('transform', `translate(${p.x} ${p.y})`);
+      this.#routeLength = route.getTotalLength();
+      this.#trainAt %= Math.max(1, this.#routeLength);
+      this.placeTrain();
+    }
+
+    /** The train runs continuously, and speeds up while someone holds to depart. */
+    drive(dt: number) {
+      if (!this.#routeLength || reducedMotion.matches) return;
+      const v = 0.05 + 1.2 * Math.max(speed.hold * speed.hold, speed.ride);
+      this.#trainAt = (this.#trainAt + v * dt) % this.#routeLength;
+      this.placeTrain();
+    }
+
+    placeTrain() {
+      const route = this.querySelector<SVGPathElement>('[data-route]');
+      const train = this.querySelector('[data-train]');
+      if (!route || !train) return;
+      const p = route.getPointAtLength(this.#trainAt);
+      const q = route.getPointAtLength(
+        Math.min(this.#routeLength, this.#trainAt + 2),
+      );
+      const angle = (Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI;
+      train.setAttribute(
+        'transform',
+        `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${angle.toFixed(1)})`,
+      );
+    }
+
+    /* ---------- the name ---------- */
+
+    /** Letters near the cursor stretch wider and heavier; far ones condense. */
+    stretch(event: PointerEvent) {
+      if (this.#morphing) return;
+      const wordmark = this.querySelector<HTMLElement>('[data-wordmark]');
+      const width = Math.max(1, wordmark?.clientWidth ?? 1);
+      for (const ch of this.querySelectorAll<HTMLElement>('.ch')) {
+        const r = ch.getBoundingClientRect();
+        const d = (event.clientX - (r.left + r.width / 2)) / width;
+        const k = Math.exp(-(d * d) / 0.006);
+        ch.style.setProperty('--w', (90 + 35 * k).toFixed(1));
+        ch.style.setProperty('--g', (640 + 260 * k).toFixed(0));
+      }
+    }
+
+    relax() {
+      for (const ch of this.querySelectorAll<HTMLElement>('.ch')) {
+        ch.style.removeProperty('--w');
+        ch.style.removeProperty('--g');
+      }
+    }
+
+    /** Scrambles the name into the old one, holds it, then scrambles back. */
+    async showOldName() {
+      if (this.#morphing) return;
+      this.#morphing = true;
+      const current = this.querySelector(
+        '[data-wordmark] .sr-only',
+      )?.textContent;
+      await this.morph(this.dataset.oldName ?? '', true);
+      await wait(OLD_NAME_MS);
+      await this.morph(current ?? '', false);
+      this.#morphing = false;
+    }
+
+    async morph(to: string, old: boolean) {
+      const wordmark = this.querySelector<HTMLElement>('[data-wordmark]');
+      const chars = this.querySelector('[data-chars]');
+      if (!wordmark || !chars) return;
+      const spans = [...to].map((letter) => {
+        const span = document.createElement('span');
+        span.className = 'ch';
+        span.textContent = letter;
+        return span;
+      });
+      wordmark.classList.toggle('old', old);
+      chars.replaceChildren(...spans);
+      if (reducedMotion.matches) return;
+
+      wordmark.classList.add('scramble');
+      const frames = 10 + to.length * 1.4;
+      for (let f = 0; f <= frames; f++) {
+        spans.forEach((span, i) => {
+          span.textContent =
+            f >= 4 + i * 1.4
+              ? to[i]
+              : GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+        });
+        await wait(34);
+      }
+      wordmark.classList.remove('scramble');
     }
   }
 
@@ -156,6 +292,7 @@ const t = getStrings(Astro.currentLocale);
     position: absolute;
     inset: 0;
     pointer-events: none;
+    will-change: transform;
   }
 
   .p-back {
@@ -259,6 +396,7 @@ const t = getStrings(Astro.currentLocale);
   .hero-board {
     position: relative;
     transform-style: preserve-3d;
+    will-change: transform;
   }
 
   .p-front {
@@ -309,6 +447,51 @@ const t = getStrings(Astro.currentLocale);
     line-height: 0.84;
     letter-spacing: -0.012em;
     white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    touch-action: pan-y;
+  }
+
+  /* The old name is longer, so it is set condensed. */
+  .wordmark:global(.old) {
+    --wm-ratio: 5.624;
+  }
+
+  .wordmark :global(.ch) {
+    display: inline-block;
+    font-stretch: calc(var(--w, 114) * 1%);
+    font-weight: var(--g, 820);
+    transition:
+      font-stretch 0.45s var(--brake),
+      font-weight 0.45s var(--brake);
+  }
+
+  .wordmark:global(.old) :global(.ch) {
+    --w: 68;
+  }
+
+  .wordmark:global(.scramble) :global(.ch) {
+    color: var(--line-ink);
+  }
+
+  .old-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: var(--fg);
+  }
+
+  .old-name:hover {
+    color: var(--line-ink);
+  }
+
+  .old-name :global(.picto) {
+    width: 14px;
+    height: 14px;
   }
 
   .board-xfer {
@@ -352,6 +535,12 @@ const t = getStrings(Astro.currentLocale);
 
   @media (max-width: 1100px) {
     .board-xfer {
+      display: none;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .tag.opt {
       display: none;
     }
   }

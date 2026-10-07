@@ -14,12 +14,18 @@ const { id, sub } = Astro.props;
 
 <div class="wrap">
   <div class="st-head">
-    <div class="ghost" aria-hidden="true">
+    <div class="ghost" aria-hidden="true" data-plane="ghost">
       {stationById(id).no}
     </div>
-    <StationBoard id={id} sub={sub} />
+    <div data-plane="shake">
+      <StationBoard id={id} sub={sub} />
+    </div>
   </div>
 </div>
+
+<script>
+  import '../scripts/parallax';
+</script>
 
 <style>
   .st-head {
@@ -41,5 +47,6 @@ const { id, sub } = Astro.props;
     -webkit-text-stroke: 1px var(--rule-2);
     pointer-events: none;
     user-select: none;
+    will-change: transform;
   }
 </style>
