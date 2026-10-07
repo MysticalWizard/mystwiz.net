@@ -9,6 +9,7 @@ import FxLayers from '../components/FxLayers.astro';
 import Hud from '../components/Hud.astro';
 import RouteBar from '../components/RouteBar.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import Sweep from '../components/Sweep.astro';
 import TicketMachine from '../components/TicketMachine.astro';
 import Toast from '../components/Toast.astro';
 import type { StationId } from '../data/stations';
@@ -87,6 +88,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </main>
     <SiteFooter />
     <Doors station={station} />
+    <Sweep />
     <TicketMachine station={station} />
     <Hud />
     <Toast />

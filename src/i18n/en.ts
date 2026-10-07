@@ -96,6 +96,7 @@ const en = {
       day: 'Day',
       toDay: 'service, switch to day service',
       toNight: 'service, switch to night service',
+      sweep: { day: 'Day service', night: 'Night service' },
     },
   },
 

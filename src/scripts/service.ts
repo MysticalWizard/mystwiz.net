@@ -1,5 +1,6 @@
 // Day and night service (the color theme). The inline script in Base.astro applies the stored
 // choice before first paint, so it repeats the storage key and colors used here.
+import { chime } from './sound';
 import { store } from './store';
 
 export type Service = 'night' | 'day';
@@ -35,4 +36,31 @@ export function applyService(service: Service): void {
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute('content', THEME_COLOR[service]);
   store.set('service', service);
+}
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+let sweeping = false;
+
+/** Switches service behind the sweep band (instantly under reduced motion). */
+export async function switchService(): Promise<void> {
+  const next: Service = currentService() === 'day' ? 'night' : 'day';
+  const sweep = document.querySelector<HTMLElement>('[data-sweep]');
+  if (!sweep || sweeping || reducedMotion.matches) {
+    applyService(next);
+    return;
+  }
+  sweeping = true;
+  const text = sweep.querySelector('[data-sweep-text]');
+  if (text) text.textContent = sweep.dataset[next] ?? '';
+  sweep.classList.remove('go');
+  void sweep.offsetWidth;
+  sweep.classList.add('go');
+  chime();
+  // The band covers the screen halfway through; flip the service then.
+  await wait(470);
+  applyService(next);
+  await wait(520);
+  sweep.classList.remove('go');
+  sweeping = false;
 }

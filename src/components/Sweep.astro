@@ -1,0 +1,78 @@
+---
+// Day/night switch: a skewed band of the line color sweeps across the screen, and the service
+// changes while it covers everything (src/scripts/service.ts).
+import { getStrings } from '../i18n';
+
+const t = getStrings(Astro.currentLocale);
+const s = t.routeBar.service.sweep;
+---
+
+<div
+  class="sweep"
+  data-sweep
+  data-day={s.day}
+  data-night={s.night}
+  aria-hidden="true"
+  transition:persist="sweep"
+>
+  <span data-sweep-text></span>
+</div>
+
+<style>
+  .sweep {
+    position: fixed;
+    top: -10vh;
+    bottom: -10vh;
+    left: 0;
+    z-index: 85;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150vw;
+    overflow: hidden;
+    background: var(--line);
+    color: var(--on-line);
+    pointer-events: none;
+    visibility: hidden;
+    transform: translateX(-160vw) skewX(-14deg);
+  }
+
+  .sweep::before,
+  .sweep::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--on-line);
+    opacity: 0.5;
+  }
+
+  .sweep::before {
+    top: 40%;
+  }
+
+  .sweep::after {
+    top: 58%;
+  }
+
+  span {
+    font-size: clamp(48px, 9vw, 140px);
+    font-stretch: 125%;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    transform: skewX(14deg);
+  }
+
+  .sweep:global(.go) {
+    visibility: visible;
+    animation: sweep 0.95s var(--door-ease) forwards;
+  }
+
+  @keyframes sweep {
+    to {
+      transform: translateX(110vw) skewX(-14deg);
+    }
+  }
+</style>

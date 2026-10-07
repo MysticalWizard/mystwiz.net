@@ -103,11 +103,7 @@ const current = station ? stationIndex(station) : -1;
 <script>
   import { STATIONS, stationIndex } from '../data/stations';
   import { currentStation } from '../scripts/ride';
-  import {
-    applyService,
-    carryService,
-    currentService,
-  } from '../scripts/service';
+  import { carryService, switchService } from '../scripts/service';
   import { setSound, soundOn } from '../scripts/sound';
   import { toast } from '../scripts/toast';
 
@@ -119,7 +115,7 @@ const current = station ? stationIndex(station) : -1;
   document.addEventListener('click', (event) => {
     const target = event.target as Element;
     if (target.closest('[data-service-toggle]')) {
-      applyService(currentService() === 'day' ? 'night' : 'day');
+      void switchService();
       return;
     }
     const melody = target.closest<HTMLElement>('[data-melody]');
