@@ -57,6 +57,17 @@ const current = station ? stationIndex(station) : -1;
       <button
         class="ctl"
         type="button"
+        aria-haspopup="dialog"
+        aria-keyshortcuts="/ Control+K Meta+K"
+        data-open-tickets
+      >
+        <Picto name="ticket" />
+        <span class="t">{t.routeBar.tickets}</span>
+        <kbd aria-hidden="true">/</kbd>
+      </button>
+      <button
+        class="ctl"
+        type="button"
         aria-pressed="false"
         data-melody
         data-hint={t.routeBar.melodyHint}
@@ -339,6 +350,15 @@ const current = station ? stationIndex(station) : -1;
     display: none;
   }
 
+  .ctl kbd {
+    padding: 0 4px;
+    border: 1px solid var(--rule-2);
+    border-radius: 3px;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
   @media (max-width: 860px) {
     .route {
       max-width: 220px;
@@ -359,6 +379,10 @@ const current = station ? stationIndex(station) : -1;
       justify-content: center;
       width: 36px;
       padding: 0;
+    }
+
+    .ctl kbd {
+      display: none;
     }
   }
 

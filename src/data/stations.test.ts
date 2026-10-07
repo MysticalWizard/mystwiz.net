@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  fare,
   nextStation,
   prevStation,
   station,
@@ -37,5 +38,15 @@ describe('MZ Line stations', () => {
     expect(stationForPath('/about')?.id).toBe('about');
     expect(stationForPath('/specs/')?.id).toBe('specs');
     expect(stationForPath('/not-in-service/')).toBeUndefined();
+  });
+
+  it('charges fares by distance on the loop: ¥140 for one stop, ¥170 for two', () => {
+    expect(fare('home', 'about')).toBe(140);
+    expect(fare('home', 'projects')).toBe(170);
+    expect(fare('about', 'specs')).toBe(170);
+    // Specs to Home is one stop round the loop.
+    expect(fare('specs', 'home')).toBe(140);
+    expect(fare('home', 'specs')).toBe(140);
+    expect(fare('projects', 'projects')).toBe(0);
   });
 });

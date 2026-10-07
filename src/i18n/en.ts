@@ -88,6 +88,7 @@ const en = {
   routeBar: {
     home: 'mystwiz, home',
     nav: 'MZ Line stations',
+    tickets: 'Tickets',
     melody: { label: 'Melody', on: 'on', off: 'off' },
     melodyHint: 'Every station has its own departure melody',
     service: {
@@ -95,6 +96,21 @@ const en = {
       day: 'Day',
       toDay: 'service, switch to day service',
       toNight: 'service, switch to night service',
+    },
+  },
+
+  tickets: {
+    title: 'Where to?',
+    from: (station: string) => `From ${station}`,
+    close: 'Esc',
+    closeLabel: 'Close the ticket machine',
+    stations: 'Stations',
+    here: 'You are here',
+    transfers: 'Transfers to other lines',
+    line: (code: string) => `${code} Line`,
+    ticket: {
+      head: (no: string) => `MZ Line · One way · No. ${no}`,
+      valid: 'Valid today only',
     },
   },
 

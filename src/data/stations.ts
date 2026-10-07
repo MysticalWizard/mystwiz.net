@@ -95,3 +95,10 @@ export function nextStation(id: StationId): Station {
 export function prevStation(id: StationId): Station {
   return stationAt(stationIndex(id) - 1);
 }
+
+/** Fares go by distance on the loop: ¥140 for one stop, ¥170 for two, ¥30 per stop after. */
+export function fare(from: StationId, to: StationId): number {
+  const gap = Math.abs(stationIndex(from) - stationIndex(to));
+  const stops = Math.min(gap, STATIONS.length - gap);
+  return stops === 0 ? 0 : 110 + 30 * stops;
+}
