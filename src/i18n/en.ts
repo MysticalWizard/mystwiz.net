@@ -175,6 +175,18 @@ const en = {
         play: { name: 'Play', text: 'osu! and whatever is on Steam' },
       },
     },
+    yorimichi: {
+      label: 'Now building',
+      name: 'Yorimichi',
+      jp: '寄り道',
+      // "Yorimichi" in the middle of the sentence is set in bold.
+      text: [
+        'An anime recommender. ',
+        ' is Japanese for taking a detour on the way somewhere, which is how most good anime gets found.',
+      ],
+      cta: 'See the line',
+      diagram: { from: 'On the way', to: 'Somewhere' },
+    },
   },
 
   about: {

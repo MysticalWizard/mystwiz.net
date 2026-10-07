@@ -1,0 +1,35 @@
+---
+// Outlined mono button for links, e.g. "See the line ▶" or "Visit wuwa.mystwiz.net ↗".
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'a'>;
+
+const { class: className, ...attrs } = Astro.props;
+---
+
+<a class:list={['link-btn', className]} {...attrs}>
+  <slot />
+</a>
+
+<style>
+  .link-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--fg);
+    border-radius: 6px;
+    font-family: var(--f-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .link-btn:hover {
+    background: var(--fg);
+    color: var(--bg);
+  }
+</style>

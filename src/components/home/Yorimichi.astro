@@ -1,0 +1,241 @@
+---
+// "Now building": Yorimichi, the anime recommender. Yorimichi means a detour on the way
+// somewhere, so it is drawn as a detour off the line: a train leaves the line, slows down at the
+// detour's station, and rejoins.
+import { station } from '../../data/stations';
+import { getStrings } from '../../i18n';
+import LinkButton from '../LinkButton.astro';
+
+const t = getStrings(Astro.currentLocale);
+const y = t.home.yorimichi;
+const projects = station('projects');
+
+// The ride along the detour slows near the middle station (the prototype's 0.3 to 1 speed
+// curve, sampled): fractions of the path's length against fractions of the loop's time.
+const keyPoints =
+  '0;0.3019;0.3585;0.4151;0.4576;0.5;0.5424;0.5849;0.6415;0.6981;1';
+const keyTimes =
+  '0;0.2349;0.2841;0.3474;0.4108;0.5;0.5892;0.6526;0.7159;0.7651;1';
+---
+
+<section class="py-sec" aria-labelledby="yorimichi-heading">
+  <div class="yori rise" style="--i: 3">
+    <div class="yori-jp" lang="ja" aria-hidden="true">
+      {y.jp}
+    </div>
+    <div class="yori-body">
+      <span class="label">
+        {`${y.label} · MZ${projects.no} ${t.stations.projects.short}`}
+      </span>
+      <h2 id="yorimichi-heading">{y.name}</h2>
+      <p>
+        {y.text[0]}
+        <b>{y.name}</b>
+        {y.text[1]}
+      </p>
+      <LinkButton href={projects.href}>
+        {y.cta}
+        <span class="tri" aria-hidden="true"></span>
+      </LinkButton>
+    </div>
+    <div class="yori-side" aria-hidden="true">
+      <svg class="detour" viewBox="0 0 340 176" data-detour>
+        <path class="dt-main" d="M14 132 H326"></path>
+        <path class="dt-way" d="M70 132 L120 82 H220 L270 132"></path>
+        <g class="dt-train">
+          <rect x="-22" y="-9" width="44" height="18" rx="6"></rect>
+          <rect class="w" x="-15" y="-4" width="8" height="5" rx="1"></rect>
+          <rect class="w" x="-4" y="-4" width="8" height="5" rx="1"></rect>
+          <rect class="w" x="7" y="-4" width="8" height="5" rx="1"></rect>
+          <animateMotion
+            dur="8.26s"
+            repeatCount="indefinite"
+            rotate="auto"
+            calcMode="linear"
+            keyPoints={keyPoints}
+            keyTimes={keyTimes}
+            path="M14 132 H70 L120 82 H220 L270 132 H326"
+          ></animateMotion>
+        </g>
+        <circle class="dt-st" cx="14" cy="132" r="8"></circle>
+        <circle class="dt-st" cx="326" cy="132" r="8"></circle>
+        <circle class="dt-st" cx="170" cy="82" r="11"></circle>
+        <text x="0" y="166">
+          {y.diagram.from}
+        </text>
+        <text x="340" y="166" text-anchor="end">
+          {y.diagram.to}
+        </text>
+        <text class="jp" x="170" y="56" text-anchor="middle" lang="ja">
+          {y.jp}
+        </text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Under reduced motion the detour train waits at the detour's station instead.
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function park() {
+    if (!reducedMotion.matches) return;
+    for (const svg of document.querySelectorAll<SVGSVGElement>(
+      '[data-detour]',
+    )) {
+      svg.pauseAnimations();
+      svg.setCurrentTime(8.26 * 0.5);
+    }
+  }
+
+  park();
+  document.addEventListener('astro:page-load', park);
+</script>
+
+<style>
+  .yori {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(18px, 4vw, 56px);
+    overflow: hidden;
+    padding: clamp(20px, 3vw, 36px);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--panel);
+  }
+
+  /* Hazard stripe along the top edge: under construction. */
+  .yori::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--line) 0 12px,
+      transparent 12px 24px
+    );
+  }
+
+  .yori-jp {
+    padding-top: 10px;
+    font-family: var(--f-jp);
+    font-size: clamp(64px, 7.2vw, 116px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    writing-mode: vertical-rl;
+  }
+
+  .yori-body {
+    display: grid;
+    gap: 12px;
+    max-width: 62ch;
+  }
+
+  .yori-body h2 {
+    font-size: clamp(40px, 6vw, 84px);
+    font-weight: 820;
+    font-stretch: 125%;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+  }
+
+  .yori-body p {
+    font-size: 18px;
+    color: var(--muted);
+  }
+
+  .yori-body p b {
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .yori-side {
+    min-width: 0;
+  }
+
+  .detour {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .dt-main {
+    fill: none;
+    stroke: var(--dim);
+    stroke-width: 8;
+    stroke-dasharray: 2 12;
+    stroke-linecap: round;
+  }
+
+  .dt-way {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 12;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .dt-st {
+    fill: var(--panel);
+    stroke: var(--fg);
+    stroke-width: 4;
+  }
+
+  .dt-train rect {
+    fill: var(--fg);
+  }
+
+  .dt-train rect.w {
+    fill: var(--panel);
+  }
+
+  .detour text {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    fill: var(--muted);
+  }
+
+  .detour text.jp {
+    font-family: var(--f-jp);
+    font-size: 20px;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    fill: var(--fg);
+  }
+
+  @media (max-width: 1100px) {
+    .yori {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .yori-side {
+      grid-column: 2;
+      max-width: 420px;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .yori {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .yori-side {
+      grid-column: auto;
+    }
+
+    .yori-jp {
+      padding-top: 6px;
+      font-size: 64px;
+      writing-mode: horizontal-tb;
+    }
+  }
+</style>
