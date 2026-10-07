@@ -1,0 +1,13 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { pictos, type PictoName } from '../assets/pictos';
+
+interface Props extends HTMLAttributes<'svg'> {
+  name: PictoName;
+}
+
+const { name, class: className, ...attrs } = Astro.props;
+const Svg = pictos[name];
+---
+
+<Svg class:list={['picto', className]} aria-hidden="true" {...attrs} />
