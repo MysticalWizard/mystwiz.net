@@ -5,6 +5,7 @@
 import { Font } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
 import Doors from '../components/Doors.astro';
+import FxLayers from '../components/FxLayers.astro';
 import Hud from '../components/Hud.astro';
 import RouteBar from '../components/RouteBar.astro';
 import SiteFooter from '../components/SiteFooter.astro';
@@ -75,6 +76,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <ClientRouter />
   </head>
   <body>
+    <FxLayers />
     <a class="skip" href="#main">
       {t.skip}
     </a>

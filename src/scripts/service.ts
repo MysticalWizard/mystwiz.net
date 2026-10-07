@@ -22,8 +22,15 @@ export function carryService(doc: Document): void {
     ?.setAttribute('content', THEME_COLOR[service]);
 }
 
+declare global {
+  interface DocumentEventMap {
+    'mz:service': CustomEvent<Service>;
+  }
+}
+
 export function applyService(service: Service): void {
   document.documentElement.dataset.service = service;
+  document.dispatchEvent(new CustomEvent('mz:service', { detail: service }));
   document
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute('content', THEME_COLOR[service]);
