@@ -1,6 +1,7 @@
 ---
 // The site header: the line with its four stops, like the route map above a train's doors.
 // It stays on screen across rides (transition:persist), so its script keeps it in sync.
+import { TRANSFERS } from '../data/lines';
 import { STATIONS, stationIndex, type StationId } from '../data/stations';
 import { getStrings } from '../i18n';
 import Picto from './Picto.astro';
@@ -14,6 +15,7 @@ interface Props {
 const { station } = Astro.props;
 const t = getStrings(Astro.currentLocale);
 const current = station ? stationIndex(station) : -1;
+const twitch = TRANSFERS.find((line) => line.id === 'tw')!;
 ---
 
 <header class="vision" transition:persist="route-bar">
@@ -54,6 +56,16 @@ const current = station ? stationIndex(station) : -1;
     </nav>
 
     <div class="controls">
+      <a
+        class="live-pill"
+        href={twitch.href}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i class="blip" aria-hidden="true"></i>
+        {t.routeBar.live}
+        <span class="sr-only">{t.routeBar.liveLabel}</span>
+      </a>
       <button
         class="ctl"
         type="button"
@@ -102,6 +114,7 @@ const current = station ? stationIndex(station) : -1;
 
 <script>
   import { STATIONS, stationIndex } from '../data/stations';
+  import '../scripts/live';
   import { currentStation } from '../scripts/ride';
   import { carryService, switchService } from '../scripts/service';
   import { setSound, soundOn } from '../scripts/sound';
@@ -314,6 +327,29 @@ const current = station ? stationIndex(station) : -1;
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  /* Only while the Twitch line is live (data-on-air on <html>): neon, linking to the stream. */
+  .live-pill {
+    display: none;
+    align-items: center;
+    gap: 7px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 13px;
+    background: var(--lit);
+    box-shadow: 0 0 18px rgb(var(--lit-rgb) / 0.55);
+    color: #0b0b0a;
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  :global(:root[data-on-air]) .live-pill {
+    display: inline-flex;
   }
 
   .ctl {

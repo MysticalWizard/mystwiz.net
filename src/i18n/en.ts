@@ -89,6 +89,8 @@ const en = {
     home: 'mystwiz, home',
     nav: 'MZ Line stations',
     tickets: 'Tickets',
+    live: 'Live',
+    liveLabel: 'on Twitch now',
     melody: { label: 'Melody', on: 'on', off: 'off' },
     melodyHint: 'Every station has its own departure melody',
     service: {
@@ -135,7 +137,12 @@ const en = {
     title: 'Departures',
     sample: 'Sample data',
     columns: { line: 'Line', destination: 'Destination', now: 'Now' },
-    footer: { updates: 'Updates every minute', tap: 'Tap a row to transfer' },
+    footer: {
+      live: 'Updates every minute',
+      snapshot: 'Updated {age}',
+      sample: 'Live feed not connected',
+      tap: 'Tap a row to transfer',
+    },
     numberLocale: 'en-US',
     rows: {
       yr: ['Now building', 'Anime recommender'],

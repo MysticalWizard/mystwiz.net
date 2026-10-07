@@ -2,27 +2,46 @@
 // LED departure board: one row per line, each alternating between two states every 4.2s.
 // Always dark, even in day service. Not an aria-live region (the flips would be noisy):
 // each row's accessible name carries both states instead.
+//
+// Rendered with the board's current data (src/lib/live), then kept fresh in the browser
+// with whatever src/scripts/live.ts hears from the board endpoint.
 import { BOARD_LINES } from '../../data/lines';
 import { getStrings } from '../../i18n';
-import { formatBoard, sampleBoard } from '../../lib/board';
+import { fill, formatAge, formatBoard } from '../../lib/board';
+import { getBoardSnapshot } from '../../lib/live';
 import Picto from '../Picto.astro';
 import SectionHeading from '../SectionHeading.astro';
 
 const t = getStrings(Astro.currentLocale);
 const s = t.departures;
-const now = new Date();
-const rows = formatBoard(sampleBoard(now), now, s);
+const snapshot = await getBoardSnapshot(!Astro.isPrerendered);
+const at = new Date(snapshot.generatedAt);
+const rows = formatBoard(snapshot.data, at, s);
+const footer =
+  snapshot.mode === 'live'
+    ? s.footer.live
+    : snapshot.mode === 'sample'
+      ? s.footer.sample
+      : fill(s.footer.snapshot, {
+          age: formatAge(snapshot.generatedAt, at, s.ago),
+        });
 ---
 
 <section class="rise" style="--i: 2" aria-labelledby="departures-heading">
   <SectionHeading id="departures-heading" label={s.label}>
     {s.heading}
   </SectionHeading>
-  <mz-departures class="led">
+  <mz-departures
+    class="led"
+    data-snapshot={JSON.stringify(snapshot)}
+    data-strings={JSON.stringify(s)}
+  >
     <div class="led-head">
       <span>{s.title}</span>
       <span class="grow"></span>
-      <span class="sample">{s.sample}</span>
+      <span class="sample" hidden={snapshot.mode !== 'sample'} data-sample>
+        {s.sample}
+      </span>
       <span class="clock" data-clock aria-hidden="true">
         --<i>:</i>--
       </span>
@@ -67,13 +86,23 @@ const rows = formatBoard(sampleBoard(now), now, s);
       })}
     </ul>
     <div class="led-foot">
-      <span>{s.footer.updates}</span>
+      <span data-footer>{footer}</span>
       <span>{s.footer.tap}</span>
     </div>
   </mz-departures>
 </section>
 
 <script>
+  import type { Strings } from '../../i18n';
+  import {
+    fill,
+    formatAge,
+    formatBoard,
+    type BoardLineId,
+  } from '../../lib/board';
+  import type { BoardSnapshot } from '../../lib/live/snapshot';
+  import { latestBoard } from '../../scripts/live';
+
   const FLIP_MS = 4200;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -81,8 +110,21 @@ const rows = formatBoard(sampleBoard(now), now, s);
   class MzDepartures extends HTMLElement {
     #phase = 0;
     #timers: number[] = [];
+    #snapshot?: BoardSnapshot;
+    #strings?: Strings['departures'];
+    #onBoard = (event: CustomEvent<BoardSnapshot>) => this.show(event.detail);
 
     connectedCallback() {
+      this.#strings = JSON.parse(this.dataset.strings ?? 'null') ?? undefined;
+      const embedded = JSON.parse(this.dataset.snapshot ?? 'null') as
+        BoardSnapshot | undefined;
+      const latest = latestBoard();
+      this.show(
+        latest && embedded && latest.generatedAt > embedded.generatedAt
+          ? latest
+          : (embedded ?? latest),
+      );
+      document.addEventListener('mz:board', this.#onBoard);
       this.tick();
       this.#timers.push(
         window.setInterval(() => this.tick(), 15_000),
@@ -91,18 +133,68 @@ const rows = formatBoard(sampleBoard(now), now, s);
     }
 
     disconnectedCallback() {
+      document.removeEventListener('mz:board', this.#onBoard);
       this.#timers.forEach(clearInterval);
       this.#timers = [];
     }
 
-    /** The clock shows the visitor's local time. */
+    /** Writes the rows for a snapshot; ages are counted from now. */
+    show(snapshot: BoardSnapshot | undefined) {
+      const s = this.#strings;
+      if (!snapshot || !s) return;
+      this.#snapshot = snapshot;
+      const now = new Date();
+      const rows = formatBoard(snapshot.data, now, s);
+      for (const el of this.querySelectorAll<HTMLElement>('[data-row]')) {
+        const row = rows[el.dataset.row as BoardLineId];
+        if (!row) continue;
+        el.dataset.states = JSON.stringify(row.states);
+        el.classList.toggle('is-live', row.live);
+        this.write(el, row.states[this.#phase]);
+        const both = el.querySelector('[data-both]');
+        if (both) both.textContent = row.states.join(', ');
+      }
+      const sample = this.querySelector<HTMLElement>('[data-sample]');
+      if (sample) sample.hidden = snapshot.mode !== 'sample';
+      const footer = this.querySelector('[data-footer]');
+      if (footer) {
+        footer.textContent =
+          snapshot.mode === 'live'
+            ? s.footer.live
+            : snapshot.mode === 'sample'
+              ? s.footer.sample
+              : fill(s.footer.snapshot, {
+                  age: formatAge(snapshot.generatedAt, now, s.ago),
+                });
+      }
+    }
+
+    write(row: HTMLElement, text: string) {
+      const now = row.querySelector('[data-now]');
+      if (!now) return;
+      const children: (Node | string)[] = [text];
+      if (row.classList.contains('is-live')) {
+        const dot = document.createElement('i');
+        dot.className = 'blip';
+        children.unshift(dot);
+      }
+      now.replaceChildren(...children);
+    }
+
+    /** The clock shows the visitor's local time; ages on the rows move on with it. */
     tick() {
       const clock = this.querySelector('[data-clock]');
-      if (!clock) return;
-      const now = new Date();
-      const colon = document.createElement('i');
-      colon.textContent = ':';
-      clock.replaceChildren(pad(now.getHours()), colon, pad(now.getMinutes()));
+      if (clock) {
+        const now = new Date();
+        const colon = document.createElement('i');
+        colon.textContent = ':';
+        clock.replaceChildren(
+          pad(now.getHours()),
+          colon,
+          pad(now.getMinutes()),
+        );
+      }
+      this.show(this.#snapshot);
     }
 
     /** Every row switches to its other state with a stepped wipe. */
@@ -110,13 +202,12 @@ const rows = formatBoard(sampleBoard(now), now, s);
       this.#phase ^= 1;
       for (const row of this.querySelectorAll<HTMLElement>('[data-row]')) {
         const states = JSON.parse(row.dataset.states ?? '[]') as string[];
-        const now = row.querySelector('[data-now]');
+        const now = row.querySelector<HTMLElement>('[data-now]');
         if (!now || states.length < 2) continue;
-        const live = row.querySelector('.blip');
-        now.replaceChildren(...(live ? [live] : []), states[this.#phase]);
+        this.write(row, states[this.#phase]);
         if (!reducedMotion.matches) {
           now.classList.remove('flip');
-          void (now as HTMLElement).offsetWidth;
+          void now.offsetWidth;
           now.classList.add('flip');
         }
       }
