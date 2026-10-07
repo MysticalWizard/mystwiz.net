@@ -4,6 +4,9 @@
 //
 // Slots: "title" replaces the station title, "sub" adds items to the sub line,
 // "side" adds a column on the right (the transfer section on Home).
+//
+// Without an id the board is for a station that isn't on the line (404): "MZ ??", and both
+// ends of the band ride back to Home.
 import {
   nextStation,
   prevStation,
@@ -14,24 +17,28 @@ import { getStrings } from '../i18n';
 import StationBadge from './StationBadge.astro';
 
 interface Props {
-  id: StationId;
+  id?: StationId;
   sub?: string[];
+  /** Title for a board off the line. */
+  title?: string;
 }
 
-const { id, sub = [] } = Astro.props;
+const { id, sub = [], title } = Astro.props;
 const t = getStrings(Astro.currentLocale);
-const here = stationById(id);
-const prev = prevStation(id);
-const next = nextStation(id);
+const no = id ? stationById(id).no : '??';
+const prev = id ? prevStation(id) : stationById('home');
+const next = id ? nextStation(id) : stationById('home');
+const name = id ? t.stations[id].name : title;
+const mid = id ? t.line.loop : t.line.outOfService;
 ---
 
 <div class="board" data-arrive>
   <div class="board-top">
-    <StationBadge no={here.no} size="clamp(60px, 7vw, 100px)" />
+    <StationBadge no={no} size="clamp(60px, 7vw, 100px)" />
     <div class="board-name">
       <slot name="title">
         <h1 class="board-title" tabindex="-1">
-          {t.stations[id].name}
+          {name}
         </h1>
       </slot>
       <p class="board-sub">
@@ -52,7 +59,7 @@ const next = nextStation(id);
       <span class="sr-only">{t.board.prev}</span> {t.stations[prev.id].short}{' '}
       <small>MZ{prev.no}</small>
     </a>
-    <span class="band-mid">{t.line.loop}</span>
+    <span class="band-mid">{mid}</span>
     <a class="band-link next" href={next.href}>
       <span class="sr-only">{t.board.next}</span> <small>MZ{next.no}</small>{' '}
       {t.stations[next.id].short}

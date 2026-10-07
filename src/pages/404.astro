@@ -1,0 +1,198 @@
+---
+// 404: Not in service. A station that doesn't exist ("MZ ??") and a train at its platform
+// with NOT IN SERVICE on its destination sign. Both ends of the board ride back to Home.
+import LinkButton from '../components/LinkButton.astro';
+import Picto from '../components/Picto.astro';
+import StationHead from '../components/StationHead.astro';
+import { station } from '../data/stations';
+import { getStrings } from '../i18n';
+import Base from '../layouts/Base.astro';
+
+const t = getStrings(Astro.currentLocale);
+const s = t.notFound;
+---
+
+<Base title={t.meta.title(s.title)} description={s.description}>
+  <StationHead sub={s.sub} title={s.title} />
+  <div class="wrap">
+    <section class="py-sec">
+      <div class="scene rise" style="--i: 0" aria-hidden="true">
+        <div class="train">
+          <div class="dest">
+            <span>{s.destination}</span>
+          </div>
+          <div class="windows">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="stripe"></div>
+          <div class="doors">
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <div class="bogies"></div>
+        <div class="edge"></div>
+      </div>
+      <div class="note rise" style="--i: 1">
+        <p>{s.text}</p>
+        <div class="actions">
+          <LinkButton href={station('home').href}>
+            {s.home}
+            <span class="tri" aria-hidden="true"></span>
+          </LinkButton>
+          <LinkButton aria-haspopup="dialog" data-open-tickets>
+            <Picto name="ticket" />
+            {s.tickets}
+          </LinkButton>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .scene {
+    position: relative;
+    max-width: 880px;
+    padding-top: 12px;
+  }
+
+  /* A train car seen from the platform. */
+  .train {
+    position: relative;
+    height: 220px;
+    border: 3px solid var(--fg);
+    border-radius: 120px 18px 10px 10px / 140px 18px 10px 10px;
+    background: var(--panel);
+    overflow: hidden;
+  }
+
+  /* LED destination sign above the windows. */
+  .dest {
+    position: absolute;
+    top: 22px;
+    left: 120px;
+    right: 28px;
+    display: grid;
+    place-items: center;
+    height: 44px;
+    border: 1px solid #26261f;
+    border-radius: 6px;
+    background: var(--led-bg);
+    box-shadow:
+      inset 0 0 0 3px #000,
+      inset 0 0 30px rgb(0 0 0 / 0.9);
+    color: var(--led-ink);
+    font-family: var(--f-led);
+    font-size: clamp(18px, 3.4vw, 30px);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .windows {
+    position: absolute;
+    top: 84px;
+    left: 96px;
+    right: 28px;
+    display: flex;
+    gap: 14px;
+  }
+
+  .windows span {
+    flex: 1;
+    height: 52px;
+    border-radius: 6px;
+    background: var(--door-glass);
+  }
+
+  .stripe {
+    position: absolute;
+    top: 150px;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: var(--line);
+  }
+
+  .doors {
+    position: absolute;
+    top: 84px;
+    bottom: 0;
+    left: 46%;
+    display: flex;
+    gap: 3px;
+  }
+
+  .doors span {
+    width: 44px;
+    border: 2px solid var(--rule-2);
+    border-bottom: 0;
+    border-radius: 4px 4px 0 0;
+    background: var(--door);
+  }
+
+  .bogies {
+    height: 22px;
+    margin: -2px 60px 0;
+    background: radial-gradient(
+        circle at 22px 4px,
+        var(--fg) 9px,
+        transparent 9.6px
+      )
+      0 0 / 25% 100% repeat-x;
+  }
+
+  /* The platform edge with its yellow tactile strip. */
+  .edge {
+    height: 16px;
+    margin-top: 6px;
+    border-radius: 2px;
+    background:
+      radial-gradient(circle, var(--on-line) 1.6px, transparent 2px) 0 0 / 8px
+        8px,
+      var(--line);
+  }
+
+  .note {
+    display: grid;
+    gap: 18px;
+    max-width: 64ch;
+    margin-top: 32px;
+  }
+
+  .note p {
+    font-size: 18px;
+    color: var(--muted);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media (max-width: 620px) {
+    .train {
+      height: 190px;
+    }
+
+    .dest {
+      left: 70px;
+      right: 16px;
+    }
+
+    .windows {
+      left: 60px;
+      right: 16px;
+    }
+
+    .doors {
+      top: 84px;
+    }
+  }
+</style>

@@ -76,6 +76,17 @@ const en = {
   line: {
     name: 'MZ Line',
     loop: 'MZ Line · Loop',
+    outOfService: 'MZ Line · Out of service',
+  },
+
+  notFound: {
+    title: 'Not in service',
+    description: 'This station is not on the MZ Line.',
+    sub: ['404', 'No such station on the MZ Line'],
+    destination: 'Not in service',
+    text: "This train is not in service, and the station you asked for isn't on the line. Ride back to Home, or buy a ticket to a station that exists.",
+    home: 'Ride back to Home',
+    tickets: 'Open the ticket machine',
   },
 
   stations: {

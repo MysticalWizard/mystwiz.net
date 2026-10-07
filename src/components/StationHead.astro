@@ -1,24 +1,26 @@
 ---
 // Board for every station except Home: the station board with a huge outlined ghost of the
-// station number peeking out below it.
+// station number peeking out below it. Without an id it is the board of a station that isn't
+// on the line (404).
 import { station as stationById, type StationId } from '../data/stations';
 import StationBoard from './StationBoard.astro';
 
 interface Props {
-  id: StationId;
+  id?: StationId;
   sub?: string[];
+  title?: string;
 }
 
-const { id, sub } = Astro.props;
+const { id, sub, title } = Astro.props;
 ---
 
 <div class="wrap">
   <div class="st-head">
     <div class="ghost" aria-hidden="true" data-plane="ghost">
-      {stationById(id).no}
+      {id ? stationById(id).no : '??'}
     </div>
     <div data-plane="shake">
-      <StationBoard id={id} sub={sub} />
+      <StationBoard id={id} sub={sub} title={title} />
     </div>
   </div>
 </div>

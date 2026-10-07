@@ -1,15 +1,22 @@
 ---
-// Outlined mono button for links, e.g. "See the line ▶" or "Visit wuwa.mystwiz.net ↗".
+// Outlined mono button, e.g. "See the line ▶" or "Visit wuwa.mystwiz.net ↗". A link when
+// given an href, otherwise a button.
 import type { HTMLAttributes } from 'astro/types';
 
-type Props = HTMLAttributes<'a'>;
+type Props = HTMLAttributes<'a'> & HTMLAttributes<'button'>;
 
-const { class: className, ...attrs } = Astro.props;
+const { class: className, href, ...attrs } = Astro.props;
 ---
 
-<a class:list={['link-btn', className]} {...attrs}>
-  <slot />
-</a>
+{href ? (
+  <a class:list={['link-btn', className]} href={href} {...attrs}>
+    <slot />
+  </a>
+) : (
+  <button type="button" class:list={['link-btn', className]} {...attrs}>
+    <slot />
+  </button>
+)}
 
 <style>
   .link-btn {
