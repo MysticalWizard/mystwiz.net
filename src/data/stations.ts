@@ -1,12 +1,69 @@
 // The MZ Line: every page is a station on one loop. Order is ride order; numbers are station codes.
 // Names and other copy live in src/i18n.
 
+/** A note of a departure melody: MIDI note number and length in beats. */
+export type Note = readonly [note: number, beats: number];
+
+// Like Tokyo stations, every station has its own short departure melody.
 export const STATIONS = [
-  { id: 'home', no: '01', href: '/' },
-  { id: 'about', no: '02', href: '/about/' },
-  { id: 'projects', no: '03', href: '/projects/' },
-  { id: 'specs', no: '04', href: '/specs/' },
-] as const;
+  {
+    id: 'home',
+    no: '01',
+    href: '/',
+    melody: [
+      [74, 0.5],
+      [78, 0.5],
+      [81, 0.5],
+      [86, 1],
+      [83, 0.5],
+      [81, 1.5],
+    ],
+  },
+  {
+    id: 'about',
+    no: '02',
+    href: '/about/',
+    melody: [
+      [76, 0.5],
+      [79, 0.5],
+      [83, 0.5],
+      [81, 0.5],
+      [79, 0.5],
+      [76, 1.5],
+    ],
+  },
+  {
+    id: 'projects',
+    no: '03',
+    href: '/projects/',
+    melody: [
+      [81, 0.5],
+      [83, 0.5],
+      [86, 0.5],
+      [88, 0.75],
+      [86, 0.25],
+      [83, 1.5],
+    ],
+  },
+  {
+    id: 'specs',
+    no: '04',
+    href: '/specs/',
+    melody: [
+      [69, 0.5],
+      [74, 0.5],
+      [76, 0.5],
+      [78, 0.5],
+      [81, 1],
+      [78, 1],
+    ],
+  },
+] as const satisfies readonly {
+  id: string;
+  no: string;
+  href: string;
+  melody: readonly Note[];
+}[];
 
 export type Station = (typeof STATIONS)[number];
 export type StationId = Station['id'];

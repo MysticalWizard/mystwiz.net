@@ -154,18 +154,19 @@ function drawRipples(now: number) {
 document.addEventListener(
   'pointerdown',
   (event) => {
-    if (reducedMotion.matches || !fxCtx) return;
     const now = performance.now();
     rhythm = comboAfter(rhythm, now);
+    // Listeners (the click tick) hear every hit; only the drawing is motion.
+    document.dispatchEvent(
+      new CustomEvent('mz:hit', { detail: { combo: rhythm.combo } }),
+    );
+    if (reducedMotion.matches || !fxCtx) return;
     ripples.push({
       x: event.clientX,
       y: event.clientY,
       t: now,
       combo: rhythm.combo,
     });
-    document.dispatchEvent(
-      new CustomEvent('mz:hit', { detail: { combo: rhythm.combo } }),
-    );
     stopDrawing ??= onFrame(drawRipples);
   },
   { capture: true, passive: true },

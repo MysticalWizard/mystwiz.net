@@ -88,6 +88,8 @@ const en = {
   routeBar: {
     home: 'mystwiz, home',
     nav: 'MZ Line stations',
+    melody: { label: 'Melody', on: 'on', off: 'off' },
+    melodyHint: 'Every station has its own departure melody',
     service: {
       night: 'Night',
       day: 'Day',

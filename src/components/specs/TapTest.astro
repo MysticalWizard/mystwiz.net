@@ -37,6 +37,7 @@ const s = t.specs.tap;
 
 <script>
   import { emptyTaps, idleTaps, readout, tapAt } from '../../lib/tap';
+  import { tick } from '../../scripts/sound';
 
   /** A pause this long starts a new run. */
   const IDLE_MS = 1600;
@@ -88,6 +89,7 @@ const s = t.specs.tap;
       this.querySelector(`[data-key="${key}"]`)?.classList.add('down');
       this.#taps = tapAt(this.#taps, performance.now());
       this.show();
+      tick();
       clearTimeout(this.#idle);
       this.#idle = window.setTimeout(() => {
         this.#taps = idleTaps(this.#taps);

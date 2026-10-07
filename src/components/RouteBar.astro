@@ -54,6 +54,25 @@ const current = station ? stationIndex(station) : -1;
     </nav>
 
     <div class="controls">
+      <button
+        class="ctl"
+        type="button"
+        aria-pressed="false"
+        data-melody
+        data-hint={t.routeBar.melodyHint}
+      >
+        <Picto name="mute" class="when-off" />
+        <Picto name="speaker" class="when-on" />
+        <span class="t">
+          {t.routeBar.melody.label}{' '}
+          <span class="when-off" aria-hidden="true">
+            {t.routeBar.melody.off}
+          </span>
+          <span class="when-on" aria-hidden="true">
+            {t.routeBar.melody.on}
+          </span>
+        </span>
+      </button>
       <button class="ctl" type="button" data-service-toggle>
         <Picto name="moon" class="day:hidden" />
         <Picto name="sun" class="hidden day:block" />
@@ -78,10 +97,27 @@ const current = station ? stationIndex(station) : -1;
     carryService,
     currentService,
   } from '../scripts/service';
+  import { setSound, soundOn } from '../scripts/sound';
+  import { toast } from '../scripts/toast';
+
+  const melodyButton = () =>
+    document.querySelector<HTMLElement>('[data-melody]');
+
+  melodyButton()?.setAttribute('aria-pressed', String(soundOn()));
 
   document.addEventListener('click', (event) => {
-    if (!(event.target as Element).closest('[data-service-toggle]')) return;
-    applyService(currentService() === 'day' ? 'night' : 'day');
+    const target = event.target as Element;
+    if (target.closest('[data-service-toggle]')) {
+      applyService(currentService() === 'day' ? 'night' : 'day');
+      return;
+    }
+    const melody = target.closest<HTMLElement>('[data-melody]');
+    if (melody) {
+      const on = !soundOn();
+      setSound(on);
+      melody.setAttribute('aria-pressed', String(on));
+      if (on && melody.dataset.hint) toast(melody.dataset.hint);
+    }
   });
 
   // Each page is rendered in night service; keep the visitor's choice on the next station.
@@ -296,6 +332,11 @@ const current = station ? stationIndex(station) : -1;
   .ctl[aria-pressed='true'] {
     border-color: var(--line);
     color: var(--line-ink);
+  }
+
+  .ctl[aria-pressed='true'] :global(.when-off),
+  .ctl[aria-pressed='false'] :global(.when-on) {
+    display: none;
   }
 
   @media (max-width: 860px) {

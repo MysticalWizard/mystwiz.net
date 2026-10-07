@@ -100,6 +100,7 @@ const name = t.stations.home.name;
 <script>
   import '../../scripts/parallax';
   import { onFrame } from '../../scripts/frame';
+  import { tick } from '../../scripts/sound';
   import { speed } from '../../scripts/speed';
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -269,6 +270,7 @@ const name = t.stations.home.name;
               ? to[i]
               : GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
         });
+        if (f % 2 === 0) tick();
         await wait(34);
       }
       wordmark.classList.remove('scramble');
