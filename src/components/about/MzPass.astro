@@ -1,0 +1,450 @@
+---
+// The MZ Pass: a commuter IC card for Wonsik. The photo shows as an LED dot portrait (the
+// avatar dithered into 46 × 46 dots) until hovered, when it powers on in full color; on touch
+// screens it powers on by itself shortly after arriving. The card tilts toward the cursor and
+// flips when pressed. The faces are decorative; their text is repeated for screen readers.
+import { Image } from 'astro:assets';
+import avatar from '../../assets/avatar.jpg';
+import { getStrings } from '../../i18n';
+
+const t = getStrings(Astro.currentLocale);
+const s = t.about.pass;
+---
+
+<mz-pass class="pass-wrap rise" style="--i: 0">
+  <button
+    class="pass"
+    type="button"
+    aria-label={s.label}
+    aria-describedby="pass-details"
+    data-pass
+  >
+    <span class="pass-in" data-pass-in>
+      <span class="face face-front" aria-hidden="true">
+        <span class="pf">
+          <span class="pf-top">
+            <span>
+              <b>{s.title}</b> <span class="label">{s.kind}</span>
+            </span>
+            <span class="chipgfx"></span>
+          </span>
+          <span class="photo">
+            <canvas width="256" height="256" data-dots></canvas>
+            <Image
+              src={avatar}
+              alt=""
+              width={176}
+              height={176}
+              loading="eager"
+              data-photo
+            />
+          </span>
+          <span class="pf-id">
+            <span class="nm">{s.name}</span>
+            <span class="hd">{s.handle}</span>
+            <span class="kv">
+              {s.fields.map(([key, value]) => (
+                <>
+                  <span class="k">{key}</span>
+                  <span>{value}</span>
+                </>
+              ))}
+            </span>
+          </span>
+          <span class="pf-band">
+            <span>{s.band[0]}</span>
+            <span>{s.band[1]}</span>
+          </span>
+        </span>
+      </span>
+      <span class="face face-back" aria-hidden="true">
+        <span class="pb">
+          <span class="stripe-mag"></span>
+          <span class="pb-text">
+            {s.back.valid}
+            <br />
+            <br />
+            {s.back.found[0]}
+            <b>{s.back.found[1]}</b>
+            {s.back.found[2]}
+            <br />
+            {s.back.formerly[0]}
+            <b>{s.back.formerly[1]}</b>
+            {s.back.formerly[2]}
+          </span>
+          <span class="pf-band">
+            <span>{s.backBand[0]}</span>
+            <span>{s.backBand[1]}</span>
+          </span>
+        </span>
+      </span>
+    </span>
+  </button>
+  <span class="label">
+    <span class="hint-fine">{s.hint.fine}</span>
+    <span class="hint-coarse">{s.hint.coarse}</span>
+  </span>
+  <p class="sr-only" id="pass-details">
+    {[
+      ...s.fields.map(([key, value]) => `${key} ${value}.`),
+      s.back.valid,
+      s.back.found.join(''),
+      s.back.formerly.join(''),
+    ].join(' ')}
+  </p>
+</mz-pass>
+
+<script>
+  /** Ordered (Bayer) dithering pattern for the dot portrait. */
+  const BAYER = [
+    [0, 8, 2, 10],
+    [12, 4, 14, 6],
+    [3, 11, 1, 9],
+    [15, 7, 13, 5],
+  ];
+  const DOTS = 46;
+  /** On touch screens the photo powers on by itself after this long. */
+  const POWER_ON_MS = 1600;
+
+  const finePointer = window.matchMedia('(pointer: fine)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  class MzPass extends HTMLElement {
+    #powerOn = 0;
+
+    connectedCallback() {
+      const pass = this.querySelector<HTMLElement>('[data-pass]');
+      const photo = this.querySelector<HTMLImageElement>('[data-photo]');
+      if (!pass || !photo) return;
+
+      if (photo.complete && photo.naturalWidth) this.drawDots(photo);
+      else
+        photo.addEventListener('load', () => this.drawDots(photo), {
+          once: true,
+        });
+
+      pass.addEventListener('click', () => pass.classList.toggle('flipped'));
+      pass.addEventListener('pointermove', (event) => this.tilt(event, pass));
+      pass.addEventListener('pointerleave', () => this.untilt(pass));
+
+      if (!finePointer.matches) {
+        this.#powerOn = window.setTimeout(
+          () => pass.classList.add('on'),
+          POWER_ON_MS,
+        );
+      }
+    }
+
+    disconnectedCallback() {
+      clearTimeout(this.#powerOn);
+    }
+
+    /** The avatar as LED dots: dithered to one color, in the board's LED ink. */
+    drawDots(photo: HTMLImageElement) {
+      const canvas = this.querySelector<HTMLCanvasElement>('[data-dots]');
+      const ctx = canvas?.getContext('2d');
+      if (!canvas || !ctx) return;
+      const size = canvas.width;
+      const cell = size / DOTS;
+
+      const sample = document.createElement('canvas');
+      sample.width = sample.height = DOTS;
+      const sampleCtx = sample.getContext('2d', { willReadFrequently: true });
+      if (!sampleCtx) return;
+      sampleCtx.drawImage(photo, 0, 0, DOTS, DOTS);
+      const pixels = sampleCtx.getImageData(0, 0, DOTS, DOTS).data;
+
+      const ink = getComputedStyle(this).getPropertyValue('--led-ink').trim();
+      ctx.fillStyle = '#060605';
+      ctx.fillRect(0, 0, size, size);
+      for (let y = 0; y < DOTS; y++) {
+        for (let x = 0; x < DOTS; x++) {
+          const i = (y * DOTS + x) * 4;
+          const luma =
+            (0.2126 * pixels[i] +
+              0.7152 * pixels[i + 1] +
+              0.0722 * pixels[i + 2]) /
+            255;
+          const on = (1 - luma) * 1.25 > (BAYER[y % 4][x % 4] + 0.5) / 16;
+          ctx.fillStyle = on ? ink : 'rgb(255 255 255 / 0.06)';
+          ctx.beginPath();
+          ctx.arc(
+            x * cell + cell / 2,
+            y * cell + cell / 2,
+            cell * (on ? 0.4 : 0.28),
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+        }
+      }
+    }
+
+    /** The card tilts toward the cursor, up to 16° by 12°, with a soft sheen. */
+    tilt(event: PointerEvent, pass: HTMLElement) {
+      if (event.pointerType !== 'mouse' || reducedMotion.matches) return;
+      const inner = this.querySelector<HTMLElement>('[data-pass-in]');
+      if (!inner) return;
+      const r = pass.getBoundingClientRect();
+      const nx = (event.clientX - r.left) / r.width - 0.5;
+      const ny = (event.clientY - r.top) / r.height - 0.5;
+      pass.classList.add('tilting');
+      inner.style.setProperty('--ry', `${(nx * 16).toFixed(2)}deg`);
+      inner.style.setProperty('--rx', `${(ny * -12).toFixed(2)}deg`);
+      inner.style.setProperty('--sheen', `${((nx + 0.5) * 60).toFixed(1)}%`);
+    }
+
+    untilt(pass: HTMLElement) {
+      pass.classList.remove('tilting');
+      const inner = this.querySelector<HTMLElement>('[data-pass-in]');
+      inner?.style.setProperty('--ry', '0deg');
+      inner?.style.setProperty('--rx', '0deg');
+    }
+  }
+
+  customElements.define('mz-pass', MzPass);
+</script>
+
+<style>
+  .pass-wrap {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+    perspective: 1100px;
+  }
+
+  .pass {
+    display: block;
+    width: min(100%, 440px);
+    aspect-ratio: 1.586;
+    border-radius: 16px;
+  }
+
+  .pass-in {
+    --rx: 0deg;
+    --ry: 0deg;
+    --flip: 0deg;
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: rotateX(var(--rx)) rotateY(calc(var(--ry) + var(--flip)));
+    transform-style: preserve-3d;
+    transition: transform 0.7s var(--brake);
+  }
+
+  .pass:global(.tilting) .pass-in {
+    transition: transform 0.12s linear;
+  }
+
+  .pass:global(.flipped) .pass-in {
+    --flip: 180deg;
+  }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border: 1px solid var(--rule-2);
+    border-radius: 16px;
+    background: var(--panel-2);
+    box-shadow: var(--shadow);
+    text-align: left;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .face::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.09) calc(30% + var(--sheen, 20%)),
+      transparent calc(50% + var(--sheen, 20%))
+    );
+  }
+
+  .face-back {
+    transform: rotateY(180deg);
+  }
+
+  .pf {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    gap: 10px 18px;
+    padding: 18px 20px 0;
+  }
+
+  .pf-top {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .pf-top b {
+    font-size: 20px;
+    font-stretch: 125%;
+    font-weight: 850;
+    letter-spacing: 0.02em;
+  }
+
+  .pf-top .label {
+    font-size: 9.5px;
+  }
+
+  /* The IC chip. */
+  .chipgfx {
+    width: 38px;
+    height: 28px;
+    border-radius: 5px;
+    background:
+      linear-gradient(
+        90deg,
+        transparent 30%,
+        rgb(0 0 0 / 0.25) 30% 33%,
+        transparent 33% 66%,
+        rgb(0 0 0 / 0.25) 66% 69%,
+        transparent 69%
+      ),
+      linear-gradient(
+        180deg,
+        transparent 45%,
+        rgb(0 0 0 / 0.25) 45% 55%,
+        transparent 55%
+      ),
+      var(--line);
+  }
+
+  .photo {
+    position: relative;
+    display: block;
+    width: clamp(92px, 11vw, 128px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid var(--rule-2);
+    border-radius: 8px;
+    background: var(--led-bg);
+  }
+
+  .photo canvas,
+  .photo :global(img) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .photo :global(img) {
+    opacity: 0;
+    transition: opacity 0.45s;
+  }
+
+  .pass:hover .photo :global(img),
+  .pass:focus-visible .photo :global(img),
+  .pass:global(.on) .photo :global(img) {
+    opacity: 1;
+  }
+
+  .pf-id {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .nm {
+    font-size: clamp(20px, 2.2vw, 26px);
+    font-stretch: 110%;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .hd {
+    color: var(--line-ink);
+    font-family: var(--f-mono);
+    font-size: 13px;
+  }
+
+  .kv {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+    margin-top: 10px;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .kv .k {
+    color: var(--muted);
+  }
+
+  .pf-band {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: space-between;
+    height: 30px;
+    margin: 0 -20px;
+    padding: 0 20px;
+    background: var(--line);
+    color: var(--on-line);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+  }
+
+  .pb {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .pb .pf-band {
+    margin: 0;
+  }
+
+  .stripe-mag {
+    height: 44px;
+    margin-top: 22px;
+    background: #050505;
+  }
+
+  .pb-text {
+    padding: 16px 20px;
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .pb-text b {
+    font-weight: 500;
+    color: var(--fg);
+  }
+
+  .hint-coarse {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .hint-fine {
+      display: none;
+    }
+
+    .hint-coarse {
+      display: inline;
+    }
+  }
+</style>

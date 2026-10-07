@@ -205,6 +205,30 @@ const en = {
 
   about: {
     sub: ['Wonsik Shin', 'mystwiz', 'Passenger information'],
+    pass: {
+      label: 'MZ Pass for Wonsik Shin. Press to flip the card.',
+      title: 'MZ PASS',
+      kind: 'Commuter',
+      name: 'Wonsik Shin',
+      handle: 'mystwiz',
+      fields: [
+        ['Route', 'Code ⇄ Stream'],
+        ['Valid', 'All MZ lines'],
+        ['No.', 'MZ-0001'],
+      ],
+      band: ['MZ LINE', 'NON-TRANSFERABLE'],
+      backBand: ['MZ LINE', 'FLIP TO RETURN'],
+      back: {
+        valid:
+          'This pass is valid on every MZ line, including ones still under construction.',
+        found: ['If found, return it at ', 'github.com/mysticalwizard', '.'],
+        formerly: ['Formerly issued as ', 'MysticalWizard', '.'],
+      },
+      hint: {
+        fine: 'The photo powers on when you hover it. Press the card to flip it.',
+        coarse: 'Press the card to flip it.',
+      },
+    },
     lede: "Hey, I'm Wonsik. Online I go by mystwiz.",
     bio: "I'm into AI, machine learning, networking and web development, and I like building things people actually use: a bot for my friends' Discord server, a tool for a game I play, and now an anime recommender.",
     offDuty:

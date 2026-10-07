@@ -1,4 +1,6 @@
 ---
+import LineHistory from '../components/about/LineHistory.astro';
+import MzPass from '../components/about/MzPass.astro';
 import Picto from '../components/Picto.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import { getStrings } from '../i18n';
@@ -9,7 +11,8 @@ const { about } = t;
 ---
 
 <Station id="about" sub={about.sub}>
-  <section class="py-sec">
+  <section class="grid items-start gap-[clamp(24px,4vw,64px)] py-sec lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <MzPass />
     <div class="about-body rise" style="--i: 1">
       <p class="lede">{about.lede}</p>
       <p>{about.bio}</p>
@@ -38,19 +41,7 @@ const { about } = t;
     <SectionHeading id="history-heading" label={about.history.label}>
       {about.history.heading}
     </SectionHeading>
-    <ol class="rise grid max-w-[900px] gap-6" style="--i: 2">
-      {about.history.stops.map((stop) => (
-        <li class="grid grid-cols-[120px_minmax(0,1fr)] gap-x-4">
-          <span class="label pt-1 text-right">{stop.when}</span>
-          <div>
-            <b class="block text-[22px] leading-tight font-[760] [font-stretch:112%]">
-              {stop.name}
-            </b>
-            <p class="text-muted">{stop.text}</p>
-          </div>
-        </li>
-      ))}
-    </ol>
+    <LineHistory />
   </section>
 </Station>
 
