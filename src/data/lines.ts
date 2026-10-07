@@ -102,3 +102,19 @@ export function platformTarget(p: Platform): {
   const line = transfer(p.line);
   return { href: line.href, internal: false, name: line.name };
 }
+
+/**
+ * Bio links: each platform's bio links to its own short path (see astro.config.mjs), so a
+ * visitor arriving from it is welcomed and finds their platform and board row first.
+ */
+export const ARRIVALS = {
+  github: { path: '/gh', row: 'gh', platform: 'code' },
+  youtube: { path: '/yt', row: 'yt', platform: 'video' },
+  twitch: { path: '/tw', row: 'tw', platform: 'stream' },
+  osu: { path: '/osu', row: 'osu', platform: 'play' },
+} as const satisfies Record<
+  string,
+  { path: string; row: BoardLineId; platform: Platform['id'] }
+>;
+
+export type Via = keyof typeof ARRIVALS;

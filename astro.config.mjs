@@ -2,6 +2,7 @@
 import { defineConfig, envField, fontProviders } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
+import { ARRIVALS } from './src/data/lines.ts';
 
 const secret = () =>
   envField.string({ context: 'server', access: 'secret', optional: true });
@@ -9,6 +10,10 @@ const secret = () =>
 // https://astro.build/config
 export default defineConfig({
   site: 'https://mystwiz.net',
+  // Bio links: each platform's bio points at its own short path, e.g. /yt -> /?via=youtube.
+  redirects: Object.fromEntries(
+    Object.entries(ARRIVALS).map(([via, { path }]) => [path, `/?via=${via}`]),
+  ),
   // API keys for the live departure board (see .env.example). All optional: rows without a
   // key stay empty, and with no keys at all the board shows sample data.
   env: {

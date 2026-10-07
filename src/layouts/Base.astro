@@ -12,6 +12,8 @@ import SiteFooter from '../components/SiteFooter.astro';
 import Sweep from '../components/Sweep.astro';
 import TicketMachine from '../components/TicketMachine.astro';
 import Toast from '../components/Toast.astro';
+import { arrivalCss } from '../data/arrivals';
+import { ARRIVALS } from '../data/lines';
 import type { StationId } from '../data/stations';
 import { getStrings } from '../i18n';
 import '../styles/global.css';
@@ -26,6 +28,7 @@ interface Props {
 const t = getStrings(Astro.currentLocale);
 const { title, description = t.meta.description, station } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const vias = Object.keys(ARRIVALS);
 ---
 
 <!doctype html>
@@ -49,10 +52,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <Font cssVariable="--font-zen-kaku-gothic-new" />
 
     <!--
-      Before first paint: apply the stored day/night service (see src/scripts/service.ts), and on
-      the first page of a visit, start behind closed doors (see Doors.astro).
+      Before first paint: apply the stored day/night service (see src/scripts/service.ts); on
+      the first page of a visit, start behind closed doors (see Doors.astro); and remember a
+      bio-link arrival (?via=youtube) for the visit, taking it out of the address bar.
     -->
-    <script is:inline>
+    <script is:inline define:vars={{ vias }}>
       try {
         if (JSON.parse(localStorage.getItem('mz:service')) === 'day') {
           document.documentElement.dataset.service = 'day';
@@ -74,7 +78,31 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       } catch {
         // Storage is blocked: skip the welcome doors.
       }
+      try {
+        const params = new URLSearchParams(location.search);
+        const via = params.get('via');
+        if (via !== null) {
+          if (vias.includes(via)) {
+            sessionStorage.setItem('mz:via', via);
+            document.documentElement.setAttribute('data-welcome', '');
+          }
+          params.delete('via');
+          const query = params.toString();
+          history.replaceState(
+            history.state,
+            '',
+            location.pathname + (query ? '?' + query : '') + location.hash,
+          );
+        }
+        const remembered = sessionStorage.getItem('mz:via');
+        if (vias.includes(remembered)) {
+          document.documentElement.dataset.via = remembered;
+        }
+      } catch {
+        // Storage is blocked: no welcome.
+      }
     </script>
+    <Fragment set:html={`<style>${arrivalCss}</style>`} />
     <ClientRouter />
   </head>
   <body>

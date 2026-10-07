@@ -22,12 +22,16 @@ const s = t.home.platforms;
             href={target.href}
             target={target.internal ? undefined : '_blank'}
             rel={target.internal ? undefined : 'noopener noreferrer'}
+            data-from-frame
           >
             <span class="plat-no">{p.no}</span>
             <span class="plat-body">
               <b>
                 {s.rows[p.id].name}
                 {p.id === 'stream' && <span class="onair tag">{s.onAir}</span>}
+                <span class="from tag" data-from>
+                  {t.arrivals.transferred}
+                </span>
               </b>{' '}
               <small>{s.rows[p.id].text}</small>
             </span>{' '}
@@ -139,6 +143,12 @@ const s = t.home.platforms;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     vertical-align: 3px;
+  }
+
+  /* Shown to visitors who arrived from this platform's bio link (src/data/arrivals.ts). */
+  .from {
+    background: var(--line);
+    color: var(--on-line);
   }
 
   /* Shown while the Twitch line is live (data-on-air on <html>). */

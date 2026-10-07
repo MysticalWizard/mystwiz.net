@@ -123,6 +123,20 @@ const en = {
     stickers: ['Please mind the gap', 'MZ Line · Loop'],
   },
 
+  arrivals: {
+    messages: {
+      github:
+        'Transfer from the GitHub Line · You are probably here for the code · Platform 1 for projects',
+      youtube:
+        'Transfer from the YouTube Line · Welcome aboard · Platform 3 has the videos',
+      twitch: 'Transfer from the Twitch Line · Check the board for live status',
+      osu: 'Transfer from the osu! Line · Yes, I still click circles · Try clicking to a beat',
+    },
+    transferred: 'You transferred here',
+    cameFrom: 'You came from here',
+    close: 'Dismiss the welcome',
+  },
+
   board: {
     prev: 'Previous station:',
     next: 'Next station:',

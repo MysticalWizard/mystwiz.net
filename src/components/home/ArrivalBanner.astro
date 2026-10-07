@@ -1,0 +1,87 @@
+---
+// Welcome strip for visitors arriving from a bio link: a dark LED strip under the route bar
+// that scrolls "Transfer from the YouTube Line · Welcome aboard · ...". One per line; the
+// matching one shows on the landing page view (data-welcome and data-via on <html>).
+import { ARRIVALS, type Via } from '../../data/lines';
+import { getStrings } from '../../i18n';
+import Picto from '../Picto.astro';
+
+const t = getStrings(Astro.currentLocale);
+const vias = Object.keys(ARRIVALS) as Via[];
+---
+
+{vias.map((via) => (
+  <div class="arrival" data-welcome-for={via}>
+    <div class="arrival-in">
+      {[0, 1, 2, 3].map((copy) => (
+        <span aria-hidden={copy > 0 ? 'true' : undefined}>
+          <Picto name="arrow" />
+          {t.arrivals.messages[via]}
+        </span>
+      ))}
+    </div>
+    <button
+      class="close"
+      type="button"
+      aria-label={t.arrivals.close}
+      data-close-welcome
+    >
+      ×
+    </button>
+  </div>
+))}
+
+<style>
+  .arrival {
+    position: relative;
+    display: none;
+    overflow: hidden;
+    border-bottom: 1px solid var(--rule);
+    background: var(--led-bg);
+    color: var(--led-ink);
+    font-family: var(--f-led);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* The message scrolls like an LED ticker; hovering or focusing it pauses it. */
+  .arrival-in {
+    display: inline-flex;
+    gap: 80px;
+    padding: 9px 0;
+    animation: marquee 22s linear infinite;
+  }
+
+  .arrival:hover .arrival-in,
+  .arrival:focus-within .arrival-in {
+    animation-play-state: paused;
+  }
+
+  .arrival-in span {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 44px;
+    border-left: 1px solid #23231d;
+    background: var(--led-bg);
+    color: inherit;
+    font-family: var(--f-mono);
+    font-size: 18px;
+  }
+</style>

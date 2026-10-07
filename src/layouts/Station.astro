@@ -20,6 +20,7 @@ const title =
 ---
 
 <Base title={title} description={description} station={id}>
+  <slot name="banner" />
   {Astro.slots.has('hero') ? (
     <slot name="hero" />
   ) : (

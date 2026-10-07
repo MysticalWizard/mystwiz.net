@@ -56,7 +56,7 @@ const footer =
       {BOARD_LINES.map((line) => {
         const row = rows[line.id];
         return (
-          <li>
+          <li data-row-item={line.id}>
             <a
               class:list={['led-row', { 'is-live': row.live }]}
               href={line.href}
@@ -78,6 +78,9 @@ const footer =
               </span>
               <span class="sr-only" data-both>
                 {row.states.join(', ')}
+              </span>
+              <span class="came-from" data-from>
+                {t.arrivals.cameFrom}
               </span>
               <Picto name={line.internal ? 'arrow' : 'external'} class="go" />
             </a>
@@ -285,6 +288,10 @@ const footer =
     animation: blip 1s steps(2, jump-none) infinite;
   }
 
+  ul {
+    display: grid;
+  }
+
   .led-cols,
   .led-row {
     display: grid;
@@ -371,6 +378,24 @@ const footer =
   .led-row.is-live .lr-now {
     color: var(--lit);
     text-shadow: 0 0 12px rgb(var(--lit-rgb) / 0.75);
+  }
+
+  /* For visitors who arrived from this line's bio link (src/data/arrivals.ts). */
+  .came-from {
+    position: absolute;
+    top: -1px;
+    right: 30px;
+    display: none;
+    padding: 1px 6px;
+    border-radius: 2px;
+    background: var(--led-ink);
+    color: var(--led-bg);
+    font-family: var(--f-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transform: translateY(-50%);
   }
 
   .led-foot {
