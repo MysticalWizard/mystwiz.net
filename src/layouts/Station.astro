@@ -1,0 +1,32 @@
+---
+// Every page is a station with the same anatomy: station board, content, next train.
+// Pass the station id and its sub line; Home replaces the board through the "hero" slot.
+import NextTrain from '../components/NextTrain.astro';
+import StationHead from '../components/StationHead.astro';
+import type { StationId } from '../data/stations';
+import { getStrings } from '../i18n';
+import Base from './Base.astro';
+
+interface Props {
+  id: StationId;
+  sub?: string[];
+  description?: string;
+}
+
+const { id, sub, description } = Astro.props;
+const t = getStrings(Astro.currentLocale);
+const title =
+  id === 'home' ? t.meta.homeTitle : t.meta.title(t.stations[id].name);
+---
+
+<Base title={title} description={description} station={id}>
+  {Astro.slots.has('hero') ? (
+    <slot name="hero" />
+  ) : (
+    <StationHead id={id} sub={sub} />
+  )}
+  <div class="wrap">
+    <slot />
+    <NextTrain from={id} />
+  </div>
+</Base>

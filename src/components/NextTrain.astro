@@ -1,0 +1,78 @@
+---
+// "Next train" block at the bottom of every station: where the line goes next.
+import { nextStation, type StationId } from '../data/stations';
+import { getStrings } from '../i18n';
+import StationBadge from './StationBadge.astro';
+
+interface Props {
+  from: StationId;
+}
+
+const { from } = Astro.props;
+const t = getStrings(Astro.currentLocale);
+const next = nextStation(from);
+const nextName = t.stations[next.id].short;
+---
+
+<section class="next-train" aria-labelledby="next-train-label">
+  <div class="nt-info">
+    <span class="label" id="next-train-label">
+      {t.nextTrain.label}
+      {next.id === 'home' && ` · ${t.nextTrain.loops}`}
+    </span>
+    <div class="nt-dest">
+      <StationBadge no={next.no} />
+      <b>{nextName}</b>
+    </div>
+    <p>
+      <a class="go" href={next.href}>
+        {t.nextTrain.depart(nextName)}
+      </a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .next-train {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: clamp(18px, 4vw, 48px);
+    margin-bottom: clamp(40px, 6vw, 80px);
+    padding: clamp(20px, 3vw, 32px);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--panel-2);
+  }
+
+  .nt-dest {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 8px 0 10px;
+  }
+
+  .nt-dest > b {
+    font-size: clamp(30px, 4vw, 52px);
+    font-weight: 800;
+    font-stretch: 120%;
+    line-height: 1;
+  }
+
+  .nt-info p {
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .go {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 620px) {
+    .next-train {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

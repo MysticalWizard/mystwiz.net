@@ -1,0 +1,45 @@
+---
+// Board for every station except Home: the station board with a huge outlined ghost of the
+// station number peeking out below it.
+import { station as stationById, type StationId } from '../data/stations';
+import StationBoard from './StationBoard.astro';
+
+interface Props {
+  id: StationId;
+  sub?: string[];
+}
+
+const { id, sub } = Astro.props;
+---
+
+<div class="wrap">
+  <div class="st-head">
+    <div class="ghost" aria-hidden="true">
+      {stationById(id).no}
+    </div>
+    <StationBoard id={id} sub={sub} />
+  </div>
+</div>
+
+<style>
+  .st-head {
+    position: relative;
+    isolation: isolate;
+    padding-top: clamp(22px, 4vw, 48px);
+  }
+
+  .ghost {
+    position: absolute;
+    right: var(--gutter);
+    bottom: -0.56em;
+    z-index: -1;
+    font-size: clamp(150px, 26vw, 420px);
+    font-weight: 900;
+    font-stretch: 62%;
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--rule-2);
+    pointer-events: none;
+    user-select: none;
+  }
+</style>

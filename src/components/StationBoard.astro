@@ -1,0 +1,218 @@
+---
+// Station name board: the sign on a platform with the station's name and number, and a band in
+// the line color that names the previous and next stations. Both ends of the band ride there.
+//
+// Slots: "title" replaces the station title, "sub" adds items to the sub line,
+// "side" adds a column on the right (the transfer section on Home).
+import {
+  nextStation,
+  prevStation,
+  station as stationById,
+  type StationId,
+} from '../data/stations';
+import { getStrings } from '../i18n';
+import StationBadge from './StationBadge.astro';
+
+interface Props {
+  id: StationId;
+  sub?: string[];
+}
+
+const { id, sub = [] } = Astro.props;
+const t = getStrings(Astro.currentLocale);
+const here = stationById(id);
+const prev = prevStation(id);
+const next = nextStation(id);
+---
+
+<div class="board">
+  <div class="board-top">
+    <StationBadge no={here.no} size="clamp(60px, 7vw, 100px)" />
+    <div class="board-name">
+      <slot name="title">
+        <h1 class="board-title" tabindex="-1">
+          {t.stations[id].name}
+        </h1>
+      </slot>
+      <p class="board-sub">
+        {sub.map((item) => (
+          <>
+            <span>{item}</span>{' '}
+          </>
+        ))}
+        <slot name="sub" />
+      </p>
+    </div>
+    <slot name="side" />
+  </div>
+
+  <div class="board-band">
+    <a class="band-link" href={prev.href}>
+      <span class="tri -scale-x-100" aria-hidden="true"></span>
+      <span class="sr-only">{t.board.prev}</span> {t.stations[prev.id].short}{' '}
+      <small>MZ{prev.no}</small>
+    </a>
+    <span class="band-mid">{t.line.loop}</span>
+    <a class="band-link next" href={next.href}>
+      <span class="sr-only">{t.board.next}</span> <small>MZ{next.no}</small>{' '}
+      {t.stations[next.id].short}
+      <span class="tri" aria-hidden="true"></span>
+    </a>
+  </div>
+</div>
+
+<style>
+  .board {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+  }
+
+  .board::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.035),
+      transparent 45%
+    );
+  }
+
+  .board-top {
+    display: flex;
+    align-items: center;
+    gap: clamp(16px, 3vw, 40px);
+    padding: clamp(20px, 3.2vw, 42px) clamp(18px, 3vw, 40px);
+  }
+
+  .board-name {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-self: stretch;
+    min-width: 0;
+    container-type: inline-size;
+  }
+
+  .board-title {
+    padding-bottom: 0.05em;
+    font-size: clamp(46px, 8.4vw, 128px);
+    font-weight: 800;
+    font-stretch: 120%;
+    line-height: 0.88;
+    letter-spacing: -0.015em;
+  }
+
+  /* Separator dots sit in the gaps. Every item draws one to its left and the row is clipped at
+     its left edge, so a wrapped line never starts with a dot. */
+  .board-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 37px;
+    margin-top: 14px;
+    clip-path: inset(-8px -8px -8px -6px);
+    font-family: var(--f-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .board-sub > :global(*) {
+    position: relative;
+  }
+
+  .board-sub > :global(*)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -21px;
+    width: 5px;
+    height: 5px;
+    margin-top: -3px;
+    border-radius: 50%;
+    background: var(--dim);
+  }
+
+  .board-band {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    min-height: 50px;
+    padding: 8px clamp(14px, 2.6vw, 32px);
+    background: var(--line);
+    color: var(--on-line);
+  }
+
+  .band-link {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 10px;
+    min-width: 0;
+    padding: 6px 0;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .band-link.next {
+    justify-self: end;
+  }
+
+  .band-link small {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+  }
+
+  .band-link:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+
+  .band-link:focus-visible {
+    outline-color: var(--on-line);
+  }
+
+  .band-mid {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 620px) {
+    .board-top {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .board-band {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .band-mid,
+    .band-link small {
+      display: none;
+    }
+
+    .band-link {
+      gap: 7px;
+      font-size: 14px;
+    }
+  }
+</style>

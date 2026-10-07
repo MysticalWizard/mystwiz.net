@@ -1,0 +1,28 @@
+---
+// Section heading preceded by a mono label, e.g. "PLATFORMS  What runs from here".
+interface Props {
+  id: string;
+  label: string;
+}
+
+const { id, label } = Astro.props;
+---
+
+<h2 class="sec-h" id={id}>
+  <span class="label">{label}</span> <slot />
+</h2>
+
+<style>
+  .sec-h {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 16px;
+    margin-bottom: 22px;
+    font-size: clamp(24px, 2.6vw, 34px);
+    font-weight: 750;
+    font-stretch: 110%;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+</style>
