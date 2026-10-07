@@ -2,13 +2,19 @@
 // "Now building": Yorimichi, the anime recommender. Yorimichi means a detour on the way
 // somewhere, so it is drawn as a detour off the line: a train leaves the line, slows down at the
 // detour's station, and rejoins.
+import { PROJECTS } from '../../data/projects';
 import { station } from '../../data/stations';
 import { getStrings } from '../../i18n';
 import LinkButton from '../LinkButton.astro';
+import Picto from '../Picto.astro';
 
 const t = getStrings(Astro.currentLocale);
 const y = t.home.yorimichi;
 const projects = station('projects');
+const yorimichi = PROJECTS.find((p) => p.id === 'yr')!;
+const testRide = new URL(
+  yorimichi.links.find((link) => link.kind === 'testRide')!.href,
+);
 
 // The ride along the detour slows near the middle station (the prototype's 0.3 to 1 speed
 // curve, sampled): fractions of the path's length against fractions of the loop's time.
@@ -33,10 +39,20 @@ const keyTimes =
         <b>{y.name}</b>
         {y.text[1]}
       </p>
-      <LinkButton href={projects.href}>
-        {y.cta}
-        <span class="tri" aria-hidden="true"></span>
-      </LinkButton>
+      <div class="yori-links">
+        <LinkButton href={projects.href}>
+          {y.cta}
+          <span class="tri" aria-hidden="true"></span>
+        </LinkButton>
+        <LinkButton
+          href={testRide.href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t.projects.links.testRide(testRide.host)}
+          <Picto name="external" />
+        </LinkButton>
+      </div>
     </div>
     <div class="yori-side" aria-hidden="true">
       <svg class="detour" viewBox="0 0 340 176" data-detour>
@@ -153,6 +169,12 @@ const keyTimes =
   .yori-body p b {
     font-weight: 600;
     color: var(--fg);
+  }
+
+  .yori-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .yori-side {

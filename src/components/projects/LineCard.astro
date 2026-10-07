@@ -44,9 +44,9 @@ const s = t.projects;
     {p.links.length ? (
       p.links.map((link) => (
         <LinkButton href={link.href} target="_blank" rel="noopener noreferrer">
-          {link.kind === 'visit'
-            ? s.links.visit(new URL(link.href).host)
-            : s.links.source}
+          {link.kind === 'source'
+            ? s.links.source
+            : s.links[link.kind](new URL(link.href).host)}
           <Picto name="external" />
         </LinkButton>
       ))

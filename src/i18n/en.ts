@@ -337,6 +337,7 @@ const en = {
     },
     links: {
       visit: (host: string) => `Visit ${host}`,
+      testRide: (host: string) => `Test ride ${host}`,
       source: 'Source on GitHub',
     },
     stationsTba: 'Stations TBA',

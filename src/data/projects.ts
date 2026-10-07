@@ -12,7 +12,8 @@ export interface Stop {
 }
 
 export interface ProjectLink {
-  kind: 'visit' | 'source';
+  /** A test ride is an early build of a line still under construction. */
+  kind: 'visit' | 'testRide' | 'source';
   href: string;
 }
 
@@ -41,7 +42,7 @@ export const PROJECTS: Project[] = [
       { name: 'Recommendations' },
       { name: '', tba: true },
     ],
-    links: [],
+    links: [{ kind: 'testRide', href: 'https://yorimichi.mystwiz.net/' }],
   },
   {
     id: 'ew',
