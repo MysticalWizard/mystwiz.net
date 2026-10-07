@@ -1,0 +1,68 @@
+---
+import Picto from '../components/Picto.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { lineCounts, PROJECTS } from '../data/projects';
+import { getStrings } from '../i18n';
+import Station from '../layouts/Station.astro';
+
+const t = getStrings(Astro.currentLocale);
+const { projects } = t;
+const counts = lineCounts();
+const sub = projects.sub(counts.lines, counts.inService, counts.building);
+---
+
+<Station id="projects" sub={sub}>
+  <section class="py-sec" aria-labelledby="lines-heading">
+    <SectionHeading id="lines-heading" label={projects.map.label}>
+      {projects.map.heading}
+    </SectionHeading>
+    <div class="grid gap-4 md:grid-cols-2">
+      {PROJECTS.map((p) => (
+        <article class="grid content-start gap-3 rounded-sign border border-rule bg-panel p-5">
+          <header class="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+            <h3 class="text-[28px] leading-none font-[800] [font-stretch:118%]">
+              {p.name}{' '}
+              {p.jp && (
+                <span lang="ja" class="ml-2 font-jp text-[0.6em] text-muted">
+                  {p.jp}
+                </span>
+              )}
+            </h3>
+            <span class="label">
+              {p.code} · {projects.status[p.status]}
+            </span>
+          </header>
+          <p class="text-muted">{projects.lines[p.id]}</p>
+          <p class="label text-fg">
+            {p.stops
+              .map((s) => (s.tba ? projects.stationsTba : s.name))
+              .join(' · ')}
+          </p>
+          <footer class="flex flex-wrap gap-4">
+            {p.links.length ? (
+              p.links.map((link) => (
+                <a
+                  class="label inline-flex items-center gap-2 text-fg underline underline-offset-4"
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {link.kind === 'visit'
+                    ? projects.links.visit(new URL(link.href).host)
+                    : projects.links.source}
+                  <Picto name="external" />
+                </a>
+              ))
+            ) : (
+              <span class="label">
+                {p.status === 'building'
+                  ? projects.noLinks.building
+                  : projects.noLinks.private}
+              </span>
+            )}
+          </footer>
+        </article>
+      ))}
+    </div>
+  </section>
+</Station>

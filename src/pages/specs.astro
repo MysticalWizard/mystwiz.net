@@ -1,0 +1,63 @@
+---
+import Picto from '../components/Picto.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { CAB, CARS, INSPECTED, SERIES } from '../data/specs';
+import { getStrings } from '../i18n';
+import Station from '../layouts/Station.astro';
+
+const t = getStrings(Astro.currentLocale);
+const { specs } = t;
+---
+
+<Station id="specs" sub={specs.sub(INSPECTED)}>
+  <section class="py-sec" aria-labelledby="rolling-heading">
+    <SectionHeading id="rolling-heading" label={specs.rolling.label}>
+      {specs.rolling.heading(SERIES, CARS.length)}
+    </SectionHeading>
+    <ol class="grid gap-2">
+      {CARS.map((car, i) => (
+        <li class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 rounded-sign border border-rule bg-panel px-4 py-3">
+          <Picto name={car.picto} class="size-[22px]" />
+          <div>
+            <span class="label">
+              {specs.car(i + 1)} · {car.type}
+            </span>
+            <p class="text-lg leading-snug font-[760] [font-stretch:104%]">
+              {car.model}
+            </p>
+            <p class="text-sm text-muted">{car.detail}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="pb-sec" aria-labelledby="cab-heading">
+    <SectionHeading id="cab-heading" label={specs.cab.label}>
+      {specs.cab.heading}
+    </SectionHeading>
+    <div class="grid gap-4 md:grid-cols-3">
+      {CAB.map((group) => (
+        <div class="rounded-sign border border-rule bg-panel px-4 py-3">
+          <h3 class="flex items-center gap-2.5 font-[780] [font-stretch:118%]">
+            <Picto name={group.picto} />
+            {group.name}
+          </h3>
+          <dl>
+            {group.items.map((item) => (
+              <div class="border-b border-dashed border-rule py-2 last:border-b-0">
+                <dt class="label">{item.label}</dt>
+                <dd>
+                  {item.model}{' '}
+                  {item.detail && (
+                    <small class="text-[13px] text-muted">{item.detail}</small>
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ))}
+    </div>
+  </section>
+</Station>

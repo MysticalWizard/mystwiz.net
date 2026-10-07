@@ -1,0 +1,144 @@
+---
+import Picto from '../components/Picto.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { getStrings } from '../i18n';
+import Station from '../layouts/Station.astro';
+
+const t = getStrings(Astro.currentLocale);
+const { about } = t;
+---
+
+<Station id="about" sub={about.sub}>
+  <section class="py-sec">
+    <div class="about-body">
+      <p class="lede">{about.lede}</p>
+      <p>{about.bio}</p>
+      <p class="soft">{about.offDuty}</p>
+      <div class="notice">
+        <Picto name="cone" />
+        <div>
+          <b>{about.notice.title}</b>
+          <p>{about.notice.body}</p>
+        </div>
+      </div>
+      <div>
+        <span class="label" id="served-label">
+          {about.served.label}
+        </span>
+        <ul class="served" aria-labelledby="served-label">
+          {about.served.stops.map((stop) => (
+            <li>{stop}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="pb-sec" aria-labelledby="history-heading">
+    <SectionHeading id="history-heading" label={about.history.label}>
+      {about.history.heading}
+    </SectionHeading>
+    <ol class="grid max-w-[900px] gap-6">
+      {about.history.stops.map((stop) => (
+        <li class="grid grid-cols-[120px_minmax(0,1fr)] gap-x-4">
+          <span class="label pt-1 text-right">{stop.when}</span>
+          <div>
+            <b class="block text-[22px] leading-tight font-[760] [font-stretch:112%]">
+              {stop.name}
+            </b>
+            <p class="text-muted">{stop.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+</Station>
+
+<style>
+  .about-body {
+    display: grid;
+    gap: 18px;
+    max-width: 64ch;
+  }
+
+  .about-body p {
+    font-size: 18px;
+  }
+
+  .about-body .lede {
+    font-size: clamp(26px, 3vw, 40px);
+    font-weight: 700;
+    font-stretch: 104%;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  .about-body .soft {
+    color: var(--muted);
+  }
+
+  .notice {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 6px;
+    background: var(--line);
+    color: var(--on-line);
+  }
+
+  .notice b {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .about-body .notice p {
+    font-size: 15px;
+  }
+
+  /* "Destinations served": a short stretch of line with a stop per interest. */
+  .served {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  .served li {
+    position: relative;
+    padding: 20px 22px 0 0;
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .served li::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--line);
+  }
+
+  .served li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    border: 3px solid var(--fg);
+    border-radius: 50%;
+    background: var(--panel);
+  }
+
+  .served li:last-child::before {
+    right: auto;
+    width: 14px;
+  }
+</style>
