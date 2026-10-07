@@ -23,34 +23,41 @@ export type { BoardMode, BoardSnapshot } from './snapshot';
 /** Short timeouts: a slow source must not hold up the board. */
 const TIMEOUT_MS = 4000;
 
-const sources: BoardSources = {
-  twitch:
-    TWITCH_CLIENT_ID && TWITCH_CLIENT_SECRET
-      ? twitch(
-          { clientId: TWITCH_CLIENT_ID, clientSecret: TWITCH_CLIENT_SECRET },
-          ACCOUNTS.twitch,
-        )
+let sources: BoardSources | undefined;
+
+// Secrets are read on first use: on Cloudflare they are bound to each request, so they are
+// not there yet when this module is first imported.
+function configuredSources(): BoardSources {
+  sources ??= {
+    twitch:
+      TWITCH_CLIENT_ID && TWITCH_CLIENT_SECRET
+        ? twitch(
+            { clientId: TWITCH_CLIENT_ID, clientSecret: TWITCH_CLIENT_SECRET },
+            ACCOUNTS.twitch,
+          )
+        : undefined,
+    youtube: YOUTUBE_API_KEY
+      ? youtube(YOUTUBE_API_KEY, ACCOUNTS.youtube)
       : undefined,
-  youtube: YOUTUBE_API_KEY
-    ? youtube(YOUTUBE_API_KEY, ACCOUNTS.youtube)
-    : undefined,
-  osu:
-    OSU_CLIENT_ID && OSU_CLIENT_SECRET
-      ? osu(
-          { clientId: OSU_CLIENT_ID, clientSecret: OSU_CLIENT_SECRET },
-          ACCOUNTS.osu,
-        )
-      : undefined,
-  github: github(ACCOUNTS.github, GITHUB_TOKEN),
-  steam: STEAM_API_KEY ? steam(STEAM_API_KEY, ACCOUNTS.steam) : undefined,
-};
+    osu:
+      OSU_CLIENT_ID && OSU_CLIENT_SECRET
+        ? osu(
+            { clientId: OSU_CLIENT_ID, clientSecret: OSU_CLIENT_SECRET },
+            ACCOUNTS.osu,
+          )
+        : undefined,
+    github: github(ACCOUNTS.github, GITHUB_TOKEN),
+    steam: STEAM_API_KEY ? steam(STEAM_API_KEY, ACCOUNTS.steam) : undefined,
+  };
+  return sources;
+}
 
 const cache = createCache();
 
 /** `live` when answering a request; false while prerendering at build time. */
 export function getBoardSnapshot(live: boolean): Promise<BoardSnapshot> {
   return boardSnapshot({
-    sources,
+    sources: configuredSources(),
     cache,
     live,
     ctx: {

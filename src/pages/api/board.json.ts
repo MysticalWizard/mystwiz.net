@@ -1,12 +1,10 @@
 // Departure board data: every source fetched in parallel with short timeouts and cached per
 // source, always answering with the last good values and an updatedAt per source.
-//
-// Live data needs a server: add an Astro adapter for the host and set prerender to false.
-// Until then this is prerendered at build time as a snapshot, and the board doesn't poll it.
+// Runs on request on Cloudflare; the board polls it every minute.
 import type { APIRoute } from 'astro';
 import { getBoardSnapshot } from '../../lib/live';
 
-export const prerender = true;
+export const prerender = false;
 
 export const GET: APIRoute = async ({ isPrerendered }) => {
   const snapshot = await getBoardSnapshot(!isPrerendered);
