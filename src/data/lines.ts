@@ -1,12 +1,16 @@
 import type { PictoName } from '../assets/pictos';
+import type { BoardLineId } from '../lib/board';
+import { station } from './stations';
 
-export interface Transfer {
-  id: string;
+export interface Line {
+  id: BoardLineId;
   /** Two-letter line code, as on a transfer sign. */
   code: string;
   name: string;
   picto: PictoName;
   href: string;
+  /** Rides to a station on the MZ Line instead of leaving the site. */
+  internal?: boolean;
 }
 
 /** Other lines: Wonsik's accounts elsewhere. Order follows the transfer section of the home board. */
@@ -46,4 +50,17 @@ export const TRANSFERS = [
     picto: 'gamepad',
     href: 'https://steamcommunity.com/id/mysticalwiz/',
   },
-] as const satisfies readonly Transfer[];
+] as const satisfies readonly Line[];
+
+/** Rows of the departure board: what is being built, then every transfer. */
+export const BOARD_LINES: readonly Line[] = [
+  {
+    id: 'yr',
+    code: 'YR',
+    name: 'Yorimichi',
+    picto: 'cone',
+    href: station('projects').href,
+    internal: true,
+  },
+  ...TRANSFERS,
+];

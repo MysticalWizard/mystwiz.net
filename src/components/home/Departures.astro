@@ -1,0 +1,329 @@
+---
+// LED departure board: one row per line, each alternating between two states every 4.2s.
+// Always dark, even in day service. Not an aria-live region (the flips would be noisy):
+// each row's accessible name carries both states instead.
+import { BOARD_LINES } from '../../data/lines';
+import { getStrings } from '../../i18n';
+import { formatBoard, sampleBoard } from '../../lib/board';
+import Picto from '../Picto.astro';
+import SectionHeading from '../SectionHeading.astro';
+
+const t = getStrings(Astro.currentLocale);
+const s = t.departures;
+const now = new Date();
+const rows = formatBoard(sampleBoard(now), now, s);
+---
+
+<section class="rise" style="--i: 2" aria-labelledby="departures-heading">
+  <SectionHeading id="departures-heading" label={s.label}>
+    {s.heading}
+  </SectionHeading>
+  <mz-departures class="led">
+    <div class="led-head">
+      <span>{s.title}</span>
+      <span class="grow"></span>
+      <span class="sample">{s.sample}</span>
+      <span class="clock" data-clock aria-hidden="true">
+        --<i>:</i>--
+      </span>
+    </div>
+    <div class="led-cols" aria-hidden="true">
+      <span>{s.columns.line}</span>
+      <span>{s.columns.destination}</span>
+      <span>{s.columns.now}</span>
+      <span></span>
+    </div>
+    <ul>
+      {BOARD_LINES.map((line) => {
+        const row = rows[line.id];
+        return (
+          <li>
+            <a
+              class:list={['led-row', { 'is-live': row.live }]}
+              href={line.href}
+              target={line.internal ? undefined : '_blank'}
+              rel={line.internal ? undefined : 'noopener noreferrer'}
+              data-row={line.id}
+              data-states={JSON.stringify(row.states)}
+            >
+              <span class="lr-line">
+                <Picto name={line.picto} />
+                <span>{line.code}</span>
+              </span>{' '}
+              <span class="lr-dest">{line.name}</span>{' '}
+              <span class="lr-now" aria-hidden="true">
+                <span class="lr-txt" data-now>
+                  {row.live && <i class="blip" />}
+                  {row.states[0]}
+                </span>
+              </span>
+              <span class="sr-only" data-both>
+                {row.states.join(', ')}
+              </span>
+              <Picto name={line.internal ? 'arrow' : 'external'} class="go" />
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+    <div class="led-foot">
+      <span>{s.footer.updates}</span>
+      <span>{s.footer.tap}</span>
+    </div>
+  </mz-departures>
+</section>
+
+<script>
+  const FLIP_MS = 4200;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  class MzDepartures extends HTMLElement {
+    #phase = 0;
+    #timers: number[] = [];
+
+    connectedCallback() {
+      this.tick();
+      this.#timers.push(
+        window.setInterval(() => this.tick(), 15_000),
+        window.setInterval(() => this.flip(), FLIP_MS),
+      );
+    }
+
+    disconnectedCallback() {
+      this.#timers.forEach(clearInterval);
+      this.#timers = [];
+    }
+
+    /** The clock shows the visitor's local time. */
+    tick() {
+      const clock = this.querySelector('[data-clock]');
+      if (!clock) return;
+      const now = new Date();
+      const colon = document.createElement('i');
+      colon.textContent = ':';
+      clock.replaceChildren(pad(now.getHours()), colon, pad(now.getMinutes()));
+    }
+
+    /** Every row switches to its other state with a stepped wipe. */
+    flip() {
+      this.#phase ^= 1;
+      for (const row of this.querySelectorAll<HTMLElement>('[data-row]')) {
+        const states = JSON.parse(row.dataset.states ?? '[]') as string[];
+        const now = row.querySelector('[data-now]');
+        if (!now || states.length < 2) continue;
+        const live = row.querySelector('.blip');
+        now.replaceChildren(...(live ? [live] : []), states[this.#phase]);
+        if (!reducedMotion.matches) {
+          now.classList.remove('flip');
+          void (now as HTMLElement).offsetWidth;
+          now.classList.add('flip');
+        }
+      }
+    }
+  }
+
+  customElements.define('mz-departures', MzDepartures);
+</script>
+
+<style>
+  .led {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    padding: 16px 18px 8px;
+    border: 1px solid #26261f;
+    border-radius: 10px;
+    background: var(--led-bg);
+    box-shadow:
+      inset 0 0 0 4px #000,
+      inset 0 0 60px rgb(0 0 0 / 0.9),
+      var(--shadow);
+    color: var(--led-ink);
+    font-family: var(--f-led);
+    font-weight: 800;
+  }
+
+  /* Faint dot mesh over the panel. */
+  .led::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        circle at 2px 2px,
+        rgb(255 255 255 / 0.045) 1px,
+        transparent 1.6px
+      )
+      0 0 / 4px 4px;
+  }
+
+  .led-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 4px 12px;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .grow {
+    flex: 1;
+  }
+
+  .sample {
+    padding: 3px 7px;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    opacity: 0.7;
+  }
+
+  .clock {
+    font-size: 26px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+
+  .clock :global(i) {
+    font-style: normal;
+    animation: blip 1s steps(2, jump-none) infinite;
+  }
+
+  .led-cols,
+  .led-row {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr) minmax(0, 1.35fr) 18px;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .led-cols {
+    padding: 6px 4px;
+    border-top: 1px solid #23231d;
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+
+  .led-row {
+    position: relative;
+    padding: 11px 4px;
+    border-top: 1px dashed #23231d;
+    font-size: 21px;
+    line-height: 1.1;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition:
+      color 0.15s,
+      text-shadow 0.15s;
+  }
+
+  .led-row:hover,
+  .led-row:focus-visible {
+    color: var(--lit);
+    text-shadow: 0 0 10px rgb(var(--lit-rgb) / 0.55);
+  }
+
+  .lr-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .lr-line :global(.picto) {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lr-dest,
+  .lr-now {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .lr-txt {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .lr-txt:global(.flip) {
+    animation: wipe 0.55s steps(10) both;
+  }
+
+  @keyframes wipe {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  .led-row :global(.go) {
+    width: 14px;
+    height: 14px;
+    opacity: 0.6;
+  }
+
+  /* Live rows switch to the lit color. */
+  .led-row.is-live .lr-now {
+    color: var(--lit);
+    text-shadow: 0 0 12px rgb(var(--lit-rgb) / 0.75);
+  }
+
+  .led-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 4px 6px;
+    border-top: 1px solid #23231d;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 620px) {
+    .led {
+      padding: 12px 10px 6px;
+    }
+
+    .led-head {
+      gap: 8px;
+      font-size: 16px;
+    }
+
+    .clock {
+      font-size: 18px;
+    }
+
+    .led-cols,
+    .led-row {
+      grid-template-columns: 28px minmax(0, 0.9fr) minmax(0, 1.3fr) 12px;
+      gap: 8px;
+    }
+
+    .lr-line span {
+      display: none;
+    }
+
+    .led-row {
+      padding: 10px 2px;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+    }
+  }
+</style>

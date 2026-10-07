@@ -271,3 +271,20 @@
   background: currentColor;
   clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
+
+/* Blinking dot for anything live. */
+@utility blip {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: blip 1.2s steps(2, jump-none) infinite;
+}
+
+@keyframes blip {
+  50% {
+    opacity: 0.15;
+  }
+}

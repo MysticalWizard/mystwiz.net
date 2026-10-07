@@ -108,6 +108,48 @@ const en = {
     transfers: 'Transfer here for',
   },
 
+  // The LED departure board. Templates fill {n}, {age} and {game}; they stay plain strings so
+  // the board can re-render them in the browser when fresh data arrives.
+  departures: {
+    label: 'Live board',
+    heading: 'Departures and transfers',
+    title: 'Departures',
+    sample: 'Sample data',
+    columns: { line: 'Line', destination: 'Destination', now: 'Now' },
+    footer: { updates: 'Updates every minute', tap: 'Tap a row to transfer' },
+    numberLocale: 'en-US',
+    rows: {
+      yr: ['Now building', 'Anime recommender'],
+      twitch: {
+        off: 'Off air',
+        lastStream: 'Last stream {age}',
+        live: 'On air now',
+        watch: 'Tap to watch',
+      },
+      youtube: {
+        subscribers: '{n} subscribers',
+        latest: 'Latest upload {age}',
+      },
+      github: { push: 'Last push {age}', commits: '{n} commits this year' },
+      osu: { rank: '#{n} global', pp: '{n} pp' },
+      steam: {
+        online: 'Online',
+        playing: 'Playing {game}',
+        offline: 'Offline',
+        lastOnline: 'Last online {age}',
+      },
+      noSignal: ['No signal', 'Check back soon'],
+    },
+    ago: {
+      now: 'just now',
+      m: '{n}m ago',
+      h: '{n}h ago',
+      d: '{n}d ago',
+      mo: '{n}mo ago',
+      y: '{n}y ago',
+    },
+  },
+
   nextTrain: {
     label: 'Next train',
     loops: 'this line loops',
