@@ -63,9 +63,9 @@ const s = t.about.pass;
             <b>{s.back.found[1]}</b>
             {s.back.found[2]}
             <br />
-            {s.back.formerly[0]}
-            <b>{s.back.formerly[1]}</b>
-            {s.back.formerly[2]}
+            {s.back.aka[0]}
+            <b>{s.back.aka[1]}</b>
+            {s.back.aka[2]}
           </span>
           <span class="pf-band">
             <span>{s.backBand[0]}</span>
@@ -84,7 +84,7 @@ const s = t.about.pass;
       ...s.fields.map(([key, value]) => `${key} ${value}.`),
       s.back.valid,
       s.back.found.join(''),
-      s.back.formerly.join(''),
+      s.back.aka.join(''),
     ].join(' ')}
   </p>
 </mz-pass>

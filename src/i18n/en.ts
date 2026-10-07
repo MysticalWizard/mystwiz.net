@@ -223,9 +223,9 @@ const en = {
 
   home: {
     sub: ['Wonsik Shin', 'Student', 'Developer'],
-    formerly: 'Formerly MysticalWizard',
-    oldName: 'MysticalWizard',
-    oldNameTitle: 'Show the old name',
+    aka: 'AKA MysticalWizard',
+    altName: 'MysticalWizard',
+    altNameTitle: 'Show the alt name',
     tags: {
       line: 'MZ Line',
       service: 'Loop service',
@@ -277,7 +277,7 @@ const en = {
         valid:
           'This pass is valid on every MZ line, including ones still under construction.',
         found: ['If found, return it at ', 'github.com/mysticalwizard', '.'],
-        formerly: ['Formerly issued as ', 'MysticalWizard', '.'],
+        aka: ['Also issued as ', 'MysticalWizard', '.'],
       },
       hint: {
         fine: 'The photo powers on when you hover it. Press the card to flip it.',

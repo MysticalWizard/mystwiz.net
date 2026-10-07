@@ -2,7 +2,7 @@
 // Home's station board, staged in layers: blueprint grid at the back, the route line with a
 // train, the board itself, and floating tags in front. The planes move with the cursor and
 // scroll (src/scripts/parallax.ts), the train runs along the line, and the name is a toy:
-// letters near the cursor stretch, and tapping it shows the old name.
+// letters near the cursor stretch, and tapping it shows the alt name.
 import { TRANSFERS } from '../../data/lines';
 import { getStrings } from '../../i18n';
 import Picto from '../Picto.astro';
@@ -12,7 +12,7 @@ const t = getStrings(Astro.currentLocale);
 const name = t.stations.home.name;
 ---
 
-<mz-hero class="hero" data-old-name={t.home.oldName}>
+<mz-hero class="hero" data-alt-name={t.home.altName}>
   <div class="plane p-back" aria-hidden="true" data-plane="back">
     <div class="hero-grid"></div>
     <div class="ghost">MZ</div>
@@ -57,11 +57,11 @@ const name = t.stations.home.name;
         <button
           slot="sub"
           type="button"
-          class="old-name"
-          title={t.home.oldNameTitle}
-          data-show-old
+          class="alt-name"
+          title={t.home.altNameTitle}
+          data-show-alt
         >
-          {t.home.formerly}
+          {t.home.aka}
           <Picto name="cycle" />
         </button>
         <div slot="side" class="board-xfer">
@@ -106,8 +106,8 @@ const name = t.stations.home.name;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const GLYPHS = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  /** How long the old name stays up before the board scrambles back. */
-  const OLD_NAME_MS = 1700;
+  /** How long the alt name stays up before the board scrambles back. */
+  const ALT_NAME_MS = 1700;
 
   class MzHero extends HTMLElement {
     #resize = new ResizeObserver(() => this.layout());
@@ -124,9 +124,9 @@ const name = t.stations.home.name;
       const wordmark = this.querySelector<HTMLElement>('[data-wordmark]');
       wordmark?.addEventListener('pointermove', (event) => this.stretch(event));
       wordmark?.addEventListener('pointerleave', () => this.relax());
-      wordmark?.addEventListener('click', () => this.showOldName());
-      this.querySelector('[data-show-old]')?.addEventListener('click', () =>
-        this.showOldName(),
+      wordmark?.addEventListener('click', () => this.showAltName());
+      this.querySelector('[data-show-alt]')?.addEventListener('click', () =>
+        this.showAltName(),
       );
     }
 
@@ -234,20 +234,20 @@ const name = t.stations.home.name;
       }
     }
 
-    /** Scrambles the name into the old one, holds it, then scrambles back. */
-    async showOldName() {
+    /** Scrambles the name into the alt one, holds it, then scrambles back. */
+    async showAltName() {
       if (this.#morphing) return;
       this.#morphing = true;
       const current = this.querySelector(
         '[data-wordmark] .sr-only',
       )?.textContent;
-      await this.morph(this.dataset.oldName ?? '', true);
-      await wait(OLD_NAME_MS);
+      await this.morph(this.dataset.altName ?? '', true);
+      await wait(ALT_NAME_MS);
       await this.morph(current ?? '', false);
       this.#morphing = false;
     }
 
-    async morph(to: string, old: boolean) {
+    async morph(to: string, alt: boolean) {
       const wordmark = this.querySelector<HTMLElement>('[data-wordmark]');
       const chars = this.querySelector('[data-chars]');
       if (!wordmark || !chars) return;
@@ -257,7 +257,7 @@ const name = t.stations.home.name;
         span.textContent = letter;
         return span;
       });
-      wordmark.classList.toggle('old', old);
+      wordmark.classList.toggle('alt', alt);
       chars.replaceChildren(...spans);
       if (reducedMotion.matches) return;
 
@@ -454,8 +454,8 @@ const name = t.stations.home.name;
     touch-action: pan-y;
   }
 
-  /* The old name is longer, so it is set condensed. */
-  .wordmark:global(.old) {
+  /* The alt name is longer, so it is set condensed. */
+  .wordmark:global(.alt) {
     --wm-ratio: 5.624;
   }
 
@@ -468,7 +468,7 @@ const name = t.stations.home.name;
       font-weight 0.45s var(--brake);
   }
 
-  .wordmark:global(.old) :global(.ch) {
+  .wordmark:global(.alt) :global(.ch) {
     --w: 68;
   }
 
@@ -476,7 +476,7 @@ const name = t.stations.home.name;
     color: var(--line-ink);
   }
 
-  .old-name {
+  .alt-name {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -487,11 +487,11 @@ const name = t.stations.home.name;
     color: var(--fg);
   }
 
-  .old-name:hover {
+  .alt-name:hover {
     color: var(--line-ink);
   }
 
-  .old-name :global(.picto) {
+  .alt-name :global(.picto) {
     width: 14px;
     height: 14px;
   }

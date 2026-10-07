@@ -8,7 +8,7 @@ import type { Strings } from '../i18n';
 export function boardSub(id: StationId, t: Strings): string[] {
   switch (id) {
     case 'home':
-      return [...t.home.sub, t.home.formerly];
+      return [...t.home.sub, t.home.aka];
     case 'about':
       return t.about.sub;
     case 'projects': {
