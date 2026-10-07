@@ -181,10 +181,60 @@
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/*
+  Arrival. After a ride (data-arriving) or behind the first-visit doors (data-boarding), the
+  station board pulls in from the right with a blur that clears and a small jolt as it stops,
+  then the station's content rises in, staggered by --i.
+*/
+@keyframes arrive {
+  0% {
+    transform: translateX(26vw);
+    filter: blur(8px);
+  }
+  62% {
+    filter: blur(0);
+  }
+  74% {
+    transform: translateX(-0.7vw);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(26px);
+    opacity: 0.15;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+:root:is([data-arriving], [data-boarding]) [data-arrive] {
+  animation: arrive 1.05s var(--brake) both;
+}
+
+:root:is([data-arriving], [data-boarding]) .rise {
+  animation: rise 0.8s var(--brake) both;
+  animation-delay: calc(0.25s + var(--i, 0) * 0.07s);
+}
+
+:root[data-boarding] [data-arrive] {
+  animation-delay: 0.45s;
+}
+
+:root[data-boarding] .rise {
+  animation-delay: calc(0.7s + var(--i, 0) * 0.07s);
 }
 
 /* Page container: max content width 1440px with the page gutter. */

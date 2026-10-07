@@ -13,6 +13,15 @@ export function currentService(): Service {
   return document.documentElement.dataset.service === 'day' ? 'day' : 'night';
 }
 
+/** Pages are rendered in night service: copy the current service onto a page about to be swapped in. */
+export function carryService(doc: Document): void {
+  const service = currentService();
+  doc.documentElement.dataset.service = service;
+  doc
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', THEME_COLOR[service]);
+}
+
 export function applyService(service: Service): void {
   document.documentElement.dataset.service = service;
   document

@@ -1,0 +1,286 @@
+---
+// Train doors for page changes. Persisted across pages; src/scripts/ride.ts drives them.
+// On a visitor's first page of the session the doors start closed and part on load.
+import {
+  STATIONS,
+  station as stationById,
+  type StationId,
+} from '../data/stations';
+import { getStrings } from '../i18n';
+
+interface Props {
+  station?: StationId;
+}
+
+const { station } = Astro.props;
+const t = getStrings(Astro.currentLocale);
+const here = station ? stationById(station) : undefined;
+const names = Object.fromEntries(
+  STATIONS.map((s) => [s.id, t.stations[s.id].short]),
+);
+---
+
+<div
+  class="doors"
+  data-doors
+  data-next={t.doors.next}
+  data-names={JSON.stringify(names)}
+  aria-hidden="true"
+  transition:persist="doors"
+>
+  <div class="door door-l">
+    <div class="door-in">
+      <div class="door-win"></div>
+      <div class="door-band"></div>
+      <div class="door-sticker">{t.doors.stickers[0]}</div>
+    </div>
+  </div>
+  <div class="door door-r">
+    <div class="door-in">
+      <div class="door-win"></div>
+      <div class="door-band"></div>
+      <div class="door-sticker">{t.doors.stickers[1]}</div>
+    </div>
+  </div>
+  <div class="door-led" data-led>
+    {t.doors.arriving}
+    <span class="tri"></span>
+    {here ? `MZ${here.no} ${t.stations[here.id].short}` : 'MZ ??'}
+  </div>
+</div>
+
+<script>
+  import '../scripts/ride';
+</script>
+
+<style>
+  /* Below the route bar: it is the route display above the doors, and its train keeps moving. */
+  .doors {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .doors.on {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .door {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50.4%;
+    background: var(--door);
+    transition: transform 0.32s var(--door-ease);
+  }
+
+  .door-l {
+    left: 0;
+    border-right: 5px solid var(--door-edge);
+    transform: translateX(-102%);
+  }
+
+  .door-r {
+    right: 0;
+    border-left: 5px solid var(--door-edge);
+    transform: translateX(102%);
+  }
+
+  .doors.closed .door {
+    transform: none;
+  }
+
+  .doors:not(.closed) .door {
+    transition-duration: 0.36s;
+  }
+
+  .door-in {
+    position: absolute;
+    inset: 0;
+  }
+
+  .doors.moving .door-in {
+    animation: rumble 0.14s linear infinite;
+  }
+
+  @keyframes rumble {
+    50% {
+      transform: translateY(1.5px);
+    }
+  }
+
+  /* The window: tunnel lights streak past while the train moves. */
+  .door-win {
+    position: absolute;
+    top: 16%;
+    left: 20%;
+    right: 20%;
+    height: 36%;
+    overflow: hidden;
+    border-radius: 22px;
+    background: var(--door-glass);
+    box-shadow: inset 0 0 0 7px var(--door-edge);
+  }
+
+  .door-win::before,
+  .door-win::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .door-win::before {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 0 60%,
+          rgb(255 228 150 / 0.95) 99%,
+          transparent 99.5%
+        )
+        0 28% / 320px 3px repeat-x,
+      linear-gradient(
+          90deg,
+          transparent 0 70%,
+          rgb(255 255 255 / 0.7) 99%,
+          transparent 99.5%
+        )
+        0 64% / 520px 2px repeat-x,
+      linear-gradient(
+          90deg,
+          transparent 0 55%,
+          rgb(255 228 150 / 0.6) 99%,
+          transparent 99.5%
+        )
+        0 82% / 410px 4px repeat-x;
+  }
+
+  /* Faint tunnel ribs. */
+  .door-win::after {
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0 70px,
+      rgb(255 255 255 / 0.06) 70px 74px
+    );
+  }
+
+  .doors.moving .door-win::before {
+    opacity: 1;
+    animation: tunnel 0.22s linear infinite;
+  }
+
+  .doors.moving .door-win::after {
+    opacity: 1;
+    animation: tunnel-ribs 0.18s linear infinite;
+  }
+
+  @keyframes tunnel {
+    to {
+      background-position:
+        -320px 28%,
+        -520px 64%,
+        -410px 82%;
+    }
+  }
+
+  @keyframes tunnel-ribs {
+    to {
+      background-position: -74px 0;
+    }
+  }
+
+  .door-band {
+    position: absolute;
+    top: 60%;
+    left: 0;
+    right: 0;
+    height: 26px;
+    background: var(--line);
+  }
+
+  .door-sticker {
+    position: absolute;
+    top: 67%;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .door-l .door-sticker {
+    right: 10%;
+  }
+
+  .door-r .door-sticker {
+    left: 10%;
+  }
+
+  /* LED sign above the doors: "Next ▶ MZ03 Projects". */
+  .door-led {
+    position: absolute;
+    top: calc(var(--bar) + env(safe-area-inset-top, 0px) + 4vh);
+    left: 50%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 20px;
+    border: 1px solid #2a2a24;
+    border-radius: 6px;
+    background: var(--led-bg);
+    color: var(--led-ink);
+    font-family: var(--f-led);
+    font-size: clamp(18px, 2.6vw, 30px);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-50%);
+    transition: opacity 0.15s;
+  }
+
+  .doors.closed .door-led {
+    opacity: 1;
+  }
+
+  /* First visit of the session: the page loads behind closed doors, which then part.
+     Pure CSS so the doors open even if scripts fail. */
+  :global(:root[data-boarding]) .doors {
+    visibility: visible;
+    animation: doors-away 0s 0.9s forwards;
+  }
+
+  :global(:root[data-boarding]) .door {
+    transition: none;
+    animation: door-part 0.36s var(--door-ease) 0.45s both;
+  }
+
+  :global(:root[data-boarding]) .door-led {
+    opacity: 1;
+    animation: led-off 0.15s 0.45s forwards;
+  }
+
+  @keyframes door-part {
+    from {
+      transform: none;
+    }
+  }
+
+  @keyframes doors-away {
+    to {
+      visibility: hidden;
+    }
+  }
+
+  @keyframes led-off {
+    to {
+      opacity: 0;
+    }
+  }
+</style>

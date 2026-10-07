@@ -16,7 +16,7 @@ const sub = projects.sub(counts.lines, counts.inService, counts.building);
     <SectionHeading id="lines-heading" label={projects.map.label}>
       {projects.map.heading}
     </SectionHeading>
-    <div class="grid gap-4 md:grid-cols-2">
+    <div class="rise grid gap-4 md:grid-cols-2" style="--i: 0">
       {PROJECTS.map((p) => (
         <article class="grid content-start gap-3 rounded-sign border border-rule bg-panel p-5">
           <header class="flex flex-wrap items-baseline gap-x-4 gap-y-2">

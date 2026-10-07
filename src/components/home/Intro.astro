@@ -6,7 +6,7 @@ const t = getStrings(Astro.currentLocale);
 ---
 
 <section class="pt-[clamp(24px,4vw,48px)] pb-sec">
-  <p class="intro">
+  <p class="intro rise" style="--i: 0">
     {t.home.intro.map((part) =>
       typeof part === 'string' ? (
         part

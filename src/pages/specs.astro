@@ -14,7 +14,7 @@ const { specs } = t;
     <SectionHeading id="rolling-heading" label={specs.rolling.label}>
       {specs.rolling.heading(SERIES, CARS.length)}
     </SectionHeading>
-    <ol class="grid gap-2">
+    <ol class="rise grid gap-2" style="--i: 0">
       {CARS.map((car, i) => (
         <li class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 rounded-sign border border-rule bg-panel px-4 py-3">
           <Picto name={car.picto} class="size-[22px]" />
@@ -36,7 +36,7 @@ const { specs } = t;
     <SectionHeading id="cab-heading" label={specs.cab.label}>
       {specs.cab.heading}
     </SectionHeading>
-    <div class="grid gap-4 md:grid-cols-3">
+    <div class="rise grid gap-4 md:grid-cols-3" style="--i: 1">
       {CAB.map((group) => (
         <div class="rounded-sign border border-rule bg-panel px-4 py-3">
           <h3 class="flex items-center gap-2.5 font-[780] [font-stretch:118%]">

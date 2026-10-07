@@ -96,6 +96,12 @@ const en = {
     },
   },
 
+  doors: {
+    next: 'Next',
+    arriving: 'Now arriving',
+    stickers: ['Please mind the gap', 'MZ Line · Loop'],
+  },
+
   board: {
     prev: 'Previous station:',
     next: 'Next station:',

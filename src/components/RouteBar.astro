@@ -1,5 +1,6 @@
 ---
 // The site header: the line with its four stops, like the route map above a train's doors.
+// It stays on screen across rides (transition:persist), so its script keeps it in sync.
 import { STATIONS, stationIndex, type StationId } from '../data/stations';
 import { getStrings } from '../i18n';
 import Picto from './Picto.astro';
@@ -15,9 +16,9 @@ const t = getStrings(Astro.currentLocale);
 const current = station ? stationIndex(station) : -1;
 ---
 
-<header class="vision">
+<header class="vision" transition:persist="route-bar">
   <div class="vision-in wrap">
-    <a class="brand" href="/" aria-label={t.routeBar.home}>
+    <a class="brand" href="/" aria-label={t.routeBar.home} data-brand>
       <StationBadge no={current >= 0 ? STATIONS[current].no : '??'} />
       <span class="brand-word" aria-hidden="true">
         mystwiz
@@ -25,9 +26,13 @@ const current = station ? stationIndex(station) : -1;
     </a>
 
     <nav class="route" aria-label={t.routeBar.nav}>
-      {current >= 0 && (
-        <span class="train-mark" style={`--i: ${current}`} aria-hidden="true" />
-      )}
+      <span
+        class="train-mark"
+        style={`--i: ${Math.max(current, 0)}`}
+        hidden={current < 0}
+        aria-hidden="true"
+        data-train-mark
+      ></span>
       <ol>
         {STATIONS.map((s, i) => (
           <li>
@@ -35,6 +40,7 @@ const current = station ? stationIndex(station) : -1;
               class="stop"
               href={s.href}
               aria-current={i === current ? 'page' : undefined}
+              data-stop={s.id}
             >
               <span class="dot" aria-hidden="true" />
               <span class="lbl">
@@ -65,11 +71,49 @@ const current = station ? stationIndex(station) : -1;
 </header>
 
 <script>
-  import { applyService, currentService } from '../scripts/service';
+  import { STATIONS, stationIndex } from '../data/stations';
+  import { currentStation } from '../scripts/ride';
+  import {
+    applyService,
+    carryService,
+    currentService,
+  } from '../scripts/service';
 
   document.addEventListener('click', (event) => {
     if (!(event.target as Element).closest('[data-service-toggle]')) return;
     applyService(currentService() === 'day' ? 'night' : 'day');
+  });
+
+  // Each page is rendered in night service; keep the visitor's choice on the next station.
+  document.addEventListener('astro:before-swap', (event) =>
+    carryService(event.newDocument),
+  );
+
+  const trainMark = () =>
+    document.querySelector<HTMLElement>('[data-train-mark]');
+
+  // The train slides to the next stop while the doors are closed.
+  document.addEventListener('mz:ride', (event) => {
+    const mark = trainMark();
+    if (mark && event.detail.to) {
+      mark.style.setProperty('--i', String(stationIndex(event.detail.to)));
+    }
+  });
+
+  document.addEventListener('astro:after-swap', () => {
+    const here = currentStation();
+    const i = here ? stationIndex(here) : -1;
+    const mark = trainMark();
+    if (mark) {
+      mark.hidden = i < 0;
+      if (i >= 0) mark.style.setProperty('--i', String(i));
+    }
+    for (const stop of document.querySelectorAll<HTMLElement>('[data-stop]')) {
+      if (stop.dataset.stop === here) stop.setAttribute('aria-current', 'page');
+      else stop.removeAttribute('aria-current');
+    }
+    const badge = document.querySelector('[data-brand] i');
+    if (badge) badge.textContent = i >= 0 ? STATIONS[i].no : '??';
   });
 </script>
 

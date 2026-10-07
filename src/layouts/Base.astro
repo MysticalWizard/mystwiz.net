@@ -1,6 +1,10 @@
 ---
 // The document shell shared by every page: head, route bar, main content and footer.
+// Page changes run through Astro's ClientRouter; the doors hide each swap, so the
+// router's own animations are off.
 import { Font } from 'astro:assets';
+import { ClientRouter } from 'astro:transitions';
+import Doors from '../components/Doors.astro';
 import RouteBar from '../components/RouteBar.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import type { StationId } from '../data/stations';
@@ -20,7 +24,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en" data-service="night">
+<html lang="en" data-service="night" transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta
@@ -39,7 +43,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <Font cssVariable="--font-jetbrains-mono" />
     <Font cssVariable="--font-zen-kaku-gothic-new" />
 
-    <!-- Apply the stored day/night service before first paint (see src/scripts/service.ts). -->
+    <!--
+      Before first paint: apply the stored day/night service (see src/scripts/service.ts), and on
+      the first page of a visit, start behind closed doors (see Doors.astro).
+    -->
     <script is:inline>
       try {
         if (JSON.parse(localStorage.getItem('mz:service')) === 'day') {
@@ -51,17 +58,30 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       } catch {
         // No stored choice, or storage is blocked: stay in night service.
       }
+      try {
+        if (
+          !sessionStorage.getItem('mz:boarded') &&
+          !matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) {
+          document.documentElement.setAttribute('data-boarding', '');
+        }
+        sessionStorage.setItem('mz:boarded', '1');
+      } catch {
+        // Storage is blocked: skip the welcome doors.
+      }
     </script>
+    <ClientRouter />
   </head>
   <body>
     <a class="skip" href="#main">
       {t.skip}
     </a>
     <RouteBar station={station} />
-    <main id="main">
+    <main id="main" data-station={station}>
       <slot />
     </main>
     <SiteFooter />
+    <Doors station={station} />
   </body>
 </html>
 

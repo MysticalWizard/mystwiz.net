@@ -25,6 +25,12 @@ export function station(id: StationId): Station {
   return stationAt(stationIndex(id));
 }
 
+/** The station served at a URL path, if any. */
+export function stationForPath(pathname: string): Station | undefined {
+  const path = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  return STATIONS.find((s) => s.href === path);
+}
+
 export function nextStation(id: StationId): Station {
   return stationAt(stationIndex(id) + 1);
 }

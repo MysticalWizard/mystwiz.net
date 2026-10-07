@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { nextStation, prevStation, station, STATIONS } from './stations';
+import {
+  nextStation,
+  prevStation,
+  station,
+  stationForPath,
+  STATIONS,
+} from './stations';
 
 describe('MZ Line stations', () => {
   it('numbers the stations in ride order', () => {
@@ -24,5 +30,12 @@ describe('MZ Line stations', () => {
 
   it('looks stations up by id', () => {
     expect(station('projects')).toMatchObject({ no: '03', href: '/projects/' });
+  });
+
+  it('finds the station for a path, with or without the trailing slash', () => {
+    expect(stationForPath('/')?.id).toBe('home');
+    expect(stationForPath('/about')?.id).toBe('about');
+    expect(stationForPath('/specs/')?.id).toBe('specs');
+    expect(stationForPath('/not-in-service/')).toBeUndefined();
   });
 });
