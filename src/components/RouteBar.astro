@@ -1,0 +1,284 @@
+---
+// The site header: the line with its four stops, like the route map above a train's doors.
+import { STATIONS, stationIndex, type StationId } from '../data/stations';
+import { getStrings } from '../i18n';
+import Picto from './Picto.astro';
+import StationBadge from './StationBadge.astro';
+
+interface Props {
+  /** Current station; undefined when off the line (404). */
+  station?: StationId;
+}
+
+const { station } = Astro.props;
+const t = getStrings(Astro.currentLocale);
+const current = station ? stationIndex(station) : -1;
+---
+
+<header class="vision">
+  <div class="vision-in wrap">
+    <a class="brand" href="/" aria-label={t.routeBar.home}>
+      <StationBadge no={current >= 0 ? STATIONS[current].no : '??'} />
+      <span class="brand-word" aria-hidden="true">
+        mystwiz
+      </span>
+    </a>
+
+    <nav class="route" aria-label={t.routeBar.nav}>
+      {current >= 0 && (
+        <span class="train-mark" style={`--i: ${current}`} aria-hidden="true" />
+      )}
+      <ol>
+        {STATIONS.map((s, i) => (
+          <li>
+            <a
+              class="stop"
+              href={s.href}
+              aria-current={i === current ? 'page' : undefined}
+            >
+              <span class="dot" aria-hidden="true" />
+              <span class="lbl">
+                <em aria-hidden="true">{s.no}</em>
+                {t.stations[s.id].short}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <div class="controls">
+      <button class="ctl" type="button" data-service-toggle>
+        <Picto name="moon" class="day:hidden" />
+        <Picto name="sun" class="hidden day:block" />
+        <span class="t">
+          <span class="day:hidden">{t.routeBar.service.night}</span>
+          <span class="hidden day:inline">{t.routeBar.service.day}</span>
+        </span>
+        <span class="sr-only">
+          <span class="day:hidden">{t.routeBar.service.toDay}</span>
+          <span class="hidden day:inline">{t.routeBar.service.toNight}</span>
+        </span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  import { applyService, currentService } from '../scripts/service';
+
+  document.addEventListener('click', (event) => {
+    if (!(event.target as Element).closest('[data-service-toggle]')) return;
+    applyService(currentService() === 'day' ? 'night' : 'day');
+  });
+</script>
+
+<style>
+  .vision {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 60;
+    padding-top: env(safe-area-inset-top, 0px);
+    border-bottom: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--bg) 84%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  .vision-in {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 20px;
+    height: var(--bar);
+    padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    text-decoration: none;
+  }
+
+  .brand-word {
+    font-size: 21px;
+    font-weight: 800;
+    font-stretch: 122%;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .route {
+    position: relative;
+    justify-self: center;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .route ol {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: start;
+  }
+
+  .route ol::before {
+    content: '';
+    position: absolute;
+    top: 9px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+    box-shadow: 0 0 0 1px var(--rule-2);
+  }
+
+  .stop {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 5px;
+    min-width: 0;
+    text-decoration: none;
+  }
+
+  .dot {
+    width: 22px;
+    height: 22px;
+    border: 4px solid var(--line);
+    border-radius: 50%;
+    background: var(--panel);
+    transition: transform 0.3s var(--brake);
+  }
+
+  .stop:hover .dot {
+    transform: scale(1.18);
+  }
+
+  .lbl {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+
+  .lbl em {
+    margin-right: 5px;
+    font-style: normal;
+    color: var(--line-ink);
+  }
+
+  .stop[aria-current='page'] .lbl {
+    color: var(--fg);
+  }
+
+  /* The train sits on the current stop and slides along the line during a ride. */
+  .train-mark {
+    position: absolute;
+    top: 1px;
+    left: calc(12.5% + 25% * var(--i, 0));
+    width: 38px;
+    height: 20px;
+    margin-left: -19px;
+    border-radius: 10px 10px 6px 6px;
+    background: var(--fg);
+    box-shadow: 0 0 0 3px var(--bg);
+    pointer-events: none;
+    transition: left 0.7s var(--brake);
+  }
+
+  .train-mark::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    right: 6px;
+    height: 6px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--bg) 0 7px,
+      transparent 7px 10px
+    );
+  }
+
+  .train-mark::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--line);
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ctl {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--rule-2);
+    border-radius: 6px;
+    background: var(--panel);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .ctl:hover {
+    border-color: var(--fg);
+  }
+
+  .ctl[aria-pressed='true'] {
+    border-color: var(--line);
+    color: var(--line-ink);
+  }
+
+  @media (max-width: 860px) {
+    .route {
+      max-width: 220px;
+    }
+
+    /* Labels leave the screen but stay as accessible names. */
+    .lbl,
+    .t {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .ctl {
+      justify-content: center;
+      width: 36px;
+      padding: 0;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .vision-in {
+      gap: 10px;
+    }
+
+    .brand-word {
+      display: none;
+    }
+  }
+</style>

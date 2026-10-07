@@ -1,0 +1,95 @@
+---
+// The document shell shared by every page: head, route bar, main content and footer.
+import { Font } from 'astro:assets';
+import RouteBar from '../components/RouteBar.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import type { StationId } from '../data/stations';
+import { getStrings } from '../i18n';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Current station; leave out for pages that are off the line (404). */
+  station?: StationId;
+}
+
+const t = getStrings(Astro.currentLocale);
+const { title, description = t.meta.description, station } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" data-service="night">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0b0b0a" />
+    <meta name="generator" content={Astro.generator} />
+
+    <Font cssVariable="--font-archivo" preload />
+    <Font cssVariable="--font-doto" preload />
+    <Font cssVariable="--font-jetbrains-mono" />
+    <Font cssVariable="--font-zen-kaku-gothic-new" />
+
+    <!-- Apply the stored day/night service before first paint (see src/scripts/service.ts). -->
+    <script is:inline>
+      try {
+        if (JSON.parse(localStorage.getItem('mz:service')) === 'day') {
+          document.documentElement.dataset.service = 'day';
+          document
+            .querySelector('meta[name="theme-color"]')
+            .setAttribute('content', '#e7e6e0');
+        }
+      } catch {
+        // No stored choice, or storage is blocked: stay in night service.
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">
+      {t.skip}
+    </a>
+    <RouteBar station={station} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>
+
+<style>
+  main {
+    position: relative;
+    z-index: 1;
+    padding-top: calc(var(--bar) + env(safe-area-inset-top, 0px));
+  }
+
+  .skip {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 100;
+    padding: 10px 14px;
+    border-radius: 6px;
+    background: var(--line);
+    color: var(--on-line);
+    font-family: var(--f-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transform: translateY(-200%);
+  }
+
+  .skip:focus {
+    transform: none;
+  }
+</style>

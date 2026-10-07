@@ -1,0 +1,56 @@
+---
+// Station numbering badge: "MZ" on top, the station number below, framed in the line color.
+// Every size derives from --s, so pass a CSS length (or clamp()) as `size`.
+interface Props {
+  no: string;
+  size?: string;
+  /** Dim frame for lines that are not part of the MZ Line proper, like the blog. */
+  minor?: boolean;
+  class?: string;
+}
+
+const { no, size, minor = false, class: className } = Astro.props;
+---
+
+<span
+  class:list={['num', { minor }, className]}
+  style={size ? `--s: ${size}` : undefined}
+>
+  <b>MZ</b>
+  <i>{no}</i>
+</span>
+
+<style>
+  .num {
+    --s: 44px;
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    align-content: center;
+    width: var(--s);
+    height: var(--s);
+    border: calc(var(--s) * 0.11) solid var(--line);
+    border-radius: calc(var(--s) * 0.22);
+    background: var(--panel);
+    color: var(--fg);
+    font-family: var(--f-sign);
+    line-height: 0.92;
+  }
+
+  .num.minor {
+    border-color: var(--dim);
+  }
+
+  b {
+    font-size: calc(var(--s) * 0.21);
+    font-weight: 800;
+    letter-spacing: 0.03em;
+  }
+
+  i {
+    font-size: calc(var(--s) * 0.4);
+    font-style: normal;
+    font-weight: 800;
+    font-stretch: 78%;
+  }
+</style>
