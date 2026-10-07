@@ -107,6 +107,27 @@ describe('formatBoard', () => {
   });
 });
 
+describe('formatBoard without commit counts', () => {
+  it('names the repo of the latest push instead', () => {
+    const rows = formatBoard(
+      {
+        twitch: null,
+        youtube: null,
+        osu: null,
+        steam: null,
+        github: {
+          lastPushAt: ago(2 * HOUR),
+          repo: 'mystwiz.net',
+          updatedAt: ago(0),
+        },
+      },
+      now,
+      en.departures,
+    );
+    expect(rows.gh.states).toEqual(['Last push 2h ago', 'To mystwiz.net']);
+  });
+});
+
 describe('sampleBoard', () => {
   it('matches the prototype board', () => {
     const rows = formatBoard(sampleBoard(now), now, en.departures);

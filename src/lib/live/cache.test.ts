@@ -1,0 +1,67 @@
+import { describe, expect, it, vi } from 'vitest';
+import { createCache, RETRY_MS } from './cache';
+
+function clock(start = 0) {
+  let now = start;
+  return {
+    now: () => now,
+    advance: (ms: number) => {
+      now += ms;
+    },
+  };
+}
+
+describe('source cache', () => {
+  it('serves a cached value until its time to live runs out', async () => {
+    const time = clock();
+    const cache = createCache(time.now);
+    const load = vi.fn().mockResolvedValueOnce('a').mockResolvedValueOnce('b');
+
+    expect(await cache.get('yt', 1000, load)).toBe('a');
+    time.advance(999);
+    expect(await cache.get('yt', 1000, load)).toBe('a');
+    time.advance(1);
+    expect(await cache.get('yt', 1000, load)).toBe('b');
+    expect(load).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps answering with the last good value when a source fails', async () => {
+    const time = clock();
+    const cache = createCache(time.now);
+    await cache.get('tw', 1000, async () => 'good');
+    time.advance(5000);
+    const failing = vi.fn().mockRejectedValue(new Error('timeout'));
+    expect(await cache.get('tw', 1000, failing)).toBe('good');
+  });
+
+  it('answers null when a source has never worked', async () => {
+    const cache = createCache(clock().now);
+    expect(
+      await cache.get('osu', 1000, () => Promise.reject(new Error('401'))),
+    ).toBeNull();
+  });
+
+  it('waits before retrying a failed source', async () => {
+    const time = clock();
+    const cache = createCache(time.now);
+    const failing = vi.fn().mockRejectedValue(new Error('down'));
+    await cache.get('st', 60_000, failing);
+    time.advance(RETRY_MS - 1);
+    await cache.get('st', 60_000, failing);
+    expect(failing).toHaveBeenCalledTimes(1);
+    time.advance(1);
+    await cache.get('st', 60_000, failing);
+    expect(failing).toHaveBeenCalledTimes(2);
+  });
+
+  it('shares one fetch between requests that arrive together', async () => {
+    const cache = createCache(clock().now);
+    let resolve: (value: string) => void = () => {};
+    const load = vi.fn(() => new Promise<string>((done) => (resolve = done)));
+    const first = cache.get('gh', 1000, load);
+    const second = cache.get('gh', 1000, load);
+    resolve('push');
+    expect(await Promise.all([first, second])).toEqual(['push', 'push']);
+    expect(load).toHaveBeenCalledTimes(1);
+  });
+});

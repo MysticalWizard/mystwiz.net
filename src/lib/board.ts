@@ -59,7 +59,10 @@ const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-function fill(template: string, values: Record<string, string | number>) {
+export function fill(
+  template: string,
+  values: Record<string, string | number>,
+) {
   return template.replace(/\{(\w+)\}/g, (_, key: string) =>
     String(values[key] ?? ''),
   );
@@ -122,9 +125,9 @@ export function formatBoard(
       : row(
           github.lastPushAt &&
             fill(r.github.push, { age: age(github.lastPushAt) }),
-          github.commitsThisYear === undefined
-            ? undefined
-            : fill(r.github.commits, { n: num(github.commitsThisYear) }),
+          github.commitsThisYear !== undefined
+            ? fill(r.github.commits, { n: num(github.commitsThisYear) })
+            : github.repo && fill(r.github.repo, { repo: github.repo }),
         ),
     osu: !osu
       ? noSignal

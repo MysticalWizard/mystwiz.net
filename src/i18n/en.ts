@@ -149,7 +149,11 @@ const en = {
         subscribers: '{n} subscribers',
         latest: 'Latest upload {age}',
       },
-      github: { push: 'Last push {age}', commits: '{n} commits this year' },
+      github: {
+        push: 'Last push {age}',
+        commits: '{n} commits this year',
+        repo: 'To {repo}',
+      },
       osu: { rank: '#{n} global', pp: '{n} pp' },
       steam: {
         online: 'Online',

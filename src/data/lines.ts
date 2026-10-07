@@ -13,6 +13,15 @@ export interface Line {
   internal?: boolean;
 }
 
+/** Wonsik's accounts, for links and the live board. */
+export const ACCOUNTS = {
+  twitch: 'mystclwzrd',
+  youtube: '@mysticalwizard',
+  github: 'mysticalwizard',
+  osu: 19430051,
+  steam: 'mysticalwiz',
+} as const;
+
 /** Other lines: Wonsik's accounts elsewhere. Order follows the transfer section of the home board. */
 export const TRANSFERS = [
   {
@@ -20,35 +29,35 @@ export const TRANSFERS = [
     code: 'TW',
     name: 'Twitch',
     picto: 'live',
-    href: 'https://www.twitch.tv/mystclwzrd/',
+    href: `https://www.twitch.tv/${ACCOUNTS.twitch}/`,
   },
   {
     id: 'yt',
     code: 'YT',
     name: 'YouTube',
     picto: 'video',
-    href: 'https://www.youtube.com/@mysticalwizard/',
+    href: `https://www.youtube.com/${ACCOUNTS.youtube}/`,
   },
   {
     id: 'gh',
     code: 'GH',
     name: 'GitHub',
     picto: 'branch',
-    href: 'https://github.com/mysticalwizard/',
+    href: `https://github.com/${ACCOUNTS.github}/`,
   },
   {
     id: 'osu',
     code: 'OS',
     name: 'osu!',
     picto: 'circle',
-    href: 'https://osu.ppy.sh/users/19430051/osu/',
+    href: `https://osu.ppy.sh/users/${ACCOUNTS.osu}/osu/`,
   },
   {
     id: 'st',
     code: 'ST',
     name: 'Steam',
     picto: 'gamepad',
-    href: 'https://steamcommunity.com/id/mysticalwiz/',
+    href: `https://steamcommunity.com/id/${ACCOUNTS.steam}/`,
   },
 ] as const satisfies readonly Line[];
 

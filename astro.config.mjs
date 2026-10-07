@@ -1,11 +1,27 @@
 // @ts-check
-import { defineConfig, fontProviders } from 'astro/config';
+import { defineConfig, envField, fontProviders } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
+
+const secret = () =>
+  envField.string({ context: 'server', access: 'secret', optional: true });
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://mystwiz.net',
+  // API keys for the live departure board (see .env.example). All optional: rows without a
+  // key stay empty, and with no keys at all the board shows sample data.
+  env: {
+    schema: {
+      TWITCH_CLIENT_ID: secret(),
+      TWITCH_CLIENT_SECRET: secret(),
+      YOUTUBE_API_KEY: secret(),
+      OSU_CLIENT_ID: secret(),
+      OSU_CLIENT_SECRET: secret(),
+      GITHUB_TOKEN: secret(),
+      STEAM_API_KEY: secret(),
+    },
+  },
   fonts: [
     {
       provider: fontProviders.google(),
