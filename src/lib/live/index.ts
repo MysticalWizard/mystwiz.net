@@ -52,7 +52,11 @@ function configuredSources(): BoardSources {
   return sources;
 }
 
-const cache = createCache();
+// A failing source answers with its last good value for a while (see cache.ts), so log each
+// failure: otherwise a wrong key or a long outage goes unnoticed.
+const cache = createCache(Date.now, (source, error) =>
+  console.error(`Live board: ${source} failed.`, error),
+);
 
 /** `live` when answering a request; false while prerendering at build time. */
 export function getBoardSnapshot(live: boolean): Promise<BoardSnapshot> {

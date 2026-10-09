@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createCache, RETRY_MS } from './cache';
+import { createCache, RETRY_MS, STALE_TTLS } from './cache';
 
 function clock(start = 0) {
   let now = start;
@@ -29,9 +29,45 @@ describe('source cache', () => {
     const time = clock();
     const cache = createCache(time.now);
     await cache.get('tw', 1000, async () => 'good');
-    time.advance(5000);
+    time.advance(3000);
     const failing = vi.fn().mockRejectedValue(new Error('timeout'));
     expect(await cache.get('tw', 1000, failing)).toBe('good');
+  });
+
+  it('stops standing in for a failing source once its last good value is too old', async () => {
+    const time = clock();
+    const cache = createCache(time.now);
+    await cache.get('tw', 1000, async () => 'on air');
+    const failing = () => Promise.reject(new Error('timeout'));
+
+    time.advance(1000 * STALE_TTLS - 1);
+    expect(await cache.get('tw', 1000, failing)).toBe('on air');
+    // Too old now, both while waiting to retry and when the retry fails too.
+    time.advance(1);
+    expect(await cache.get('tw', 1000, failing)).toBeNull();
+    time.advance(1000);
+    expect(await cache.get('tw', 1000, failing)).toBeNull();
+  });
+
+  it('reports each failed refresh, but not the answers it gives while waiting to retry', async () => {
+    const time = clock();
+    const failures: [string, unknown][] = [];
+    const cache = createCache(time.now, (key, error) =>
+      failures.push([key, error]),
+    );
+    const down = new Error('down');
+    const failing = () => Promise.reject(down);
+
+    await cache.get('st', 60_000, failing);
+    time.advance(RETRY_MS - 1);
+    await cache.get('st', 60_000, failing);
+    expect(failures).toEqual([['st', down]]);
+    time.advance(1);
+    await cache.get('st', 60_000, failing);
+    expect(failures).toEqual([
+      ['st', down],
+      ['st', down],
+    ]);
   });
 
   it('answers null when a source has never worked', async () => {

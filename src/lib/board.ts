@@ -40,7 +40,8 @@ export interface SteamData extends Stamped {
 
 /**
  * Last good value per source. A source with no API key is left out (its row reads "Not
- * connected"); one with a key is null until it has answered at least once ("No data").
+ * connected"); one with a key is null until it has answered, and again once it has been failing
+ * for too long ("No data").
  */
 export interface BoardData {
   twitch?: TwitchData | null;

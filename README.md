@@ -52,9 +52,10 @@ TikTok, Discord...), add an entry to `ARRIVALS` in `src/data/lines.ts` and its w
 ## Live departure board
 
 `/api/board.json` fetches Twitch, YouTube, osu!, GitHub and Steam in parallel, caches each source
-separately, and always answers with the last good values. The board polls it every minute. It
-never makes values up: a row without a key reads "Not connected", and a source that hasn't
-answered reads "No data". Both are dimmed.
+separately, and rides out a failing source on its last good values. The board polls it every
+minute. It never makes values up: a row without a key reads "Not connected", and a source that
+hasn't answered, or whose last answer is five times its cache time old, reads "No data". Both
+are dimmed. Each failure is logged, so a wrong key shows up in the Worker's logs.
 
 Keys are listed in `.env.example`. All are optional; GitHub works without one.
 
