@@ -45,6 +45,12 @@ const typing = (el: Element) =>
   (el instanceof HTMLElement && el.isContentEditable) ||
   el.matches('input, textarea, select');
 
+/** Whether a click landed outside the element's box. */
+const outside = (el: Element, { clientX: x, clientY: y }: MouseEvent) => {
+  const box = el.getBoundingClientRect();
+  return x < box.left || x > box.right || y < box.top || y > box.bottom;
+};
+
 document.addEventListener('keydown', (event) => {
   const dialog = machine();
   const open = Boolean(dialog?.open);
@@ -110,8 +116,12 @@ document.addEventListener('click', async (event) => {
   }
   const dialog = machine();
   if (!dialog?.open) return;
-  // A click on the dimmed backdrop lands on the dialog element itself.
-  if (target === dialog || target.closest('[data-close]')) {
+  // A click on the dimmed backdrop lands on the dialog element itself, but so does one on the
+  // dialog's padding or between its rows: only a click outside its box is on the backdrop.
+  if (
+    target.closest('[data-close]') ||
+    (target === dialog && outside(dialog, event))
+  ) {
     closeTickets();
     return;
   }
