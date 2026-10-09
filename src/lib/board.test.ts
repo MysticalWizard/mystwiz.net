@@ -1,12 +1,30 @@
 import { describe, expect, it } from 'vitest';
 import en from '../i18n/en';
-import { formatAge, formatBoard, rowLabel, type BoardData } from './board';
+import {
+  formatAge,
+  formatBoard,
+  formatTime,
+  rowLabel,
+  type BoardData,
+} from './board';
 
 const now = new Date('2026-10-07T12:00:00Z');
 const ago = (ms: number) => new Date(now.getTime() - ms).toISOString();
 const MIN = 60_000;
 const HOUR = 60 * MIN;
 const DAY = 24 * HOUR;
+
+describe('formatTime', () => {
+  it.each([
+    ['2026-10-08T12:58:35.313Z', 'Oct 8, 12:58 UTC'],
+    ['2026-10-09T00:05:00Z', 'Oct 9, 00:05 UTC'],
+  ])(
+    'reads %s as "%s", for a board read long after it was taken',
+    (at, text) => {
+      expect(formatTime(at, en.departures.numberLocale)).toBe(text);
+    },
+  );
+});
 
 describe('formatAge', () => {
   it.each([

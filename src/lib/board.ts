@@ -84,6 +84,19 @@ export function formatAge(at: string, now: Date, s: Departures['ago']): string {
   return fill(s.y, { n: Math.floor(days / 365) });
 }
 
+/** A time for a board read long after it was taken, e.g. "Oct 8, 12:58 UTC". */
+export function formatTime(at: string, locale: string): string {
+  return new Date(at).toLocaleString(locale, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: 'UTC',
+    timeZoneName: 'short',
+  });
+}
+
 export function formatBoard(
   data: BoardData,
   now: Date,

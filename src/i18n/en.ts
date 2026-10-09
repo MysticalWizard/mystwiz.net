@@ -154,8 +154,8 @@ const en = {
     transfers: 'Transfer here for',
   },
 
-  // The LED departure board. Templates fill {n}, {age} and {game}; they stay plain strings so
-  // the board can re-render them in the browser when fresh data arrives.
+  // The LED departure board. Templates fill {n}, {age}, {time} and {game}; they stay plain
+  // strings so the board can re-render them in the browser when fresh data arrives.
   departures: {
     label: 'Live board',
     heading: 'Departures and transfers',
@@ -164,6 +164,8 @@ const en = {
     footer: {
       live: 'Updates every minute',
       snapshot: 'Updated {age}',
+      // A board taken at build time, until the browser can say how long ago that was.
+      taken: 'Updated {time}',
       tap: 'Tap a row to transfer',
     },
     numberLocale: 'en-US',

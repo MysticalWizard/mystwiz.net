@@ -7,7 +7,7 @@
 // with whatever src/scripts/live.ts hears from the board endpoint.
 import { BOARD_LINES } from '../../data/lines';
 import { getStrings } from '../../i18n';
-import { fill, formatAge, formatBoard, rowLabel } from '../../lib/board';
+import { fill, formatBoard, formatTime, rowLabel } from '../../lib/board';
 import { getBoardSnapshot } from '../../lib/live';
 import Picto from '../Picto.astro';
 import SectionHeading from '../SectionHeading.astro';
@@ -17,11 +17,13 @@ const s = t.departures;
 const snapshot = await getBoardSnapshot(!Astro.isPrerendered);
 const at = new Date(snapshot.generatedAt);
 const rows = formatBoard(snapshot.data, at, s);
+// A board taken at build time is read later, so the page says when it was taken; the script
+// below turns that into how long ago.
 const footer =
   snapshot.mode === 'live'
     ? s.footer.live
-    : fill(s.footer.snapshot, {
-        age: formatAge(snapshot.generatedAt, at, s.ago),
+    : fill(s.footer.taken, {
+        time: formatTime(snapshot.generatedAt, s.numberLocale),
       });
 ---
 
