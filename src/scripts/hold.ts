@@ -1,9 +1,10 @@
 // Hold to depart. Holding the next-train button (or Space, anywhere) for 950ms departs for the
-// next station. While holding: the button's approach ring closes in, the HUD counts up the
-// speed, speed lines stream past (see fx.ts), the hero train speeds up and the route-bar train
-// creeps toward the next stop. Letting go early decays back to zero.
-import { nextStation, stationIndex } from '../data/stations';
-import { currentStation, rideNext } from './ride';
+// next station; holding Shift+Space departs for the previous one. While holding: the button's
+// approach ring closes in, the HUD counts up the speed, speed lines stream past (see fx.ts), the
+// hero train speeds up and the route-bar train creeps toward the stop it's heading for. Letting
+// go early decays back to zero.
+import { nextStation, prevStation, stationIndex } from '../data/stations';
+import { currentStation, rideNext, ridePrev } from './ride';
 import { speed } from './speed';
 import { toast } from './toast';
 
@@ -27,6 +28,8 @@ export const hold = {
   on: false,
   /** Progress from 0 to 1. */
   p: 0,
+  /** Heading for the previous station instead of the next. */
+  back: false,
   start: 0,
   raf: 0,
   button: null as HTMLElement | null,
@@ -68,10 +71,10 @@ function render(p: number) {
   const here = currentStation();
   if (mark && here) {
     const from = stationIndex(here);
-    const to = stationIndex(nextStation(here).id);
+    const to = stationIndex((hold.back ? prevStation : nextStation)(here).id);
     mark.classList.toggle('creep', p > 0);
-    // From Specs the next station is Home, back at the start of the bar: creep that way, the
-    // same short distance as from any other station.
+    // Where the loop wraps around (Specs on to Home, Home back to Specs) the stop is at the other
+    // end of the bar: creep that way, the same short distance as from any other station.
     const creep = Math.sign(to - from) * p * CREEP;
     mark.style.setProperty('--i', String(from + creep));
   }
@@ -84,15 +87,19 @@ function nudge(button: HTMLElement) {
   if (button.dataset.nudge) toast(button.dataset.nudge);
 }
 
-export function press(button: HTMLElement | null): void {
+/** Starts holding to depart: for the next station, or the previous one when `back`. */
+export function press(button: HTMLElement | null, back = false): void {
   if (!button || hold.on || riding) return;
   hold.on = true;
   hold.button = button;
-  // Picking up again during a decay continues from where the progress fell to.
+  // Picking up again during a decay continues from where the progress fell to, unless the train
+  // turns around: then it starts from a standstill.
+  if (back !== hold.back) hold.p = 0;
+  hold.back = back;
   hold.start = performance.now() - hold.p * HOLD_MS;
   button.classList.add('holding');
   const to = document.querySelector('[data-hud-to]');
-  if (to) to.textContent = button.dataset.hudText ?? '';
+  if (to) to.textContent = button.dataset[back ? 'hudPrev' : 'hudNext'] ?? '';
   document.dispatchEvent(new CustomEvent('mz:hold'));
 
   const step = () => {
@@ -100,7 +107,8 @@ export function press(button: HTMLElement | null): void {
     render(p);
     if (p >= 1) {
       release(true);
-      rideNext();
+      if (back) ridePrev();
+      else rideNext();
       return;
     }
     hold.raf = requestAnimationFrame(step);
@@ -168,10 +176,12 @@ document.addEventListener('click', (event) => {
   if (button && !hold.on && event.detail === 0) nudge(button);
 });
 
-/* ---------- keyboard: hold Space anywhere ---------- */
+/* ---------- keyboard: hold Space anywhere, Shift+Space to go back ---------- */
 
 /** Up, down (a tap so far), or held long enough to count as holding to depart. */
 let space: 'up' | 'down' | 'held' = 'up';
+/** Shift was down when Space went down: a tap scrolls up, a hold departs for the previous stop. */
+let spaceBack = false;
 let spaceTimer = 0;
 
 const usesSpace = (el: Element) =>
@@ -189,9 +199,10 @@ document.addEventListener('keydown', (event) => {
   event.preventDefault();
   if (event.repeat || space !== 'up') return;
   space = 'down';
+  spaceBack = event.shiftKey;
   spaceTimer = window.setTimeout(() => {
     space = 'held';
-    press(button);
+    press(button, spaceBack);
   }, SPACE_HOLD_DELAY_MS);
 });
 
@@ -207,7 +218,7 @@ document.addEventListener('keyup', (event) => {
     // A quick tap: scroll like Space normally does. A hold never scrolls, even when the train
     // has already departed by the time it ends.
     window.scrollBy({
-      top: (event.shiftKey ? -1 : 1) * window.innerHeight * 0.8,
+      top: (spaceBack ? -1 : 1) * window.innerHeight * 0.8,
       behavior: reducedMotion.matches ? 'auto' : 'smooth',
     });
   }

@@ -1,7 +1,8 @@
 ---
 // "Next train" block at the bottom of every station: where the line goes next, and the hold
-// button to depart (src/scripts/hold.ts). "Go now instead" is the plain path.
-import { nextStation, type StationId } from '../data/stations';
+// button to depart (src/scripts/hold.ts), which Shift+Space holds the other way, for the previous
+// station. "Go now instead" is the plain path.
+import { nextStation, prevStation, type StationId } from '../data/stations';
 import { getStrings } from '../i18n';
 import StationBadge from './StationBadge.astro';
 
@@ -14,6 +15,7 @@ const t = getStrings(Astro.currentLocale);
 const s = t.nextTrain;
 const next = nextStation(from);
 const nextName = t.stations[next.id].short;
+const prev = prevStation(from);
 ---
 
 <section class="next-train" aria-labelledby="next-train-label" data-next-train>
@@ -38,7 +40,8 @@ const nextName = t.stations[next.id].short;
     class="hold"
     type="button"
     data-hold
-    data-hud-text={s.departing(next.no, nextName)}
+    data-hud-next={s.departing(next.no, nextName)}
+    data-hud-prev={s.departing(prev.no, t.stations[prev.id].short)}
     data-nudge={s.keepHolding}
     aria-label={s.holdLabel(nextName)}
   >

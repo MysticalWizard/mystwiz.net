@@ -5,7 +5,7 @@ const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
 vi.mock('astro:transitions/client', () => ({ navigate }));
 
 /** A Space key event on the page itself, with nothing focused that uses Space. */
-const space = () => ({
+const space = ({ shiftKey = false } = {}) => ({
   code: 'Space',
   target: { matches: () => false, closest: () => null },
   repeat: false,
@@ -13,7 +13,7 @@ const space = () => ({
   metaKey: false,
   ctrlKey: false,
   altKey: false,
-  shiftKey: false,
+  shiftKey,
   preventDefault() {
     this.defaultPrevented = true;
   },
@@ -78,6 +78,36 @@ describe('holding Space to depart', () => {
     expect(page.window.scrollBy).not.toHaveBeenCalled();
   });
 
+  it('rides back to the previous station with Shift held', async () => {
+    const page = await station('/about/');
+    page.document.fire('keydown', space({ shiftKey: true }));
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(navigate).toHaveBeenCalledWith('/');
+  });
+
+  it('scrolls back up on a quick tap with Shift, even when Shift comes up first', async () => {
+    const page = await station();
+    page.document.fire('keydown', space({ shiftKey: true }));
+    await vi.advanceTimersByTimeAsync(100);
+    page.document.fire('keyup', space());
+    expect(page.window.scrollBy).toHaveBeenCalledWith(
+      expect.objectContaining({ top: -640 }),
+    );
+  });
+
+  it('starts from a standstill when the train turns around', async () => {
+    const page = await station('/about/');
+    page.document.fire('keydown', space());
+    await vi.advanceTimersByTimeAsync(900);
+    page.document.fire('keyup', space());
+    page.document.fire('keydown', space({ shiftKey: true }));
+    // The whole hold again: 170ms to count as a hold, then 950ms from zero.
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(navigate).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(200);
+    expect(navigate).toHaveBeenCalledWith('/');
+  });
+
   it('settles back without departing or scrolling when let go early', async () => {
     const page = await station();
     page.document.fire('keydown', space());
@@ -106,6 +136,19 @@ describe('holding Space to depart', () => {
     async (_, path, at) => {
       const { document, train } = await station(path);
       document.fire('keydown', space());
+      await vi.advanceTimersByTimeAsync(1500);
+      expect(Number(train['--i'])).toBeCloseTo(at);
+    },
+  );
+
+  it.each([
+    ['About', '/about/', 0.7],
+    ['Home, where the loop runs back to Specs', '/', 0.3],
+  ])(
+    'creeps the route-bar train 0.3 stops toward the previous station from %s with Shift held',
+    async (_, path, at) => {
+      const { document, train } = await station(path);
+      document.fire('keydown', space({ shiftKey: true }));
       await vi.advanceTimersByTimeAsync(1500);
       expect(Number(train['--i'])).toBeCloseTo(at);
     },
