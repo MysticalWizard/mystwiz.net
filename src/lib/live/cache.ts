@@ -1,6 +1,7 @@
 // A small cache per data source. Each source has its own time to live; when a refresh fails the
 // cache keeps answering with the last good value (which carries its own updatedAt) for a while,
-// and waits a little before trying that source again. Concurrent requests share one fetch.
+// and waits a little before trying that source again, or as long as a rate-limited source asks.
+// Concurrent requests share one fetch.
 
 /** How long to wait before retrying a source that just failed (unless its TTL is shorter). */
 export const RETRY_MS = 30_000;
@@ -16,7 +17,17 @@ interface Entry {
   value: unknown;
   fetchedAt: number;
   failedAt?: number;
+  /** When the source said to try again after failing, if it did (a rate limit). */
+  retryAt?: number;
 }
+
+/** A failure that says when to try again: an error with a `retryAt` time, in ms. */
+const retryAtOf = (error: unknown) =>
+  error instanceof Object &&
+  'retryAt' in error &&
+  typeof error.retryAt === 'number'
+    ? error.retryAt
+    : undefined;
 
 export interface SourceCache {
   get<T>(key: string, ttlMs: number, load: () => Promise<T>): Promise<T | null>;
@@ -42,7 +53,9 @@ export function createCache(
       const fresh = entry !== undefined && at - entry.fetchedAt < ttlMs;
       const coolingDown =
         entry?.failedAt !== undefined &&
-        at - entry.failedAt < Math.min(ttlMs, RETRY_MS);
+        (entry.retryAt !== undefined
+          ? at < entry.retryAt
+          : at - entry.failedAt < Math.min(ttlMs, RETRY_MS));
       if (fresh || coolingDown) return Promise.resolve(lastGood(entry, at));
 
       let request = pending.get(key) as Promise<T | null> | undefined;
@@ -60,6 +73,7 @@ export function createCache(
                 value: last?.value ?? null,
                 fetchedAt: last?.fetchedAt ?? -Infinity,
                 failedAt,
+                retryAt: retryAtOf(error),
               });
               onError(key, error);
               return lastGood(last, failedAt);

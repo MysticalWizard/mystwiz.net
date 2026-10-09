@@ -57,7 +57,11 @@ minute. It never makes values up: a row without a key reads "Not connected", and
 hasn't answered, or whose last answer is five times its cache time old, reads "No data". Both
 are dimmed. Each failure is logged, so a wrong key shows up in the Worker's logs.
 
-Keys are listed in `.env.example`. All are optional; GitHub works without one.
+Keys are listed in `.env.example`. All are optional, and GitHub works without one, but set
+`GITHUB_TOKEN` in production anyway: without a token GitHub allows 60 requests an hour per IP
+address, and a Worker's requests come from IP addresses it shares with other Cloudflare
+customers. When that limit runs out, the board waits for it to reset (the Worker logs say until
+when) and the GitHub row reads "No data" in the meantime.
 
 - **Local:** copy `.env.example` to `.env` and fill in what you have.
 - **Production:** add each key as a Worker secret, for example

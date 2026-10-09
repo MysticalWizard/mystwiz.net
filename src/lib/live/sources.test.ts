@@ -13,7 +13,10 @@ const NOW = new Date('2026-10-07T12:00:00Z');
 
 type Route = unknown | ((url: string, init?: RequestInit) => unknown);
 
-/** A fetch that answers JSON by URL prefix; a number answers with that HTTP status. */
+/**
+ * A fetch that answers JSON by URL prefix; a number answers with that HTTP status, and a
+ * Response is answered as it is.
+ */
 function fakeFetch(routes: Record<string, Route>) {
   return vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input);
@@ -23,6 +26,7 @@ function fakeFetch(routes: Record<string, Route>) {
     if (key === undefined) throw new Error(`unexpected fetch ${url}`);
     const route = routes[key];
     const body = typeof route === 'function' ? route(url, init) : route;
+    if (body instanceof Response) return body;
     if (typeof body === 'number') return new Response('{}', { status: body });
     return new Response(JSON.stringify(body), {
       headers: { 'Content-Type': 'application/json' },
@@ -257,6 +261,60 @@ describe('github', () => {
     });
     const data = await github('mysticalwizard', 'gh-token')(context(fetch));
     expect(data.commitsThisYear).toBe(312);
+  });
+
+  it('says when the limit for requests without a token resets', async () => {
+    const resetAt = Date.parse('2026-10-07T12:42:00Z');
+    const fetch = fakeFetch({
+      'https://api.github.com/users/mysticalwizard/events/public': () =>
+        new Response(
+          JSON.stringify({
+            message:
+              "API rate limit exceeded for 203.0.113.7. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+            documentation_url:
+              'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting',
+          }),
+          {
+            status: 403,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-RateLimit-Limit': '60',
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': String(resetAt / 1000),
+              'X-RateLimit-Used': '60',
+              'X-RateLimit-Resource': 'core',
+            },
+          },
+        ),
+    });
+    await expect(
+      github('mysticalwizard')(context(fetch)),
+    ).rejects.toMatchObject({
+      retryAt: resetAt,
+      message: expect.stringContaining('2026-10-07T12:42:00.000Z'),
+    });
+  });
+
+  it('waits as long as a secondary rate limit asks', async () => {
+    const fetch = fakeFetch({
+      'https://api.github.com/users/mysticalwizard/events/public': () =>
+        new Response(
+          JSON.stringify({
+            message:
+              'You have exceeded a secondary rate limit. Please wait a few minutes before you try again.',
+          }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              'Retry-After': '60',
+            },
+          },
+        ),
+    });
+    await expect(
+      github('mysticalwizard')(context(fetch)),
+    ).rejects.toMatchObject({ retryAt: Date.parse('2026-10-07T12:01:00Z') });
   });
 });
 

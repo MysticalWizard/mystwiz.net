@@ -22,9 +22,30 @@ class HttpError extends Error {
   constructor(
     readonly status: number,
     url: string,
+    /** When a rate-limited API said to try again (ms since the epoch); the cache waits till then. */
+    readonly retryAt?: number,
   ) {
-    super(`${status} from ${new URL(url).host}`);
+    super(
+      `${status} from ${new URL(url).host}` +
+        (retryAt === undefined
+          ? ''
+          : `, rate limited until ${new Date(retryAt).toISOString()}`),
+    );
   }
+}
+
+/**
+ * When a rate-limited API says to try again: after Retry-After seconds, or, once GitHub has no
+ * requests left, at its X-RateLimit-Reset.
+ */
+function retryTime(res: Response, now: Date): number | undefined {
+  const after = Number(res.headers.get('Retry-After'));
+  if (after > 0) return now.getTime() + after * 1000;
+  const reset = Number(res.headers.get('X-RateLimit-Reset'));
+  if (res.headers.get('X-RateLimit-Remaining') === '0' && reset > 0) {
+    return reset * 1000;
+  }
+  return undefined;
 }
 
 async function getJson<T>(
@@ -36,7 +57,7 @@ async function getJson<T>(
     ...init,
     signal: AbortSignal.timeout(ctx.timeoutMs),
   });
-  if (!res.ok) throw new HttpError(res.status, url);
+  if (!res.ok) throw new HttpError(res.status, url, retryTime(res, ctx.now()));
   return (await res.json()) as T;
 }
 

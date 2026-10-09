@@ -70,6 +70,24 @@ describe('source cache', () => {
     ]);
   });
 
+  it('waits as long as a rate-limited source asks before trying it again', async () => {
+    const time = clock();
+    const cache = createCache(time.now);
+    const limited = vi.fn().mockRejectedValue(
+      Object.assign(new Error('403 from api.github.com'), {
+        retryAt: 10 * 60_000,
+      }),
+    );
+
+    await cache.get('gh', 5 * 60_000, limited);
+    time.advance(10 * 60_000 - 1);
+    await cache.get('gh', 5 * 60_000, limited);
+    expect(limited).toHaveBeenCalledTimes(1);
+    time.advance(1);
+    await cache.get('gh', 5 * 60_000, limited);
+    expect(limited).toHaveBeenCalledTimes(2);
+  });
+
   it('answers null when a source has never worked', async () => {
     const cache = createCache(clock().now);
     expect(
