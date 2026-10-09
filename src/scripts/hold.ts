@@ -11,7 +11,7 @@ const HOLD_MS = 950;
 /** A Space press shorter than this still scrolls the page. */
 const SPACE_HOLD_DELAY_MS = 170;
 const DECAY_MS = 380;
-/** The route-bar train creeps this share of the way to the next stop. */
+/** How far the route-bar train creeps toward the next station, in stops. */
 const CREEP = 0.3;
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -63,7 +63,10 @@ function render(p: number) {
     const from = stationIndex(here);
     const to = stationIndex(nextStation(here).id);
     mark.classList.toggle('creep', p > 0);
-    mark.style.setProperty('--i', String(from + (to - from) * p * CREEP));
+    // From Specs the next station is Home, back at the start of the bar: creep that way, the
+    // same short distance as from any other station.
+    const creep = Math.sign(to - from) * p * CREEP;
+    mark.style.setProperty('--i', String(from + creep));
   }
 }
 

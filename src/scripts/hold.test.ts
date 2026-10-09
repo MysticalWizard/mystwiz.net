@@ -19,20 +19,32 @@ const space = () => ({
   },
 });
 
-/** Home, with its next-train hold button. */
-async function home() {
+/** A station with its next-train hold button, and the route bar's train (its CSS properties). */
+async function station(path = '/') {
   const holdButton = {
     dataset: {},
     classList: { add: () => {}, remove: () => {} },
     style: { setProperty: () => {} },
     closest: () => null,
   };
+  const train: Record<string, string> = {};
+  const routeBarTrain = {
+    classList: { toggle: () => {}, remove: () => {} },
+    style: {
+      setProperty: (name: string, value: string) => {
+        train[name] = value;
+      },
+    },
+  };
   const page = fakeBrowser({
-    path: '/',
-    elements: { 'main [data-hold]': holdButton },
+    path,
+    elements: {
+      'main [data-hold]': holdButton,
+      '[data-train-mark]': routeBarTrain,
+    },
   });
   await import('./hold');
-  return page;
+  return { ...page, train };
 }
 
 describe('holding Space to depart', () => {
@@ -48,7 +60,7 @@ describe('holding Space to depart', () => {
   });
 
   it('scrolls the page on a quick tap, like Space always does', async () => {
-    const page = await home();
+    const page = await station();
     page.document.fire('keydown', space());
     await vi.advanceTimersByTimeAsync(100);
     page.document.fire('keyup', space());
@@ -57,7 +69,7 @@ describe('holding Space to depart', () => {
   });
 
   it('departs for the next station, and letting go afterwards does not scroll', async () => {
-    const page = await home();
+    const page = await station();
     page.document.fire('keydown', space());
     // 170ms to count as a hold, then 950ms of holding.
     await vi.advanceTimersByTimeAsync(1500);
@@ -67,7 +79,7 @@ describe('holding Space to depart', () => {
   });
 
   it('settles back without departing or scrolling when let go early', async () => {
-    const page = await home();
+    const page = await station();
     page.document.fire('keydown', space());
     await vi.advanceTimersByTimeAsync(500);
     page.document.fire('keyup', space());
@@ -75,4 +87,18 @@ describe('holding Space to depart', () => {
     expect(navigate).not.toHaveBeenCalled();
     expect(page.window.scrollBy).not.toHaveBeenCalled();
   });
+
+  // The route bar's train sits at the station's position: 0 for Home up to 3 for Specs.
+  it.each([
+    ['Home', '/', 0.3],
+    ['Specs, where the loop runs back to Home', '/specs/', 2.7],
+  ])(
+    'creeps the route-bar train 0.3 stops toward the next station from %s',
+    async (_, path, at) => {
+      const { document, train } = await station(path);
+      document.fire('keydown', space());
+      await vi.advanceTimersByTimeAsync(1500);
+      expect(Number(train['--i'])).toBeCloseTo(at);
+    },
+  );
 });
