@@ -43,6 +43,7 @@ export function fakeBrowser({
   elements?: Record<string, object>;
 } = {}) {
   const doc = Object.assign(eventTarget(), {
+    body: { matches: () => false, closest: () => null },
     visibilityState: 'visible' as DocumentVisibilityState,
     documentElement: {
       hasAttribute: () => false,

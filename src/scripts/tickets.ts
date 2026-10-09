@@ -63,6 +63,8 @@ document.addEventListener('keydown', (event) => {
     ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k');
   if (shortcut) {
     event.preventDefault();
+    // Holding the key down opens or closes the machine once.
+    if (event.repeat) return;
     if (open) closeTickets();
     else openTickets();
     return;

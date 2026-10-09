@@ -191,10 +191,12 @@ document.addEventListener(
   { capture: true },
 );
 
-// Left and right arrows ride, unless focus is somewhere that uses the arrows itself.
+// Left and right arrows ride, unless focus is somewhere that uses the arrows itself. One ride per
+// press: a held key's repeats would each restart the ride.
 document.addEventListener('keydown', (event) => {
   if (
     event.defaultPrevented ||
+    event.repeat ||
     event.metaKey ||
     event.ctrlKey ||
     event.altKey
