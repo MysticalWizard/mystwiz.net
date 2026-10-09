@@ -17,7 +17,7 @@ export const CARS: Car[] = [
   {
     type: 'CPU',
     picto: 'chip',
-    model: 'Ryzen R9 9950x3D',
+    model: 'Ryzen 9 9950X3D',
     detail: '16-core 32-threads',
   },
   {
@@ -29,7 +29,7 @@ export const CARS: Car[] = [
   {
     type: 'Board',
     picto: 'board',
-    model: 'MSI ROG STRIX X870E-E GAMING WIFI',
+    model: 'ASUS ROG STRIX X870E-E GAMING WIFI',
     detail: 'Motherboard',
   },
   {
