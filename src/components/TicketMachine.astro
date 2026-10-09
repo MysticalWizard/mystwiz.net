@@ -1,7 +1,7 @@
 ---
 // The ticket machine: a command palette styled as a ticket vending machine. Opens with "/",
-// Ctrl/Cmd+K or the Tickets button. Choosing a station prints a ticket out of the slot, then
-// rides there. Rendered per page, so fares are counted from the current station.
+// Ctrl/Cmd+K or the Tickets button. Choosing a station prints a ticket out of the slot, punches
+// it, then rides there. Rendered per page, so fares are counted from the current station.
 import { TRANSFERS } from '../data/lines';
 import {
   fare,
@@ -277,6 +277,71 @@ const fareTo = (id: StationId) => (station ? fare(station, id) : 140);
   .ticket:global(.out) {
     opacity: 1;
     transform: translate(-50%, 0) scaleY(1);
+  }
+
+  /* Then the gate punches it: a hole at the top right, and the punched-out bit falls away. */
+  .ticket::before,
+  .ticket::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+
+  /* Through the hole: the machine's panel behind the ticket. */
+  .ticket::before {
+    background: var(--panel);
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.35);
+    transform: scale(0);
+  }
+
+  .ticket::after {
+    background: #efe6c8;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
+    opacity: 0;
+  }
+
+  .ticket:global(.punched) {
+    animation: punch 0.18s var(--brake);
+  }
+
+  .ticket:global(.punched)::before {
+    transform: none;
+    transition: transform 0.06s;
+  }
+
+  .ticket:global(.punched)::after {
+    animation: punched-out 0.45s forwards;
+  }
+
+  /* The ticket gives a little as the punch bites. */
+  @keyframes punch {
+    35% {
+      transform: translate(-50%, 2px) scaleY(1);
+    }
+  }
+
+  /* The punched-out bit is pushed through the ticket, then falls away, tumbling. */
+  @keyframes punched-out {
+    from {
+      opacity: 1;
+      animation-timing-function: ease-out;
+    }
+
+    15% {
+      opacity: 1;
+      transform: translate(0, 0) scale(0.8);
+      /* Falling from rest: y = t². */
+      animation-timing-function: cubic-bezier(0.33, 0, 0.67, 0.33);
+    }
+
+    to {
+      opacity: 0;
+      transform: translate(-3px, 24px) scale(0.8, 0.3);
+    }
   }
 
   .ticket :global(b) {

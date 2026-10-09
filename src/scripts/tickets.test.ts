@@ -6,8 +6,14 @@ vi.mock('astro:transitions/client', () => ({ navigate }));
 
 /** The ticket machine on a 1280 × 800 screen: a 760 × 600 panel with 18px of padding. */
 async function machine({ open = true } = {}) {
+  /** The printed ticket's classes: "out" of the slot, "punched". */
+  const ticketClasses = new Set<string>();
   const ticket = {
-    classList: { add: () => {}, remove: () => {} },
+    classList: {
+      add: (...names: string[]) => names.forEach((n) => ticketClasses.add(n)),
+      remove: (...names: string[]) =>
+        names.forEach((n) => ticketClasses.delete(n)),
+    },
     replaceChildren: () => {},
   };
   const dialog = {
@@ -61,7 +67,7 @@ async function machine({ open = true } = {}) {
       altKey: false,
       preventDefault() {},
     });
-  return { dialog, fare, click, key };
+  return { dialog, fare, ticket: ticketClasses, click, key };
 }
 
 const openMachine = () => machine({ open: true });
@@ -102,6 +108,37 @@ describe('ticket machine', () => {
     dialog.close();
     await vi.advanceTimersByTimeAsync(2000);
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('punches the ticket as soon as it is out of the slot, then rides right after', async () => {
+    const { fare, ticket, click } = await openMachine();
+    click(fare, 400, 300);
+    // The ticket takes 0.55s to slide out of the slot (TicketMachine.astro).
+    await vi.advanceTimersByTimeAsync(550);
+    expect([...ticket]).toEqual(['out']);
+    await vi.advanceTimersByTimeAsync(50);
+    expect([...ticket]).toEqual(['out', 'punched']);
+    expect(navigate).not.toHaveBeenCalled();
+    // The doors close within a third of a second of the punch.
+    await vi.advanceTimersByTimeAsync(300);
+    expect(navigate.mock.calls).toEqual([['/about/']]);
+  });
+
+  it('does not punch a ticket whose ride was cancelled', async () => {
+    const { dialog, fare, ticket, click } = await openMachine();
+    click(fare, 400, 300);
+    await vi.advanceTimersByTimeAsync(300);
+    dialog.close();
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(ticket.has('punched')).toBe(false);
+  });
+
+  it('prints an unpunched ticket the next time it opens', async () => {
+    const { fare, ticket, click, key } = await openMachine();
+    click(fare, 400, 300);
+    await vi.advanceTimersByTimeAsync(2000);
+    key('/');
+    expect([...ticket]).toEqual([]);
   });
 
   it('opens once when / is held down', async () => {

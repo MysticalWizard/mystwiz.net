@@ -4,8 +4,10 @@ import { navigate } from 'astro:transitions/client';
 import { tick } from './sound';
 import { store } from './store';
 
-/** Time for the ticket to come out of the slot before the ride starts. */
-const PRINT_MS = 900;
+/** Time for the ticket to come out of the slot and rest a moment before it is punched. */
+const PRINT_MS = 600;
+/** Time for the punch to land and the punched-out bit to fall before the ride starts. */
+const PUNCH_MS = 300;
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
@@ -20,7 +22,7 @@ export function openTickets(): void {
   const dialog = machine();
   if (!dialog || dialog.open) return;
   lastFocus = document.activeElement as HTMLElement | null;
-  dialog.querySelector('[data-ticket]')?.classList.remove('out');
+  dialog.querySelector('[data-ticket]')?.classList.remove('out', 'punched');
   dialog.showModal();
   dialog
     .querySelector<HTMLElement>('.fare:not([aria-disabled="true"])')
@@ -136,7 +138,9 @@ document.addEventListener('click', async (event) => {
   if (printing) return;
   printing = button;
   await printTicket(dialog, button);
-  // The machine was closed while the ticket printed (Esc, the backdrop): no ride.
+  // The machine was closed while the ticket printed (Esc, the backdrop): no punch, no ride.
+  if (printing !== button) return;
+  await punchTicket(dialog);
   if (printing !== button) return;
   printing = undefined;
   closeTickets();
@@ -166,4 +170,12 @@ async function printTicket(dialog: HTMLDialogElement, button: HTMLElement) {
   if (reducedMotion.matches) return;
   ticket.classList.add('out');
   await wait(PRINT_MS);
+}
+
+/** Punches a hole in the ticket, the way a gate clips a paper ticket, before the ride. */
+async function punchTicket(dialog: HTMLDialogElement) {
+  const ticket = dialog.querySelector<HTMLElement>('[data-ticket]');
+  if (!ticket || reducedMotion.matches) return;
+  ticket.classList.add('punched');
+  await wait(PUNCH_MS);
 }
