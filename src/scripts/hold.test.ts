@@ -95,6 +95,14 @@ describe('holding Space to depart', () => {
     );
   });
 
+  it('heads the effects that follow the speed back too', async () => {
+    const page = await station('/about/');
+    const { speed } = await import('./speed');
+    page.document.fire('keydown', space({ shiftKey: true }));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(speed.dir).toBe(-1);
+  });
+
   it('starts from a standstill when the train turns around', async () => {
     const page = await station('/about/');
     page.document.fire('keydown', space());

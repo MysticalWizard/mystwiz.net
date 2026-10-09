@@ -193,6 +193,13 @@ const names = Object.fromEntries(
     }
   }
 
+  /* Riding back, the lights stream past the other way and the sign above points back. */
+  .doors.back .door-win::before,
+  .doors.back .door-win::after,
+  .doors.back :global(.tri) {
+    scale: -1 1;
+  }
+
   .door-band {
     position: absolute;
     top: 60%;

@@ -10,6 +10,7 @@ import { navigate } from 'astro:transitions/client';
 import {
   nextStation,
   prevStation,
+  ridesBack,
   station,
   stationForPath,
   type StationId,
@@ -18,6 +19,8 @@ import {
 export interface RideDetail {
   from?: StationId;
   to?: StationId;
+  /** The ride goes back round the loop, so everything that moves runs the other way. */
+  back?: boolean;
 }
 
 declare global {
@@ -102,8 +105,9 @@ async function openDoors(el: HTMLElement) {
 
 let arrivalTimer = 0;
 
-function markArrival() {
-  root.setAttribute('data-arriving', '');
+/** Starts the arrival in global.css: after a ride back, the board pulls in from the left. */
+function markArrival(back: boolean) {
+  root.setAttribute('data-arriving', back ? 'back' : '');
   clearTimeout(arrivalTimer);
   arrivalTimer = window.setTimeout(
     () => root.removeAttribute('data-arriving'),
@@ -122,15 +126,15 @@ function focusTitle() {
 
 document.addEventListener('astro:before-preparation', (event) => {
   root.removeAttribute('data-boarding');
-  const detail = {
-    from: stationForPath(event.from.pathname)?.id,
-    to: stationForPath(event.to.pathname)?.id,
-  };
+  const from = stationForPath(event.from.pathname)?.id;
+  const to = stationForPath(event.to.pathname)?.id;
+  const detail = { from, to, back: from && to ? ridesBack(from, to) : false };
   emit('mz:depart', detail);
 
   const el = doors();
   if (!el || reducedMotion.matches) return;
   showDestination(el, detail.to);
+  el.classList.toggle('back', detail.back);
   const load = event.loader;
   event.loader = async () => {
     await closeDoors(el);
@@ -149,7 +153,7 @@ document.addEventListener('astro:after-swap', () => {
   const el = doors();
   if (!el?.classList.contains('closed')) return;
   el.classList.remove('moving');
-  markArrival();
+  markArrival(el.classList.contains('back'));
   setTimeout(() => openDoors(el), SETTLE_MS);
 });
 

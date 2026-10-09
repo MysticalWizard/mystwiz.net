@@ -198,11 +198,14 @@ const name = t.stations.home.name;
       this.placeTrain();
     }
 
-    /** The train runs continuously, and speeds up while someone holds to depart. */
+    /** The train runs continuously, and speeds up while someone holds to depart. Heading back,
+     *  it slows to a stop and then runs backward. */
     drive(dt: number) {
       if (!this.#routeLength || reducedMotion.matches) return;
-      const v = 0.05 + 1.2 * Math.max(speed.hold * speed.hold, speed.ride);
-      this.#trainAt = (this.#trainAt + v * dt) % this.#routeLength;
+      const level = Math.max(speed.hold * speed.hold, speed.ride);
+      const v = 0.05 + (1.25 * speed.dir - 0.05) * level;
+      const length = this.#routeLength;
+      this.#trainAt = (((this.#trainAt + v * dt) % length) + length) % length;
       this.placeTrain();
     }
 

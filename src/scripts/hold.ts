@@ -96,6 +96,7 @@ export function press(button: HTMLElement | null, back = false): void {
   // turns around: then it starts from a standstill.
   if (back !== hold.back) hold.p = 0;
   hold.back = back;
+  speed.dir = back ? -1 : 1;
   hold.start = performance.now() - hold.p * HOLD_MS;
   button.classList.add('holding');
   const to = document.querySelector('[data-hud-to]');

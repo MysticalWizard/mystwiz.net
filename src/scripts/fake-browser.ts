@@ -1,8 +1,8 @@
 // Test helper, not part of the site: just enough of a browser for the scripts in this folder to
 // run under Vitest in Node. Listeners added to document and window are kept so a test can fire
 // events at them, document.querySelector answers from the elements the test passes in, <html>
-// keeps the attributes set on it, and timers and animation frames run on whatever clock the test
-// installed (vi.useFakeTimers).
+// keeps the attributes set on it and their values, and timers and animation frames run on
+// whatever clock the test installed (vi.useFakeTimers).
 import { vi } from 'vitest';
 
 type Listener = (event: never) => void;
@@ -49,21 +49,22 @@ export function fakeBrowser({
   /** Attributes already on <html> when the scripts run. */
   attributes?: string[];
 } = {}) {
-  const html = new Set(attributes);
+  const html = new Map(attributes.map((name) => [name, '']));
   const doc = Object.assign(eventTarget(), {
     body: { matches: () => false, closest: () => null },
     visibilityState: 'visible' as DocumentVisibilityState,
     documentElement: {
       dataset: {} as DOMStringMap,
       hasAttribute: (name: string) => html.has(name),
-      setAttribute: (name: string) => {
-        html.add(name);
+      getAttribute: (name: string) => html.get(name) ?? null,
+      setAttribute: (name: string, value: string) => {
+        html.set(name, value);
       },
       removeAttribute: (name: string) => {
         html.delete(name);
       },
       toggleAttribute: (name: string, force = !html.has(name)) => {
-        if (force) html.add(name);
+        if (force) html.set(name, '');
         else html.delete(name);
         return force;
       },

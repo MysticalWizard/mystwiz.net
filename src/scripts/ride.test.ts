@@ -102,3 +102,58 @@ describe('arriving at Specs', () => {
     expect(html.hasAttribute('data-boarding')).toBe(false);
   });
 });
+
+describe('riding back', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  it('tells the effects, and runs the doors and the arrival the other way', async () => {
+    const doorClasses = new Set<string>();
+    const doors = {
+      dataset: {},
+      querySelector: () => null,
+      classList: {
+        add: (...names: string[]) => names.forEach((n) => doorClasses.add(n)),
+        remove: (...names: string[]) =>
+          names.forEach((n) => doorClasses.delete(n)),
+        toggle: (name: string, force: boolean) =>
+          force ? doorClasses.add(name) : doorClasses.delete(name),
+        contains: (name: string) => doorClasses.has(name),
+      },
+    };
+    const page = fakeBrowser({
+      path: '/about/',
+      elements: { '[data-doors]': doors },
+    });
+    await import('./ride');
+    const rides = vi.fn();
+    page.document.addEventListener('mz:ride', (event: CustomEvent) =>
+      rides(event.detail),
+    );
+
+    // Astro's router asks to go from About back to Home, then runs the (wrapped) page load.
+    const navigation = {
+      from: new URL('http://localhost/about/'),
+      to: new URL('http://localhost/'),
+      loader: async () => {},
+    };
+    page.document.fire('astro:before-preparation', navigation);
+    const ride = navigation.loader();
+    await vi.advanceTimersByTimeAsync(1500);
+    await ride;
+    expect(rides).toHaveBeenCalledWith(expect.objectContaining({ back: true }));
+    expect(doorClasses.has('back')).toBe(true);
+
+    page.document.fire('astro:after-swap');
+    expect(page.document.documentElement.getAttribute('data-arriving')).toBe(
+      'back',
+    );
+  });
+});

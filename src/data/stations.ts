@@ -96,6 +96,16 @@ export function prevStation(id: StationId): Station {
   return stationAt(stationIndex(id) - 1);
 }
 
+/** Whether a ride goes back round the loop: the shorter way, or halfway round, toward the left
+ *  of the route bar. */
+export function ridesBack(from: StationId, to: StationId): boolean {
+  const n = STATIONS.length;
+  const ahead = (stationIndex(to) - stationIndex(from) + n) % n;
+  return ahead * 2 === n
+    ? stationIndex(to) < stationIndex(from)
+    : ahead * 2 > n;
+}
+
 /** Fares go by distance on the loop: ¥140 for one stop, ¥170 for two, ¥30 per stop after. */
 export function fare(from: StationId, to: StationId): number {
   const gap = Math.abs(stationIndex(from) - stationIndex(to));

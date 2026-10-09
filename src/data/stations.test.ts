@@ -3,6 +3,7 @@ import {
   fare,
   nextStation,
   prevStation,
+  ridesBack,
   station,
   stationForPath,
   STATIONS,
@@ -48,5 +49,19 @@ describe('MZ Line stations', () => {
     expect(fare('specs', 'home')).toBe(140);
     expect(fare('home', 'specs')).toBe(140);
     expect(fare('projects', 'projects')).toBe(0);
+  });
+
+  it('rides back the shorter way round the loop', () => {
+    expect(ridesBack('about', 'home')).toBe(true);
+    expect(ridesBack('home', 'about')).toBe(false);
+    // Specs on to Home is one stop forward round the loop, and Home back to Specs one stop back.
+    expect(ridesBack('specs', 'home')).toBe(false);
+    expect(ridesBack('home', 'specs')).toBe(true);
+  });
+
+  it('rides back halfway round the loop when the stop is to the left on the route bar', () => {
+    expect(ridesBack('projects', 'home')).toBe(true);
+    expect(ridesBack('home', 'projects')).toBe(false);
+    expect(ridesBack('specs', 'about')).toBe(true);
   });
 });

@@ -7,8 +7,8 @@ function canvases() {
     setTransform: () => {},
     clearRect: () => {},
     beginPath: () => {},
-    moveTo: () => {},
-    lineTo: () => {},
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
     stroke: vi.fn(),
     arc: () => {},
     fill: () => {},
@@ -35,6 +35,7 @@ describe('speed lines', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
     vi.resetModules();
   });
 
@@ -50,12 +51,31 @@ describe('speed lines', () => {
     const page = fakeBrowser({ elements });
     await import('./fx');
 
-    page.document.fire('mz:ride');
+    page.document.fire('mz:ride', { detail: {} });
     await vi.advanceTimersByTimeAsync(300);
     expect(context.stroke).toHaveBeenCalled();
 
-    page.document.fire('mz:arrive');
+    page.document.fire('mz:arrive', { detail: {} });
     await vi.advanceTimersByTimeAsync(2000);
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  // Every line starts mid-screen, at x = 640, and streams past against the way the train goes
+  // with its tail trailing behind it.
+  it.each([
+    ['on to the next station', false, -1],
+    ['back to the previous one', true, 1],
+  ])('stream past the way the train is going: %s', async (_, back, way) => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const { context, elements } = canvases();
+    const page = fakeBrowser({ elements });
+    await import('./fx');
+
+    page.document.fire('mz:ride', { detail: { back } });
+    await vi.advanceTimersByTimeAsync(300);
+    const [x] = context.moveTo.mock.lastCall!;
+    const [tail] = context.lineTo.mock.lastCall!;
+    expect(Math.sign(x - 640)).toBe(way);
+    expect(Math.sign(tail - x)).toBe(-way);
   });
 });

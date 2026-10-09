@@ -1,10 +1,11 @@
-// Canvas effects. Behind the page: speed lines that stream past while the train speeds up.
+// Canvas effects. Behind the page: speed lines that stream past while the train speeds up, the
+// other way when it heads back.
 // Over the page: every press spawns an osu!-style approach circle that closes in on the point,
 // then a hit burst; clicking on a steady beat shows a dot-matrix ×N combo that turns lit at ×8.
 // All of it is off under reduced motion, and neither takes frames while it has nothing to draw.
 import { comboAfter, emptyRhythm } from '../lib/rhythm';
 import { onFrame } from './frame';
-import { speedLevel } from './speed';
+import { speed, speedLevel } from './speed';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -73,10 +74,12 @@ function drawStreaks(_: number, dt: number) {
   }
   streakCtx.strokeStyle = colors.line;
   streakCtx.lineCap = 'round';
+  // Heading on, the lines stream left with their tails to the right; heading back, mirrored.
+  const dir = speed.dir;
   for (const s of streaks) {
-    s.x -= s.speed * amount * dt * 0.0022;
-    if (s.x < -0.3) {
-      s.x = 1.1;
+    s.x -= dir * s.speed * amount * dt * 0.0022;
+    if (s.x < -0.3 || s.x > 1.3) {
+      s.x = dir > 0 ? 1.1 : -0.1;
       s.y = Math.random();
     }
     const x = s.x * width;
@@ -85,7 +88,7 @@ function drawStreaks(_: number, dt: number) {
     streakCtx.lineWidth = s.speed > 1.3 ? 2 : 1;
     streakCtx.beginPath();
     streakCtx.moveTo(x, y);
-    streakCtx.lineTo(x + s.length * 220 * amount, y);
+    streakCtx.lineTo(x + dir * s.length * 220 * amount, y);
     streakCtx.stroke();
   }
   streakCtx.globalAlpha = 1;

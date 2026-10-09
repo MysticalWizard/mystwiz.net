@@ -193,18 +193,22 @@
   station board pulls in from the right with a blur that clears and a small jolt as it stops,
   then the station's content rises in, staggered by --i. Specs' train pulls in as its formation
   rises, from further right (--arrive-from) and with a softer jolt (--arrive-jolt, see
-  Formation.astro).
+  Formation.astro). After a ride back (data-arriving="back") both pull in from the left.
 */
 @keyframes arrive {
   0% {
-    transform: translateX(var(--arrive-from, 26vw));
+    transform: translateX(
+      calc(var(--arrive-from, 26vw) * var(--arrive-dir, 1))
+    );
     filter: blur(8px);
   }
   62% {
     filter: blur(0);
   }
   74% {
-    transform: translateX(var(--arrive-jolt, -0.7vw));
+    transform: translateX(
+      calc(var(--arrive-jolt, -0.7vw) * var(--arrive-dir, 1))
+    );
   }
   100% {
     transform: none;
@@ -224,6 +228,10 @@
 
 :root:is([data-arriving], [data-boarding]) [data-arrive] {
   animation: arrive 1.05s var(--brake) both;
+}
+
+:root[data-arriving='back'] {
+  --arrive-dir: -1;
 }
 
 :root:is([data-arriving], [data-boarding]) .rise {
