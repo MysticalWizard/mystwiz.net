@@ -33,10 +33,10 @@ const RIDE_MS = 640;
 const OPEN_MS = 360;
 /** Pause between the swap and the doors opening, as the train settles. */
 const SETTLE_MS = 90;
-/** Long enough for the board's arrival and the staggered content to finish. */
-const ARRIVAL_MS = 1500;
+/** Long enough for the board's arrival, the staggered content and Specs' train to finish. */
+const ARRIVAL_MS = 1700;
 /** First visit: the doors open on load (see Doors.astro), then normal service resumes. */
-const BOARDING_MS = 1800;
+const BOARDING_MS = 2100;
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const root = document.documentElement;

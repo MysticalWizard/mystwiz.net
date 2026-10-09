@@ -94,6 +94,18 @@ const FIRST = 4;
     scroll-snap-type: x proximity;
   }
 
+  /* The train pulls in from offscreen as the formation rises (see .rise in global.css). */
+  :global(:root:is([data-arriving], [data-boarding])) .train {
+    --arrive-from: 100vw;
+    --arrive-jolt: -0.05vw;
+    animation: arrive 1.2s var(--brake) both;
+    animation-delay: 0.3s;
+  }
+
+  :global(:root[data-boarding]) .train {
+    animation-delay: 0.75s;
+  }
+
   .car {
     position: relative;
     flex: 0 0 138px;

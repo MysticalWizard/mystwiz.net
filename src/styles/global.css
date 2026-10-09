@@ -191,18 +191,20 @@
 /*
   Arrival. After a ride (data-arriving) or behind the first-visit doors (data-boarding), the
   station board pulls in from the right with a blur that clears and a small jolt as it stops,
-  then the station's content rises in, staggered by --i.
+  then the station's content rises in, staggered by --i. Specs' train pulls in as its formation
+  rises, from further right (--arrive-from) and with a softer jolt (--arrive-jolt, see
+  Formation.astro).
 */
 @keyframes arrive {
   0% {
-    transform: translateX(26vw);
+    transform: translateX(var(--arrive-from, 26vw));
     filter: blur(8px);
   }
   62% {
     filter: blur(0);
   }
   74% {
-    transform: translateX(-0.7vw);
+    transform: translateX(var(--arrive-jolt, -0.7vw));
   }
   100% {
     transform: none;

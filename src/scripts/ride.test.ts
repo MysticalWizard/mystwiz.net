@@ -45,3 +45,60 @@ describe('riding with the arrow keys', () => {
     expect(navigate).toHaveBeenCalledOnce();
   });
 });
+
+/** Specs swapped in at the end of a ride, with the doors still shut. Returns <html>. */
+async function rideIntoSpecs() {
+  /** The doors' classes, as the ride leaves them. */
+  const doorClasses = new Set(['on', 'closed', 'moving']);
+  const doors = {
+    classList: {
+      contains: (name: string) => doorClasses.has(name),
+      remove: (...names: string[]) =>
+        names.forEach((n) => doorClasses.delete(n)),
+    },
+  };
+  const page = fakeBrowser({
+    path: '/specs/',
+    elements: { '[data-doors]': doors },
+  });
+  await import('./ride');
+  page.document.fire('astro:after-swap');
+  return page.document.documentElement;
+}
+
+/** Specs as a first visit loads it, behind the doors (see Base.astro). Returns <html>. */
+async function boardAtSpecs() {
+  const page = fakeBrowser({ path: '/specs/', attributes: ['data-boarding'] });
+  await import('./ride');
+  return page.document.documentElement;
+}
+
+// Specs' train pulls in as its formation rises (see Formation.astro): 0.3s + 1.2s after a ride,
+// 0.75s + 1.2s on a first visit.
+describe('arriving at Specs', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  it('lasts until the train has pulled in after a ride', async () => {
+    const html = await rideIntoSpecs();
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(html.hasAttribute('data-arriving')).toBe(true);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(html.hasAttribute('data-arriving')).toBe(false);
+  });
+
+  it('lasts until the train has pulled in on a first visit', async () => {
+    const html = await boardAtSpecs();
+    await vi.advanceTimersByTimeAsync(1950);
+    expect(html.hasAttribute('data-boarding')).toBe(true);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(html.hasAttribute('data-boarding')).toBe(false);
+  });
+});
