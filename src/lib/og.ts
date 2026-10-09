@@ -16,9 +16,13 @@ const TTF_AGENT =
   'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1';
 
 /** A static instance of a Google font, e.g. ("Archivo", "wdth,wght@125,800"). */
-async function googleTtf(family: string, axes: string): Promise<Buffer> {
+export async function googleTtf(
+  family: string,
+  axes: string,
+  cacheDir = CACHE_DIR,
+): Promise<Buffer> {
   const file = join(
-    CACHE_DIR,
+    cacheDir,
     `${family}-${axes}.ttf`.replace(/[^\w.-]+/g, '-'),
   );
   try {
@@ -33,8 +37,14 @@ async function googleTtf(family: string, axes: string): Promise<Buffer> {
   const url = css.match(/url\((https:[^)]+\.ttf)\)/)?.[1];
   if (!url) throw new Error(`Google Fonts has no TTF for ${family} ${axes}`);
   const font = await fetch(url);
+  // Only a font goes in the cache: a cached error page would break every later build.
+  if (!font.ok) {
+    throw new Error(
+      `Google Fonts answered ${font.status} for ${family} ${axes}`,
+    );
+  }
   const data = Buffer.from(await font.arrayBuffer());
-  await mkdir(CACHE_DIR, { recursive: true });
+  await mkdir(cacheDir, { recursive: true });
   await writeFile(file, data);
   return data;
 }
