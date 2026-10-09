@@ -159,7 +159,8 @@ document.addEventListener('click', (event) => {
 
 /* ---------- keyboard: hold Space anywhere ---------- */
 
-let spaceDown = false;
+/** Up, down (a tap so far), or held long enough to count as holding to depart. */
+let space: 'up' | 'down' | 'held' = 'up';
 let spaceTimer = 0;
 
 const usesSpace = (el: Element) =>
@@ -175,20 +176,25 @@ document.addEventListener('keydown', (event) => {
   const button = holdButton();
   if (!button || document.querySelector('[data-overlay][open]')) return;
   event.preventDefault();
-  if (event.repeat || spaceDown) return;
-  spaceDown = true;
-  spaceTimer = window.setTimeout(() => press(button), SPACE_HOLD_DELAY_MS);
+  if (event.repeat || space !== 'up') return;
+  space = 'down';
+  spaceTimer = window.setTimeout(() => {
+    space = 'held';
+    press(button);
+  }, SPACE_HOLD_DELAY_MS);
 });
 
 document.addEventListener('keyup', (event) => {
-  if (event.code !== 'Space' || !spaceDown) return;
-  spaceDown = false;
+  if (event.code !== 'Space' || space === 'up') return;
+  const tap = space === 'down';
+  space = 'up';
   clearTimeout(spaceTimer);
   event.preventDefault();
   if (hold.on) {
     release(false);
-  } else {
-    // A quick tap: scroll like Space normally does.
+  } else if (tap) {
+    // A quick tap: scroll like Space normally does. A hold never scrolls, even when the train
+    // has already departed by the time it ends.
     window.scrollBy({
       top: (event.shiftKey ? -1 : 1) * window.innerHeight * 0.8,
       behavior: reducedMotion.matches ? 'auto' : 'smooth',
@@ -197,7 +203,7 @@ document.addEventListener('keyup', (event) => {
 });
 
 window.addEventListener('blur', () => {
-  spaceDown = false;
+  space = 'up';
   clearTimeout(spaceTimer);
   release(false);
 });
