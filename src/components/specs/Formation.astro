@@ -94,10 +94,12 @@ const FIRST = 4;
     scroll-snap-type: x proximity;
   }
 
-  /* The train pulls in from offscreen as the formation rises (see .rise in global.css). */
+  /* The train pulls in from offscreen as the formation rises (see .rise in global.css). It runs
+     the way the ride goes, against the board: in from the left, or from the right after a ride
+     back. */
   :global(:root:is([data-arriving], [data-boarding])) .train {
-    --arrive-from: 100vw;
-    --arrive-jolt: -0.05vw;
+    --arrive-from: -100vw;
+    --arrive-jolt: 0.05vw;
     animation: arrive 1.2s var(--brake) both;
     animation-delay: 0.3s;
   }
