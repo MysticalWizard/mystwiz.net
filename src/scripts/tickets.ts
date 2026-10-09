@@ -10,6 +10,8 @@ const PRINT_MS = 900;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 let lastFocus: HTMLElement | null = null;
+/** The fare whose ticket is printing. Closing the machine cancels its ride. */
+let printing: HTMLElement | undefined;
 
 const machine = () =>
   document.querySelector<HTMLDialogElement>('[data-ticket-machine]');
@@ -35,6 +37,7 @@ document.addEventListener(
   'close',
   (event) => {
     if (!(event.target as Element).matches?.('[data-ticket-machine]')) return;
+    printing = undefined;
     if (lastFocus?.isConnected) lastFocus.focus({ preventScroll: true });
     lastFocus = null;
   },
@@ -129,7 +132,13 @@ document.addEventListener('click', async (event) => {
   }
   const button = target.closest<HTMLElement>('[data-fare]');
   if (!button || button.getAttribute('aria-disabled') === 'true') return;
+  // One ticket at a time.
+  if (printing) return;
+  printing = button;
   await printTicket(dialog, button);
+  // The machine was closed while the ticket printed (Esc, the backdrop): no ride.
+  if (printing !== button) return;
+  printing = undefined;
   closeTickets();
   if (button.dataset.href) navigate(button.dataset.href);
 });

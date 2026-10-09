@@ -57,6 +57,7 @@ export function fakeBrowser({
     },
     querySelector: (selector: string) => elements[selector] ?? null,
     querySelectorAll: (selector: string) => all[selector] ?? [],
+    createElement: () => ({}),
   });
   const win = Object.assign(eventTarget(), {
     innerWidth: 1280,
