@@ -49,6 +49,7 @@ export function fakeBrowser({
     body: { matches: () => false, closest: () => null },
     visibilityState: 'visible' as DocumentVisibilityState,
     documentElement: {
+      dataset: {} as DOMStringMap,
       hasAttribute: () => false,
       setAttribute: () => {},
       removeAttribute: () => {},

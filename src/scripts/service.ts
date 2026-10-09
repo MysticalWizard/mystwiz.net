@@ -44,9 +44,11 @@ let sweeping = false;
 
 /** Switches service behind the sweep band (instantly under reduced motion). */
 export async function switchService(): Promise<void> {
+  // A click while the band is crossing is ignored: the service may only change behind it.
+  if (sweeping) return;
   const next: Service = currentService() === 'day' ? 'night' : 'day';
   const sweep = document.querySelector<HTMLElement>('[data-sweep]');
-  if (!sweep || sweeping || reducedMotion.matches) {
+  if (!sweep || reducedMotion.matches) {
     applyService(next);
     return;
   }
