@@ -1,6 +1,7 @@
-// Live data for the whole site. Asks the board endpoint once on load; when the server answers
-// live, it keeps asking every minute (paused while the tab is hidden). The departure board
-// listens for mz:board, and the LIVE pill and "On air" tags follow data-on-air on <html>.
+// Live data for the whole site. Asks the board endpoint on load and then every minute (paused
+// while the tab is hidden), trying again after a failed request. It stops only when there is no
+// live board to ask: no endpoint, or a board taken at build time. The departure board listens
+// for mz:board, and the LIVE pill and "On air" tags follow data-on-air on <html>.
 import type { BoardSnapshot } from '../lib/live/snapshot';
 
 const ENDPOINT = '/api/board.json';
@@ -13,7 +14,7 @@ declare global {
 }
 
 let latest: BoardSnapshot | undefined;
-let polling = false;
+let polling = true;
 let timer = 0;
 
 /** The most recent board data from the endpoint, if any. */
@@ -37,9 +38,11 @@ async function refresh() {
       polling = latest.mode === 'live';
       showOnAir();
       document.dispatchEvent(new CustomEvent('mz:board', { detail: latest }));
+    } else if (res.status === 404) {
+      polling = false;
     }
   } catch {
-    // Offline or the endpoint is missing: the board keeps what it has.
+    // Offline: the board keeps what it has until the next try.
   }
   if (polling && document.visibilityState === 'visible') {
     timer = window.setTimeout(refresh, POLL_MS);
