@@ -36,11 +36,14 @@ function eventTarget() {
 export function fakeBrowser({
   path = '/',
   elements = {},
+  all = {},
 }: {
   /** The page's URL path. */
   path?: string;
   /** What document.querySelector finds, by selector. */
   elements?: Record<string, object>;
+  /** What document.querySelectorAll finds, by selector. */
+  all?: Record<string, object[]>;
 } = {}) {
   const doc = Object.assign(eventTarget(), {
     body: { matches: () => false, closest: () => null },
@@ -52,9 +55,13 @@ export function fakeBrowser({
       toggleAttribute: () => false,
     },
     querySelector: (selector: string) => elements[selector] ?? null,
+    querySelectorAll: (selector: string) => all[selector] ?? [],
   });
   const win = Object.assign(eventTarget(), {
+    innerWidth: 1280,
     innerHeight: 800,
+    devicePixelRatio: 1,
+    scrollY: 0,
     matchMedia: () => ({ matches: false }),
     scrollBy: vi.fn(),
     setTimeout: (callback: () => void, ms?: number) => setTimeout(callback, ms),
@@ -64,6 +71,7 @@ export function fakeBrowser({
   vi.stubGlobal('window', win);
   vi.stubGlobal('location', { pathname: path });
   vi.stubGlobal('HTMLElement', class {});
+  vi.stubGlobal('getComputedStyle', () => ({ getPropertyValue: () => '' }));
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
     setTimeout(() => callback(performance.now()), 16),
   );

@@ -88,6 +88,15 @@ describe('holding Space to depart', () => {
     expect(page.window.scrollBy).not.toHaveBeenCalled();
   });
 
+  it('wakes the effects that follow the speed when a hold starts', async () => {
+    const page = await station();
+    const holds = vi.fn();
+    page.document.addEventListener('mz:hold', holds);
+    page.document.fire('keydown', space());
+    await vi.advanceTimersByTimeAsync(300);
+    expect(holds).toHaveBeenCalledOnce();
+  });
+
   // The route bar's train sits at the station's position: 0 for Home up to 3 for Specs.
   it.each([
     ['Home', '/', 0.3],

@@ -16,6 +16,13 @@ const CREEP = 0.3;
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+declare global {
+  interface DocumentEventMap {
+    /** Someone started holding to depart: effects that follow the speed wake up. */
+    'mz:hold': CustomEvent<null>;
+  }
+}
+
 export const hold = {
   on: false,
   /** Progress from 0 to 1. */
@@ -86,6 +93,7 @@ export function press(button: HTMLElement | null): void {
   button.classList.add('holding');
   const to = document.querySelector('[data-hud-to]');
   if (to) to.textContent = button.dataset.hudText ?? '';
+  document.dispatchEvent(new CustomEvent('mz:hold'));
 
   const step = () => {
     const p = Math.min(1, (performance.now() - hold.start) / HOLD_MS);

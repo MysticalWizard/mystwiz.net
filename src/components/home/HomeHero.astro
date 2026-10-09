@@ -111,6 +111,14 @@ const name = t.stations.home.name;
 
   class MzHero extends HTMLElement {
     #resize = new ResizeObserver(() => this.layout());
+    /** The train only runs while the hero is on screen, so the frame loop can sleep below it. */
+    #onScreen = new IntersectionObserver(([entry]) => {
+      this.#stopTrain?.();
+      this.#stopTrain =
+        entry?.isIntersecting && !reducedMotion.matches
+          ? onFrame((_, dt) => this.drive(dt))
+          : undefined;
+    });
     #stopTrain?: () => void;
     /** Distance of the hero train along the route. */
     #trainAt = 120;
@@ -119,7 +127,7 @@ const name = t.stations.home.name;
 
     connectedCallback() {
       this.#resize.observe(this);
-      this.#stopTrain = onFrame((_, dt) => this.drive(dt));
+      this.#onScreen.observe(this);
 
       const wordmark = this.querySelector<HTMLElement>('[data-wordmark]');
       wordmark?.addEventListener('pointermove', (event) => this.stretch(event));
@@ -132,7 +140,9 @@ const name = t.stations.home.name;
 
     disconnectedCallback() {
       this.#resize.disconnect();
+      this.#onScreen.disconnect();
       this.#stopTrain?.();
+      this.#stopTrain = undefined;
     }
 
     /* ---------- the route line and its train ---------- */

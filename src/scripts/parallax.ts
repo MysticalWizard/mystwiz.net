@@ -1,6 +1,8 @@
 // Depth. On fine pointers the home hero's planes drift with the cursor and scroll at different
 // rates, the board tilts, and every other station's ghost numeral drifts behind its board.
-// While someone holds to depart, the board shakes. Nothing moves under reduced motion.
+// While someone holds to depart, the board shakes. Nothing moves under reduced motion. The planes
+// only take frames while something moves them (the cursor, scrolling, a hold, a new page), so
+// the frame loop can sleep the rest of the time.
 import { onFrame } from './frame';
 import { speed } from './speed';
 
@@ -8,16 +10,6 @@ const finePointer = window.matchMedia('(pointer: fine)');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
-
-window.addEventListener(
-  'pointermove',
-  (event) => {
-    if (event.pointerType !== 'mouse') return;
-    pointer.targetX = (event.clientX / window.innerWidth) * 2 - 1;
-    pointer.targetY = (event.clientY / window.innerHeight) * 2 - 1;
-  },
-  { passive: true },
-);
 
 /** Offsets per plane: pointer x and y in px, and how fast it moves with scroll. */
 const PLANES: Record<string, { x: number; y: number; scroll: number }> = {
@@ -35,7 +27,10 @@ function setTransform(el: HTMLElement, transform: string) {
   el.style.transform = transform;
 }
 
-onFrame(() => {
+let stop: (() => void) | undefined;
+let lastScroll = 0;
+
+function frame() {
   const still = reducedMotion.matches;
   const depth = finePointer.matches && !still;
   pointer.x += (pointer.targetX - pointer.x) * 0.07;
@@ -66,4 +61,36 @@ onFrame(() => {
       `translate3d(${(x * offsets.x).toFixed(2)}px, ${(y * offsets.y + scroll * offsets.scroll).toFixed(2)}px, 0)`,
     );
   }
-});
+
+  const settled =
+    shake === 0 &&
+    scroll === lastScroll &&
+    (!depth ||
+      (Math.abs(pointer.targetX - pointer.x) < 0.001 &&
+        Math.abs(pointer.targetY - pointer.y) < 0.001));
+  lastScroll = scroll;
+  if (settled) {
+    stop?.();
+    stop = undefined;
+  }
+}
+
+/** Moves the planes frame by frame until they settle. */
+const run = () => {
+  stop ??= onFrame(frame);
+};
+
+window.addEventListener(
+  'pointermove',
+  (event) => {
+    if (event.pointerType !== 'mouse') return;
+    pointer.targetX = (event.clientX / window.innerWidth) * 2 - 1;
+    pointer.targetY = (event.clientY / window.innerHeight) * 2 - 1;
+    run();
+  },
+  { passive: true },
+);
+window.addEventListener('scroll', run, { passive: true });
+document.addEventListener('mz:hold', run);
+document.addEventListener('astro:after-swap', run);
+run();

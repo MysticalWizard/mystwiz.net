@@ -1,7 +1,7 @@
 // Canvas effects. Behind the page: speed lines that stream past while the train speeds up.
 // Over the page: every press spawns an osu!-style approach circle that closes in on the point,
 // then a hit burst; clicking on a steady beat shows a dot-matrix ×N combo that turns lit at ×8.
-// All of it is off under reduced motion.
+// All of it is off under reduced motion, and neither takes frames while it has nothing to draw.
 import { comboAfter, emptyRhythm } from '../lib/rhythm';
 import { onFrame } from './frame';
 import { speedLevel } from './speed';
@@ -55,19 +55,22 @@ const streaks = Array.from({ length: 70 }, () => ({
   speed: 0.6 + Math.random(),
 }));
 let amount = 0;
-let streaksDrawn = false;
+let stopStreaks: (() => void) | undefined;
 
-onFrame((_, dt) => {
+function drawStreaks(_: number, dt: number) {
   if (!streakCtx) return;
   const target = reducedMotion.matches ? 0 : speedLevel();
   amount += (target - amount) * 0.12;
+  streakCtx.clearRect(0, 0, width, height);
   if (amount < 0.01) {
-    if (streaksDrawn) streakCtx.clearRect(0, 0, width, height);
-    streaksDrawn = false;
+    // Faded out, and nothing is speeding the train up: stop until it moves again.
+    if (target === 0) {
+      amount = 0;
+      stopStreaks?.();
+      stopStreaks = undefined;
+    }
     return;
   }
-  streaksDrawn = true;
-  streakCtx.clearRect(0, 0, width, height);
   streakCtx.strokeStyle = colors.line;
   streakCtx.lineCap = 'round';
   for (const s of streaks) {
@@ -86,7 +89,14 @@ onFrame((_, dt) => {
     streakCtx.stroke();
   }
   streakCtx.globalAlpha = 1;
-});
+}
+
+/** Speed lines run from when the train starts moving until they have faded out. */
+const runStreaks = () => {
+  if (streakCtx) stopStreaks ??= onFrame(drawStreaks);
+};
+document.addEventListener('mz:hold', runStreaks);
+document.addEventListener('mz:ride', runStreaks);
 
 /* ---------- approach circles and combo ---------- */
 
