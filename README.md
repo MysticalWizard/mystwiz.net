@@ -24,7 +24,9 @@ board endpoint runs on request.
 
 - **Copy:** every visible string is in `src/i18n/en.ts`. Korean or Japanese can be added as new
   files next to it once Astro i18n routing is set up.
-- **Stations:** `src/data/stations.ts` (order, numbers, paths, departure melodies, fares).
+- **Stations:** `src/data/stations.ts` (order, numbers, paths, departure melodies, fares). The
+  sitemap (`src/pages/sitemap.xml.ts`) lists every station, so a new page shows up there once it
+  joins the line.
 - **Lines and transfers:** `src/data/lines.ts` (accounts, transfer links, departure board rows,
   platforms, bio-link arrivals).
 - **Projects and the network map:** `src/data/projects.ts`. Adding a project is a data change: add
