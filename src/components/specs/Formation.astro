@@ -96,7 +96,8 @@ const FIRST = 4;
 
   /* The train pulls in from offscreen as the formation rises (see .rise in global.css). It runs
      the way the ride goes, against the board: in from the left, or from the right after a ride
-     back. */
+     back. Behind the first-visit doors there is no ride to follow, so it comes in from the
+     right with the board. */
   :global(:root:is([data-arriving], [data-boarding])) .train {
     --arrive-from: -100vw;
     --arrive-jolt: 0.05vw;
@@ -105,6 +106,8 @@ const FIRST = 4;
   }
 
   :global(:root[data-boarding]) .train {
+    --arrive-from: 100vw;
+    --arrive-jolt: -0.05vw;
     animation-delay: 0.75s;
   }
 

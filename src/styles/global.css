@@ -193,8 +193,9 @@
   station board pulls in from the right with a blur that clears and a small jolt as it stops,
   then the station's content rises in, staggered by --i. Specs' train pulls in as its formation
   rises, from the left (--arrive-from) since it runs the way the ride goes, against the board,
-  and with a softer jolt (--arrive-jolt, see Formation.astro). After a ride back
-  (data-arriving="back") each comes in from the other side.
+  and with a softer jolt (--arrive-jolt, see Formation.astro); behind the doors, with no ride to
+  follow, it comes in from the right. After a ride back (data-arriving="back") each comes in
+  from the other side.
 */
 @keyframes arrive {
   0% {
