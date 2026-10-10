@@ -1,0 +1,16 @@
+// Merged into the Worker config the Cloudflare adapter generates at build time
+// (dist/server/wrangler.json), so only what the adapter doesn't set goes here.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mystwiz-net",
+  // Cloudflare caches the Worker's responses as their Cache-Control allows and answers from
+  // that cache without running the Worker: the live board is fetched once per 30s, not per poll.
+  "cache": { "enabled": true },
+  "assets": {
+    "binding": "ASSETS",
+    // Paths with no page get 404.html straight from the assets, so scans for /.env and the
+    // like never run the Worker. Only the live board endpoint runs on request.
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"],
+  },
+}

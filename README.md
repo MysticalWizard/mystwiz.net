@@ -73,9 +73,12 @@ when) and the GitHub row reads "No data" in the meantime.
 
 ## Deploying
 
-The Cloudflare adapter generates the Worker config at build time, so there is no `wrangler.jsonc`
-to keep in sync. The Worker is named after `package.json` (`mystwiz-net`); to deploy over an
-existing Worker with another name, add a `wrangler.jsonc` containing just `{ "name": "..." }`.
+The Cloudflare adapter generates the Worker config at build time (`dist/server/wrangler.json`) and
+merges in `wrangler.jsonc`, which only holds what the adapter doesn't set: the Worker's name
+(`mystwiz-net`), Workers Cache, and assets routing. Paths with no page get `404.html` from the
+assets without running the Worker, and only `/api/*` runs it. Workers Cache serves the board
+endpoint from Cloudflare's cache for as long as its `Cache-Control` allows; it only runs on
+Cloudflare, not in `pnpm dev` or `pnpm preview`.
 
 ```sh
 pnpm build
