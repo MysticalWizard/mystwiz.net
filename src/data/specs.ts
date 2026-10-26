@@ -3,7 +3,7 @@ import type { PictoName } from '../assets/pictos';
 // The PC is an 8-car train named after its CPU. Peripherals are the driver's cab.
 
 /** Date the parts list was last checked. */
-export const INSPECTED = '2026.08.14';
+export const INSPECTED = '2026.10.17';
 export const SERIES = 'R958';
 
 export interface Car {
@@ -79,13 +79,21 @@ export const CAB: CabGroup[] = [
     items: [
       { label: 'Keyboard', model: 'ATK RS7 Air Cyber' },
       { label: 'Keypad', model: 'Wooting UwU RGB' },
-      { label: 'Mouse 1', model: 'ATK A9 Pro Max 2.0' },
-      { label: 'Mouse 2', model: 'Logitech G Pro X Superlight' },
+      { label: 'Mouse 1', model: 'ATK A9 Pro Max 2.0', detail: '800 DPI' },
+      {
+        label: 'Mouse 2',
+        model: 'Logitech G Pro X Superlight',
+        detail: '800 DPI',
+      },
       {
         label: 'Mousepad',
         model: 'ATK Blaze XSoft',
       },
-      { label: 'Tablet', model: 'Wacom CTL-4100 Intuos Small' },
+      {
+        label: 'Tablet',
+        model: 'Wacom CTL-4100 Intuos Small',
+        detail: 'osu!: 80 mm × 45 mm ',
+      },
     ],
   },
   {
@@ -99,20 +107,20 @@ export const CAB: CabGroup[] = [
       },
       {
         label: 'Monitor 2',
-        model: 'TBD',
-        detail: 'TBD',
+        model: 'AOC Q27G41ZE',
+        detail: '27" · 1440p IPS · 240 Hz',
       },
       { label: 'Stream Deck', model: 'Elgato Stream Deck +' },
     ],
   },
   {
-    name: 'Audio and camera',
+    name: 'Audio and Camera',
     picto: 'mic',
     items: [
       { label: 'IEM', model: 'MOONDROP ARIA2' },
       { label: 'Microphone', model: 'Elgato Wave DX', detail: 'Dynamic XLR' },
       { label: 'Mic arm', model: 'Elgato Wave Mic Arm LP' },
-      { label: 'XLR', model: 'Elgato Wave XLR MK.2' },
+      { label: 'Audio interface', model: 'Elgato Wave XLR MK.2' },
       { label: 'Camera', model: 'Logitech StreamCam' },
     ],
   },
