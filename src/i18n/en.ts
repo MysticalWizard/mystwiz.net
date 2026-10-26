@@ -19,10 +19,9 @@ const intro: IntroPart[] = [
   ' and ',
   { chip: 'TOOL', text: 'tools', after: '.' },
   ' ',
-  { soft: 'Sometimes I stream the process.' },
+  { soft: 'Self-built, self-deployed, occasionally self-destructing.' },
 ];
 
-// Years are placeholders until Wonsik fills them in.
 const history: HistoryStop[] = [
   {
     when: 'Opened',
@@ -30,33 +29,52 @@ const history: HistoryStop[] = [
     text: 'Teen gaming days, and the username that came with them.',
   },
   {
-    when: 'Year TBD',
-    name: 'ElectricalWizard',
-    text: 'First Discord bot, built for a server with friends.',
+    when: 'Jul 2021',
+    name: 'mystwiz.net, experimental first build',
+    text: 'Nuxt and Vue on the new mystwiz.net domain.',
   },
   {
-    when: 'Year TBD',
-    name: 'mystwiz.net, first build',
+    when: 'May 2022',
+    name: 'mystwiz.net, rebuilt in Next.js',
     text: 'Next.js and Tailwind.',
   },
   {
-    when: 'Year TBD',
+    when: 'Sep 2023',
+    name: 'ElectricalWizard',
+    text: 'First Discord bot, built for a server with friends. Discord.js and SQLite self-hosted on AWS.',
+  },
+  {
+    when: 'Jun 2024',
     name: 'Waveworn',
-    text: 'A Wuthering Waves tool for Discord and the web.',
+    text: 'A Wuthering Waves tool for Discord and the web. TypeScript and Discord.js.',
   },
   {
-    when: 'Notice',
-    name: 'This line has been renamed',
-    text: 'MysticalWizard is now mystwiz. Old tickets are still valid.',
-    kind: 'renamed',
+    when: 'Aug 2024',
+    name: 'ElectricalWizard v4',
+    text: 'TypeScript rewrite with MongoDB.',
   },
   {
-    when: 'Now',
+    when: 'May 2026',
     name: 'Yorimichi',
-    text: 'An anime recommender, under construction.',
+    text: 'An anime recommender in Svelte, under construction.',
   },
   {
-    when: 'You are here',
+    when: 'Aug 2026',
+    name: 'Biome searcher',
+    text: 'A Minecraft biome finder written in C, built on cubiomes.',
+  },
+  {
+    when: 'Oct 2026',
+    name: 'Status page, rebuilt',
+    text: 'Astro and Svelte, replacing the old Express.js server.',
+  },
+  {
+    when: 'Oct 2026',
+    name: 'Compost',
+    text: 'A judgmental todo app. React, Dexie and TypeScript.',
+  },
+  {
+    when: 'Oct 2026',
     name: 'mystwiz.net, rebuilt in Astro',
     text: 'The site you are riding right now.',
     kind: 'here',
