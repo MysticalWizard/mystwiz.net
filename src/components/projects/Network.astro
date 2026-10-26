@@ -10,9 +10,13 @@ const t = getStrings(Astro.currentLocale);
 const s = t.projects.map;
 const project = (id: string) => PROJECTS.find((p) => p.id === id)!;
 
+/** A capsule spans its lines, which run 16 apart. */
+const capsuleHeight = (station: MapStation) =>
+  18 + 16 * (station.lines.length - 1);
+
 function labelY(station: MapStation) {
   if (station.label === 'above') return -22;
-  if (station.shape === 'capsule') return 40;
+  if (station.shape === 'capsule') return capsuleHeight(station) / 2 + 23;
   return station.shape === 'junction' ? 34 : 30;
 }
 ---
@@ -32,9 +36,20 @@ function labelY(station: MapStation) {
               class="m-hit"
               d={line.extension ? `${line.d} ${line.extension}` : line.d}
             />
+            <path class="m-glow" d={line.d} />
+            {line.extension && <path class="m-glow m-ext" d={line.extension} />}
             <path class="m-path" d={line.d} />
             {line.extension && <path class="m-path m-ext" d={line.extension} />}
           </g>
+        ))}
+        {/* Where lines run side by side, the wide hit areas overlap; these row-wide ones sit
+            on top so each line keeps its own row. */}
+        {NETWORK.lines.map((line) => (
+          <path
+            class="m-hit m-row"
+            data-line={line.id}
+            d={line.extension ? `${line.d} ${line.extension}` : line.d}
+          />
         ))}
         {NETWORK.termini.map((terminus) => (
           <g class="mst mterm" data-lines={terminus.id} aria-hidden="true">
@@ -56,9 +71,9 @@ function labelY(station: MapStation) {
               <rect
                 class="s-shape"
                 x="-11"
-                y="-17"
+                y={-capsuleHeight(station) / 2}
                 width="22"
-                height="34"
+                height={capsuleHeight(station)}
                 rx="11"
               />
             ) : station.shape === 'junction' ? (
@@ -88,6 +103,7 @@ function labelY(station: MapStation) {
               aria-label={s.badge(p.code, p.name)}
             >
               <circle class="ring" r="29" />
+              <circle class="glow" r="22" />
               <circle class="disc" r="22" />
               <text>{p.code}</text>
             </g>
@@ -102,6 +118,7 @@ function labelY(station: MapStation) {
       </span>
       <span>
         <i class="lg-xfer"></i>
+        <i class="lg-jx"></i>
         {s.legend.transfer}
       </span>
       <span>
@@ -130,12 +147,14 @@ function labelY(station: MapStation) {
       const map = this.querySelector<HTMLElement>('[data-map]');
       if (!map) return;
       const lineOf = (event: Event) =>
-        (event.target as Element).closest<SVGElement>('.mline, .mbadge')
+        (event.target as Element).closest<SVGElement>('.mline, .m-row, .mbadge')
           ?.dataset.line;
 
+      // Off a line, the map falls back to the pinned line. Stations sit on top of lines, so
+      // passing over one keeps whatever is lit.
       map.addEventListener('pointerover', (event) => {
-        const id = lineOf(event);
-        if (id) this.light(id);
+        if ((event.target as Element).closest('.mst')) return;
+        this.light(lineOf(event) ?? this.#pinned);
       });
       map.addEventListener('pointerleave', () => this.light(this.#pinned));
       map.addEventListener('click', (event) => {
@@ -246,13 +265,25 @@ function labelY(station: MapStation) {
     transition: opacity 0.25s;
   }
 
-  .m-path {
+  .m-path,
+  .m-glow {
     fill: none;
     stroke: var(--tone);
     stroke-width: 10;
     stroke-linecap: round;
     stroke-linejoin: round;
-    transition: stroke 0.25s;
+  }
+
+  /* A lit line glows in its own color: a blurred copy underneath that only fades its
+     opacity, since a filter transition passes through a black shadow before the color. */
+  .m-glow {
+    filter: blur(3.5px);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .mline:global(.on) .m-glow {
+    opacity: 0.65;
   }
 
   /* Under construction: the line continues as dots. */
@@ -268,9 +299,9 @@ function labelY(station: MapStation) {
     cursor: pointer;
   }
 
-  .mline:global(.on) .m-path {
-    stroke: var(--lit);
-    filter: drop-shadow(0 0 7px rgb(var(--lit-rgb) / 0.65));
+  /* As wide as the gap between lines that run side by side. */
+  .m-hit.m-row {
+    stroke-width: 16;
   }
 
   [data-focus] .mline:not(:global(.on)),
@@ -328,8 +359,18 @@ function labelY(station: MapStation) {
     stroke-width: 6;
   }
 
-  .mbadge:global(.on) .disc {
-    stroke: var(--lit);
+  /* Glows with its line, the same way. */
+  .mbadge .glow {
+    fill: none;
+    stroke: var(--tone);
+    stroke-width: 6;
+    filter: blur(3.5px);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .mbadge:global(.on) .glow {
+    opacity: 0.65;
   }
 
   .mbadge .ring {
@@ -383,6 +424,15 @@ function labelY(station: MapStation) {
     height: 12px;
     border: 2.5px solid var(--fg);
     border-radius: 6px;
+  }
+
+  /* Where lines cross: a ring with a dot, as on the map. */
+  .lg-jx {
+    width: 14px;
+    height: 14px;
+    border: 2.5px solid var(--fg);
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--fg) 2px, transparent 2.5px);
   }
 
   .lg-tba {

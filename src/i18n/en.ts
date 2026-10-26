@@ -333,7 +333,7 @@ const en = {
       label: 'Network map',
       heading: "Every project is a line. Every stop is what it's built with.",
       description:
-        'Network map of projects. ElectricalWizard shares Discord.js with Waveworn, and TypeScript and Tailwind with mystwiz.net. Yorimichi is under construction, and Waveworn is out of service.',
+        'Network map of projects. All four lines share TypeScript. Yorimichi, ElectricalWizard and mystwiz.net share Tailwind. mystwiz status shares Astro with mystwiz.net and Svelte with Yorimichi. Yorimichi is under construction.',
       badge: (code: string, name: string) => `${code}, ${name} line`,
       legend: {
         station: 'Station',
@@ -363,9 +363,9 @@ const en = {
     stationsTba: 'Stations TBA',
     lines: {
       yr: 'An anime recommender. The name means taking a detour on the way somewhere.',
-      ww: 'A Wuthering Waves tool that works on Discord and the web.',
-      mz: 'This site. First built with Next.js, now rebuilt in Astro as a loop line.',
-      ew: 'A Discord bot for a server with friends, with a web dashboard. The line that started it all.',
+      mz: 'This site. First built with Nuxt.js, now rebuilt in Astro as a loop line.',
+      ms: 'The status page for mystwiz services, built in Astro and Svelte.',
+      ew: 'A Discord bot for a server with friends, with a web dashboard. On its fourth version, now TypeScript with MongoDB.',
     },
   },
 
