@@ -119,8 +119,8 @@
 }
 
 :root[data-service='day'] {
-  --bg: #e7e6e0;
-  --bg-2: #dedcd5;
+  --bg: #ebeae4;
+  --bg-2: #e2e0d9;
   --panel: #fbfbf8;
   --panel-2: #f1f0eb;
   --rule: #cfcdc5;

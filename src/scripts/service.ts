@@ -7,7 +7,7 @@ export type Service = 'night' | 'day';
 
 const THEME_COLOR: Record<Service, string> = {
   night: '#0b0b0a',
-  day: '#e7e6e0',
+  day: '#ebeae4',
 };
 
 export function currentService(): Service {
