@@ -2,7 +2,8 @@
 // The network map and its line cards. Every project is a line, every stop is what it is built
 // with, and shared technologies are transfer stations. Hover or tap a line (or focus its badge)
 // to light it, or a transfer station to light every line through it; click pins a line and
-// brings its card into view, and clicking anywhere else lets it go.
+// brings its card into view, and clicking anywhere else lets it go. On arrival the map draws
+// itself in.
 import { NETWORK, PROJECTS, type MapStation } from '../../data/projects';
 import { getStrings } from '../../i18n';
 import LineCard from './LineCard.astro';
@@ -20,6 +21,63 @@ function labelY(station: MapStation) {
   if (station.shape === 'capsule') return capsuleHeight(station) / 2 + 23;
   return station.shape === 'junction' ? 34 : 30;
 }
+
+/*
+  The draw-in: lines run out from their badges one after another, top badge first, all at one
+  speed, and each stop appears as the first line reaches it. Times are in seconds from the
+  start of the draw.
+*/
+const DRAW = { stagger: 0.15, speed: 1100 };
+
+/** A line's length, and how far along it is to the point nearest `at`. Paths use only M, H and L. */
+function measure(d: string, at: [number, number] = [0, 0]) {
+  let [x, y] = [0, 0];
+  let length = 0;
+  let best = { gap: Infinity, along: 0 };
+  for (const [, cmd, args] of d.matchAll(/([MHL])([^MHL]*)/g)) {
+    const [a, b] = args.trim().split(/\s+/).map(Number);
+    const [nx, ny] = cmd === 'H' ? [a, y] : [a, b];
+    if (cmd !== 'M') {
+      const seg = Math.hypot(nx - x, ny - y);
+      const u = Math.max(
+        0,
+        Math.min(
+          1,
+          ((at[0] - x) * (nx - x) + (at[1] - y) * (ny - y)) / seg ** 2,
+        ),
+      );
+      const gap = Math.hypot(
+        x + u * (nx - x) - at[0],
+        y + u * (ny - y) - at[1],
+      );
+      if (gap < best.gap) best = { gap, along: length + u * seg };
+      length += seg;
+    }
+    [x, y] = [nx, ny];
+  }
+  return { length, along: best.along };
+}
+
+const draw = Object.fromEntries(
+  NETWORK.lines.map((line) => {
+    const order = NETWORK.badges.findIndex((badge) => badge.id === line.id);
+    const start = +(order * DRAW.stagger).toFixed(3);
+    return [
+      line.id,
+      { start, end: start + measure(line.d).length / DRAW.speed },
+    ];
+  }),
+);
+const lineVars = (id: string) =>
+  `--draw-start: ${draw[id].start}; --draw-end: ${draw[id].end.toFixed(3)}`;
+const stationPop = (station: MapStation) =>
+  Math.min(
+    ...station.lines.map((id) => {
+      const line = NETWORK.lines.find((l) => l.id === id)!;
+      const { along } = measure(line.d, [station.x, station.y]);
+      return draw[id].start + along / DRAW.speed;
+    }),
+  ).toFixed(3);
 ---
 
 <mz-network>
@@ -31,15 +89,15 @@ function labelY(station: MapStation) {
           <g
             class="mline"
             data-line={line.id}
-            style={`--tone: ${project(line.id).tone}`}
+            style={`--tone: ${project(line.id).tone}; ${lineVars(line.id)}`}
           >
             <path
               class="m-hit"
               d={line.extension ? `${line.d} ${line.extension}` : line.d}
             />
-            <path class="m-glow" d={line.d} />
+            <path class="m-glow" d={line.d} pathLength="1" />
             {line.extension && <path class="m-glow m-ext" d={line.extension} />}
-            <path class="m-path" d={line.d} />
+            <path class="m-path" d={line.d} pathLength="1" />
             {line.extension && <path class="m-path m-ext" d={line.extension} />}
           </g>
         ))}
@@ -53,8 +111,13 @@ function labelY(station: MapStation) {
           />
         ))}
         {NETWORK.termini.map((terminus) => (
-          <g class="mst mterm" data-lines={terminus.id} aria-hidden="true">
-            <text x={terminus.x} y={terminus.y}>
+          <g
+            class="mst mterm"
+            data-lines={terminus.id}
+            style={`--pop: ${draw[terminus.id].end.toFixed(3)}`}
+            aria-hidden="true"
+          >
+            <text class="pop" x={terminus.x} y={terminus.y}>
               {terminus.text}
             </text>
           </g>
@@ -67,27 +130,30 @@ function labelY(station: MapStation) {
             ]}
             data-lines={station.lines.join(' ')}
             transform={`translate(${station.x} ${station.y})`}
+            style={`--pop: ${stationPop(station)}`}
           >
-            {station.shape === 'capsule' ? (
-              <rect
-                class="s-shape"
-                x="-11"
-                y={-capsuleHeight(station) / 2}
-                width="22"
-                height={capsuleHeight(station)}
-                rx="11"
-              />
-            ) : station.shape === 'junction' ? (
-              <>
-                <circle class="s-shape" r="12" />
-                <circle class="s-core" r="5" />
-              </>
-            ) : (
-              <circle class="s-shape" r="9" />
-            )}
-            <text y={labelY(station)}>
-              {station.tba ? t.projects.stationsTba : station.name}
-            </text>
+            <g class="pop">
+              {station.shape === 'capsule' ? (
+                <rect
+                  class="s-shape"
+                  x="-11"
+                  y={-capsuleHeight(station) / 2}
+                  width="22"
+                  height={capsuleHeight(station)}
+                  rx="11"
+                />
+              ) : station.shape === 'junction' ? (
+                <>
+                  <circle class="s-shape" r="12" />
+                  <circle class="s-core" r="5" />
+                </>
+              ) : (
+                <circle class="s-shape" r="9" />
+              )}
+              <text y={labelY(station)}>
+                {station.tba ? t.projects.stationsTba : station.name}
+              </text>
+            </g>
           </g>
         ))}
         {NETWORK.badges.map((badge) => {
@@ -96,17 +162,19 @@ function labelY(station: MapStation) {
             <g
               class="mbadge"
               data-line={badge.id}
-              style={`--tone: ${p.tone}`}
+              style={`--tone: ${p.tone}; --pop: ${draw[badge.id].start}`}
               transform={`translate(${badge.x} ${badge.y})`}
               tabindex="0"
               role="button"
               aria-pressed="false"
               aria-label={s.badge(p.code, p.name)}
             >
-              <circle class="ring" r="29" />
-              <circle class="glow" r="22" />
-              <circle class="disc" r="22" />
-              <text>{p.code}</text>
+              <g class="pop">
+                <circle class="ring" r="29" />
+                <circle class="glow" r="22" />
+                <circle class="disc" r="22" />
+                <text>{p.code}</text>
+              </g>
             </g>
           );
         })}
@@ -151,6 +219,13 @@ function labelY(station: MapStation) {
       const lineOf = (event: Event) =>
         (event.target as Element).closest<SVGElement>('.mline, .m-row, .mbadge')
           ?.dataset.line;
+      // After a ride, or behind the first-visit doors, the map draws itself in. Both are marked
+      // on the root by the time the swap's next frame comes around.
+      requestAnimationFrame(() => {
+        const root = document.documentElement;
+        if (root.hasAttribute('data-boarding')) map.dataset.draw = 'boarding';
+        else if (root.hasAttribute('data-arriving')) map.dataset.draw = '';
+      });
       const transferOf = (event: Event) =>
         (event.target as Element)
           .closest<SVGElement>('.mst.ix')
@@ -324,6 +399,62 @@ function labelY(station: MapStation) {
 
   .mline:global(.on) .m-glow {
     opacity: 0.65;
+  }
+
+  /* The draw-in, timed in the frontmatter. It starts as the map rises (see .rise in
+     global.css), later behind the doors. Each animation fills backwards only, so once it ends
+     the lit and faded states are untouched. */
+  [data-draw] {
+    --draw-at: 0.35s;
+  }
+
+  [data-draw='boarding'] {
+    --draw-at: 0.8s;
+  }
+
+  [data-draw] :is(.m-path, .m-glow):not(.m-ext) {
+    animation: draw calc((var(--draw-end) - var(--draw-start)) * 1s) linear
+      calc(var(--draw-at) + var(--draw-start) * 1s) backwards;
+  }
+
+  [data-draw] .m-ext {
+    animation: fade 0.4s ease calc(var(--draw-at) + var(--draw-end) * 1s)
+      backwards;
+  }
+
+  /* Stops and badges pop in about their center; termini fade in. */
+  [data-draw] .pop {
+    transform-origin: 0 0;
+    animation: pop 0.4s var(--brake) calc(var(--draw-at) + var(--pop) * 1s)
+      backwards;
+  }
+
+  [data-draw] .mterm .pop {
+    animation-name: fade;
+  }
+
+  @keyframes draw {
+    from {
+      stroke-dasharray: 1 2;
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dasharray: 1 2;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      scale: 0.3;
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
   }
 
   /* Under construction: the line continues as dots. */
