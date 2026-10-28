@@ -87,13 +87,17 @@ const C = {
 
 type Node = { type: string; props: Record<string, unknown> };
 
-/** Satori element; anything with more than one child is a flex box unless styled otherwise. */
+/**
+ * Satori element; anything with more than one child is a flex box unless styled otherwise.
+ * Every box is border-box, so widths and heights include padding and borders.
+ */
 function h(
   type: string,
   style: Record<string, unknown>,
   ...children: (Node | string)[]
 ): Node {
-  const layout = children.length > 1 ? { display: 'flex', ...style } : style;
+  const sized = { boxSizing: 'border-box', ...style };
+  const layout = children.length > 1 ? { display: 'flex', ...sized } : sized;
   // Satori rejects an empty children array, so leave the prop out for empty boxes.
   const content =
     children.length === 0
