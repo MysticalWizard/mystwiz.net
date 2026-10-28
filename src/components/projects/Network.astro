@@ -1,7 +1,8 @@
 ---
 // The network map and its line cards. Every project is a line, every stop is what it is built
 // with, and shared technologies are transfer stations. Hover or tap a line (or focus its badge)
-// to light it; click pins it and brings its card into view.
+// to light it, or a transfer station to light every line through it; click pins a line and
+// brings its card into view, and clicking anywhere else lets it go.
 import { NETWORK, PROJECTS, type MapStation } from '../../data/projects';
 import { getStrings } from '../../i18n';
 import LineCard from './LineCard.astro';
@@ -141,7 +142,8 @@ function labelY(station: MapStation) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   class MzNetwork extends HTMLElement {
-    #pinned = '';
+    #pinned: string[] = [];
+    #abort?: AbortController;
 
     connectedCallback() {
       const map = this.querySelector<HTMLElement>('[data-map]');
@@ -149,18 +151,23 @@ function labelY(station: MapStation) {
       const lineOf = (event: Event) =>
         (event.target as Element).closest<SVGElement>('.mline, .m-row, .mbadge')
           ?.dataset.line;
+      const transferOf = (event: Event) =>
+        (event.target as Element)
+          .closest<SVGElement>('.mst.ix')
+          ?.dataset.lines?.split(' ');
 
-      // Off a line, the map falls back to the pinned line. Stations sit on top of lines, so
-      // passing over one keeps whatever is lit.
+      // Off a line, the map falls back to the pinned lines. Stations sit on top of lines, so
+      // passing over one keeps whatever is lit, unless it is a transfer: that lights every
+      // line through it.
       map.addEventListener('pointerover', (event) => {
-        if ((event.target as Element).closest('.mst')) return;
-        this.light(lineOf(event) ?? this.#pinned);
+        const transfer = transferOf(event);
+        if (transfer) this.light(...transfer);
+        else if (!(event.target as Element).closest('.mst')) {
+          const id = lineOf(event);
+          this.light(...(id ? [id] : this.#pinned));
+        }
       });
-      map.addEventListener('pointerleave', () => this.light(this.#pinned));
-      map.addEventListener('click', (event) => {
-        const id = lineOf(event);
-        if (id) this.pin(id);
-      });
+      map.addEventListener('pointerleave', () => this.light(...this.#pinned));
       map.addEventListener('keydown', (event) => {
         const id = (event.target as Element).closest<SVGElement>('.mbadge')
           ?.dataset.line;
@@ -174,47 +181,80 @@ function labelY(station: MapStation) {
           ?.dataset.line;
         if (id) this.light(id);
       });
-      map.addEventListener('focusout', () => this.light(this.#pinned));
+      map.addEventListener('focusout', () => this.light(...this.#pinned));
+
+      // Clicking a line pins it and a transfer pins every line through it. A click anywhere
+      // else unpins, except on a pinned line's own stops or card.
+      this.#abort = new AbortController();
+      document.addEventListener(
+        'click',
+        (event) => {
+          const target = event.target as Element;
+          const ids = transferOf(event) ?? [lineOf(event) ?? ''];
+          if (ids[0]) return this.pin(...ids);
+          if (!this.#pinned.length) return;
+          const card = target.closest<HTMLElement>('[data-card]')?.dataset.line;
+          const lines =
+            target.closest<SVGElement>('.mst')?.dataset.lines ?? card;
+          const keep = (lines ?? '')
+            .split(' ')
+            .some((line) => this.#pinned.includes(line));
+          if (keep) return;
+          this.pin();
+          // Still over a card: it stays lit, as hovering it would.
+          if (card) this.light(card);
+        },
+        { signal: this.#abort.signal },
+      );
 
       for (const card of this.querySelectorAll<HTMLElement>('[data-card]')) {
         card.addEventListener('pointerenter', () =>
           this.light(card.dataset.line ?? ''),
         );
-        card.addEventListener('pointerleave', () => this.light(this.#pinned));
+        card.addEventListener('pointerleave', () =>
+          this.light(...this.#pinned),
+        );
       }
     }
 
-    /** Clicking a line pins it (or unpins it) and brings its card into view. */
-    pin(id: string) {
-      this.#pinned = this.#pinned === id ? '' : id;
-      this.light(this.#pinned);
+    disconnectedCallback() {
+      this.#abort?.abort();
+    }
+
+    /** Pins some lines (or unpins them, if they are what is pinned) and brings their first
+        card into view. */
+    pin(...ids: string[]) {
+      const same = ids.join(' ') === this.#pinned.join(' ');
+      this.#pinned = same ? [] : ids;
+      this.light(...this.#pinned);
       for (const badge of this.querySelectorAll('.mbadge')) {
         badge.setAttribute(
           'aria-pressed',
-          String(badge.getAttribute('data-line') === this.#pinned),
+          String(this.#pinned.includes(badge.getAttribute('data-line') ?? '')),
         );
       }
-      if (this.#pinned) {
-        this.querySelector(`[data-card][data-line="${id}"]`)?.scrollIntoView({
-          behavior: reducedMotion.matches ? 'auto' : 'smooth',
-          block: 'nearest',
-        });
-      }
+      const [first] = this.#pinned;
+      if (!first) return;
+      this.querySelector(`[data-card][data-line="${first}"]`)?.scrollIntoView({
+        behavior: reducedMotion.matches ? 'auto' : 'smooth',
+        block: 'nearest',
+      });
     }
 
-    /** Lights one line (and its stations and card); the rest fade back. */
-    light(id: string) {
+    /** Lights some lines (and their stations and cards); the rest fade back. */
+    light(...ids: string[]) {
+      const lit = new Set(ids.filter(Boolean));
       const map = this.querySelector<HTMLElement>('[data-map]');
-      map?.toggleAttribute('data-focus', Boolean(id));
+      map?.toggleAttribute('data-focus', lit.size > 0);
       for (const el of this.querySelectorAll<HTMLElement | SVGElement>(
         '.mline, .mbadge, [data-card]',
       )) {
-        el.classList.toggle('on', el.dataset.line === id);
+        el.classList.toggle('on', lit.has(el.dataset.line ?? ''));
       }
       for (const el of this.querySelectorAll<SVGElement>('.mst')) {
         el.classList.toggle(
           'on',
-          Boolean(id) && (el.dataset.lines ?? '').split(' ').includes(id),
+          (el.dataset.lines ?? '').split(' ').some((line) => lit.has(line)),
         );
       }
     }
