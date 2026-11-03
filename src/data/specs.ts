@@ -18,7 +18,7 @@ export const CARS: Car[] = [
     type: 'CPU',
     picto: 'chip',
     model: 'AMD Ryzen 9 9950X3D',
-    detail: '16-core 32-threads',
+    detail: '16 cores · 32 threads',
   },
   {
     type: 'Cooler',
@@ -30,7 +30,7 @@ export const CARS: Car[] = [
     type: 'Board',
     picto: 'board',
     model: 'ASUS ROG STRIX X870E-E GAMING WIFI',
-    detail: 'Motherboard',
+    detail: 'ATX Motherboard',
   },
   {
     type: 'RAM',
@@ -41,7 +41,7 @@ export const CARS: Car[] = [
   {
     type: 'GPU',
     picto: 'gpu',
-    model: 'MSI Gaming RTX 5080 16G SUPRIM SOC',
+    model: 'MSI GeForce RTX 5080 16G SUPRIM SOC',
     detail: '16GB GDDR7',
   },
   {
@@ -49,13 +49,13 @@ export const CARS: Car[] = [
     picto: 'disk',
     model: 'Samsung 9100 PRO 2TB NVMe M.2 SSD',
     detail:
-      'Also: Samsung 990 Pro 1TB · Crucial MX500 1TB · Kingston A400 240GB',
+      'Also: Samsung 990 PRO 1TB · Crucial MX500 1TB · Kingston A400 240GB',
   },
   {
     type: 'Case',
     picto: 'case',
     model: 'HYTE Y70',
-    detail: 'Black | Dual Chamber Mid-Tower ATX Case',
+    detail: 'Black · Dual Chamber Mid-Tower ATX Case',
   },
   { type: 'PSU', picto: 'bolt', model: 'CORSAIR RM1000x', detail: '1000 W' },
 ];
@@ -82,7 +82,7 @@ export const CAB: CabGroup[] = [
       { label: 'Mouse 1', model: 'ATK A9 Pro Max 2.0', detail: '800 DPI' },
       {
         label: 'Mouse 2',
-        model: 'Logitech G Pro X Superlight',
+        model: 'Logitech G PRO X SUPERLIGHT',
         detail: '800 DPI',
       },
       {
@@ -92,7 +92,7 @@ export const CAB: CabGroup[] = [
       {
         label: 'Tablet',
         model: 'Wacom CTL-4100 Intuos Small',
-        detail: 'osu!: 80 mm × 45 mm ',
+        detail: 'osu!: 80 mm × 45 mm',
       },
     ],
   },
