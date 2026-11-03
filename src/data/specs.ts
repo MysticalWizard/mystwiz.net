@@ -17,7 +17,7 @@ export const CARS: Car[] = [
   {
     type: 'CPU',
     picto: 'chip',
-    model: 'Ryzen 9 9950X3D',
+    model: 'AMD Ryzen 9 9950X3D',
     detail: '16-core 32-threads',
   },
   {
@@ -41,7 +41,7 @@ export const CARS: Car[] = [
   {
     type: 'GPU',
     picto: 'gpu',
-    model: 'msi Gaming RTX 5080 16G SUPRIM SOC',
+    model: 'MSI Gaming RTX 5080 16G SUPRIM SOC',
     detail: '16GB GDDR7',
   },
   {
