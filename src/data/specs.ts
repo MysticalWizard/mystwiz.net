@@ -117,7 +117,7 @@ export const CAB: CabGroup[] = [
     name: 'Audio and Camera',
     picto: 'mic',
     items: [
-      { label: 'IEM', model: 'MOONDROP ARIA2' },
+      { label: 'IEM', model: 'MOONDROP Blessing3 AQUA' },
       { label: 'Microphone', model: 'Elgato Wave DX', detail: 'Dynamic XLR' },
       { label: 'Mic arm', model: 'Elgato Wave Mic Arm LP' },
       { label: 'Audio interface', model: 'Elgato Wave XLR MK.2' },
