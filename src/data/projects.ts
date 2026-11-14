@@ -18,7 +18,7 @@ export interface ProjectLink {
 }
 
 export interface Project {
-  id: 'yr' | 'ms' | 'mz' | 'ew';
+  id: 'yr' | 'ms' | 'mz' | 'ew' | 'cp';
   code: string;
   name: string;
   jp?: string;
@@ -85,8 +85,8 @@ export const PROJECTS: Project[] = [
     status: 'service',
     stops: [
       { name: 'Discord.js' },
-      { name: 'React' },
       { name: 'Next.js' },
+      { name: 'React', transfer: true },
       { name: 'TypeScript', transfer: true },
       { name: 'Tailwind', transfer: true },
       { name: 'MongoDB' },
@@ -98,6 +98,20 @@ export const PROJECTS: Project[] = [
         href: 'https://github.com/mysticalwizard/electricalwizard',
       },
     ],
+  },
+  {
+    id: 'cp',
+    code: 'CP',
+    name: 'Compost',
+    tone: 'var(--line-cp)',
+    status: 'service',
+    stops: [
+      { name: 'Vite' },
+      { name: 'React', transfer: true },
+      { name: 'TypeScript', transfer: true },
+      { name: 'Dexie.js' },
+    ],
+    links: [{ kind: 'visit', href: 'https://compost.mystwiz.net/' }],
   },
 ];
 
@@ -128,8 +142,8 @@ export interface MapStation {
 }
 
 export const NETWORK = {
-  viewBox: '0 50 1080 345',
-  /** Lines in a capsule run side by side, 16 apart: MS 292, YR 308, MZ 324, EW 340. */
+  viewBox: '0 50 1080 415',
+  /** Lines in a capsule run side by side, 16 apart: MS 292, YR 308, MZ 324, EW 340, CP 356. */
   lines: [
     {
       id: 'yr',
@@ -137,6 +151,7 @@ export const NETWORK = {
       extension: 'M970 230 H1050',
     },
     { id: 'ew', d: 'M80 340 H1050' },
+    { id: 'cp', d: 'M80 420 H300 L364 356 H700 L764 420 H1050' },
     { id: 'mz', d: 'M80 210 H326 L440 324 H820 L854 290 H1050' },
     {
       id: 'ms',
@@ -164,13 +179,21 @@ export const NETWORK = {
       shape: 'junction',
     },
     { name: 'Discord.js', x: 190, y: 340, lines: ['ew'], label: 'below' },
-    { name: 'React', x: 300, y: 340, lines: ['ew'], label: 'below' },
-    { name: 'Next.js', x: 410, y: 340, lines: ['ew'], label: 'below' },
+    { name: 'Next.js', x: 300, y: 340, lines: ['ew'], label: 'below' },
+    {
+      name: 'React',
+      x: 400,
+      y: 348,
+      lines: ['ew', 'cp'],
+      label: 'below',
+      shape: 'capsule',
+    },
+    { name: 'Vite', x: 200, y: 420, lines: ['cp'], label: 'below' },
     {
       name: 'TypeScript',
-      x: 680,
-      y: 316,
-      lines: ['ms', 'yr', 'mz', 'ew'],
+      x: 650,
+      y: 324,
+      lines: ['ms', 'yr', 'mz', 'ew', 'cp'],
       label: 'below',
       shape: 'capsule',
     },
@@ -183,6 +206,7 @@ export const NETWORK = {
       shape: 'capsule',
     },
     { name: 'MongoDB', x: 870, y: 340, lines: ['ew'], label: 'below' },
+    { name: 'Dexie.js', x: 860, y: 420, lines: ['cp'], label: 'below' },
     { name: 'Cloudflare D1', x: 950, y: 150, lines: ['ms'], label: 'above' },
   ] as MapStation[],
   /** Line badges sit at the start of each line. */
@@ -191,11 +215,13 @@ export const NETWORK = {
     { id: 'mz', x: 80, y: 210 },
     { id: 'ms', x: 80, y: 280 },
     { id: 'ew', x: 80, y: 340 },
+    { id: 'cp', x: 80, y: 420 },
   ] as { id: Project['id']; x: number; y: number }[],
   /** Termini are labeled with the project's domain. */
   termini: [
     { id: 'ms', x: 1050, y: 180, text: 'status.mystwiz.net' },
     { id: 'mz', x: 1050, y: 314, text: 'mystwiz.net' },
     { id: 'ew', x: 1050, y: 374, text: 'elecwiz.mystwiz.net' },
+    { id: 'cp', x: 1050, y: 454, text: 'compost.mystwiz.net' },
   ] as { id: Project['id']; x: number; y: number; text: string }[],
 };

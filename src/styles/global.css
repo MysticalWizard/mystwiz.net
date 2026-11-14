@@ -84,12 +84,13 @@
   --on-line: #0b0b0a;
 
   /* Project line colors (Projects map and cards), each holding 3:1 on both night and day
-     panels. ElectricalWizard is Discord blurple; Yorimichi and mystwiz status borrow Tokyo
-     Metro's Marunouchi and Hanzomon. mystwiz.net is not here: it rides on the site's own
+     panels. ElectricalWizard is Discord blurple; Yorimichi, mystwiz status and Compost borrow
+     Tokyo Metro's Marunouchi, Hanzomon and Fukutoshin. mystwiz.net is not here: it rides on the site's own
      --line, drawn the same in both services like the route bar. */
   --line-ew: #5865f2;
   --line-yr: #f62e36;
   --line-ms: #8f76d6;
+  --line-cp: #9c5e31;
 
   /* LED boards stay dark in day service, like real ones. */
   --led-bg: #060605;
