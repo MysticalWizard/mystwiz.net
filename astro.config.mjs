@@ -36,6 +36,9 @@ export default defineConfig({
       OSU_CLIENT_SECRET: secret(),
       GITHUB_TOKEN: secret(),
       STEAM_API_KEY: secret(),
+      // Manual override for the Projects cards' service status (see README). Read on request, so
+      // changing it in the Worker's settings takes effect without a rebuild.
+      STATUS_OVERRIDE: secret(),
     },
   },
   fonts: [

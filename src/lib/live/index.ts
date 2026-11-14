@@ -4,19 +4,22 @@ import {
   GITHUB_TOKEN,
   OSU_CLIENT_ID,
   OSU_CLIENT_SECRET,
+  STATUS_OVERRIDE,
   STEAM_API_KEY,
   TWITCH_CLIENT_ID,
   TWITCH_CLIENT_SECRET,
   YOUTUBE_API_KEY,
 } from 'astro:env/server';
 import { ACCOUNTS } from '../../data/lines';
+import { PROJECTS } from '../../data/projects';
+import { parseOverrides, type LineServices } from '../services';
 import { createCache } from './cache';
 import {
   boardSnapshot,
   type BoardSnapshot,
   type BoardSources,
 } from './snapshot';
-import { github, osu, steam, twitch, youtube } from './sources';
+import { github, osu, statusPage, steam, twitch, youtube } from './sources';
 
 export type { BoardMode, BoardSnapshot } from './snapshot';
 
@@ -48,8 +51,27 @@ function configuredSources(): BoardSources {
         : undefined,
     github: github(ACCOUNTS.github, GITHUB_TOKEN),
     steam: STEAM_API_KEY ? steam(STEAM_API_KEY, ACCOUNTS.steam) : undefined,
+    services: statusPage(),
   };
   return sources;
+}
+
+let overrides: { raw: string | undefined; lines: LineServices } | undefined;
+
+// The manual override is parsed once per value (changing the variable deploys a new version),
+// and a value it can't fully use is logged once, not on every request.
+function lineOverrides(): LineServices {
+  if (!overrides || overrides.raw !== STATUS_OVERRIDE) {
+    overrides = {
+      raw: STATUS_OVERRIDE,
+      lines: parseOverrides(
+        STATUS_OVERRIDE,
+        PROJECTS.map((p) => p.id),
+        (problem) => console.error(problem),
+      ),
+    };
+  }
+  return overrides.lines;
 }
 
 // A failing source answers with its last good value for a while (see cache.ts), so log each
@@ -64,6 +86,7 @@ export function getBoardSnapshot(live: boolean): Promise<BoardSnapshot> {
     sources: configuredSources(),
     cache,
     live,
+    overrides: live ? lineOverrides() : undefined,
     ctx: {
       fetch: (input, init) => fetch(input, init),
       now: () => new Date(),

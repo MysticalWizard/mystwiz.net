@@ -14,6 +14,7 @@ import type {
   TwitchData,
   YouTubeData,
 } from '../board';
+import type { LineServices, ServicesData } from '../services';
 import type { SourceCache } from './cache';
 import type { Source, SourceContext } from './sources';
 
@@ -31,6 +32,7 @@ export interface BoardSources {
   osu?: Source<OsuData>;
   github?: Source<GitHubData>;
   steam?: Source<SteamData>;
+  services?: Source<ServicesData>;
 }
 
 const MINUTE = 60_000;
@@ -42,6 +44,8 @@ export const TTL = {
   osu: 30 * MINUTE,
   github: 5 * MINUTE,
   steam: 2 * MINUTE,
+  // The status page checks every minute.
+  services: MINUTE,
 } as const;
 
 export async function boardSnapshot(options: {
@@ -49,8 +53,10 @@ export async function boardSnapshot(options: {
   cache: SourceCache;
   ctx: SourceContext;
   live: boolean;
+  /** Lines set by hand (STATUS_OVERRIDE); only on a live board. */
+  overrides?: LineServices;
 }): Promise<BoardSnapshot> {
-  const { sources, cache, ctx, live } = options;
+  const { sources, cache, ctx, live, overrides } = options;
   const generatedAt = ctx.now().toISOString();
 
   const load = <T>(key: keyof typeof TTL, source: Source<T> | undefined) =>
@@ -58,12 +64,15 @@ export async function boardSnapshot(options: {
       ? cache.get(key, TTL[key], () => source(ctx))
       : Promise.resolve(undefined);
 
-  const [twitch, youtube, osu, github, steam] = await Promise.all([
+  const [twitch, youtube, osu, github, steam, services] = await Promise.all([
     load('twitch', sources.twitch),
     load('youtube', sources.youtube),
     load('osu', sources.osu),
     load('github', sources.github),
     load('steam', sources.steam),
+    // Line status read long after the build could say a line is down that came back long
+    // ago: a build-time snapshot leaves it out, and the cards keep their own status.
+    live ? load('services', sources.services) : Promise.resolve(undefined),
   ]);
 
   return {
@@ -75,6 +84,10 @@ export async function boardSnapshot(options: {
       osu,
       github,
       steam,
+      services,
+      ...(live && overrides && Object.keys(overrides).length
+        ? { overrides }
+        : {}),
     },
   };
 }

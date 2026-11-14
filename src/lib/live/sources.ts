@@ -9,6 +9,11 @@ import type {
   TwitchData,
   YouTubeData,
 } from '../board';
+import {
+  servicesFromStatus,
+  type ServicesData,
+  type StatusPageAnswer,
+} from '../services';
 
 export interface SourceContext {
   fetch: (input: string, init?: RequestInit) => Promise<Response>;
@@ -326,4 +331,20 @@ export function steam(apiKey: string, vanity: string): Source<SteamData> {
       updatedAt: ctx.now().toISOString(),
     };
   };
+}
+
+/* ---------- status.mystwiz.net: live service on the project lines ---------- */
+
+export const STATUS_URL = 'https://status.mystwiz.net/api/status';
+
+// The status page is a Worker on a Custom Domain in the same zone, so a plain fetch reaches it
+// from this Worker (same-zone fetches to a Worker on a route would fail).
+export function statusPage(url = STATUS_URL): Source<ServicesData> {
+  return async (ctx) =>
+    servicesFromStatus(
+      await getJson<StatusPageAnswer>(ctx, url, {
+        headers: { Accept: 'application/json' },
+      }),
+      ctx.now(),
+    );
 }

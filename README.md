@@ -73,6 +73,37 @@ when) and the GitHub row reads "No data" in the meantime.
   build variables (Workers Builds: Settings > Build > Variables and secrets). Otherwise those
   rows read "Not connected" until the first poll.
 
+## Line status
+
+The pill on each Projects card follows [status.mystwiz.net](https://status.mystwiz.net/). The
+board endpoint also fetches `https://status.mystwiz.net/api/status` (cached for a minute) and maps
+the status page's components to lines in `src/lib/services.ts`. Up is "In service", slow or
+unstable is "Delays", down is "Suspended", and the status page's maintenance and paused states
+read "Maintenance" and "Not running". A line with several parts (ElectricalWizard's bot and
+dashboard) shows its worst part. The status page Worker is on a Custom Domain in the same zone,
+so a plain `fetch` reaches it without a service binding.
+
+Only lines marked in service follow the status page. Yorimichi stays "Under construction" and
+this site stays "You are here". A card keeps its own status when the status page has no answer
+for it, or when the status page's checks are more than 5 minutes old (then mystwiz status itself
+reads "Delays").
+
+**Manual override:** set `STATUS_OVERRIDE` to a JSON object from line id to status, for example
+
+```json
+{ "yr": "suspended", "cp": "maintenance" }
+```
+
+The line ids are `yr`, `mz`, `ms`, `ew` and `cp`, and the statuses are `service`, `delayed`,
+`suspended`, `maintenance` and `paused`. An override wins over the status page on any line, also
+when the status page doesn't answer. Set it as a secret, with
+`pnpm wrangler secret put STATUS_OVERRIDE` or in the Cloudflare dashboard (the Worker's Settings >
+Variables and Secrets, type Secret). Don't use the Text type: the next deploy from `main` removes
+text variables that aren't in the Wrangler config, and secrets stay. It's read on request, so it
+needs no rebuild: open pages pick it up on their next poll, within about a minute and a half with
+the edge cache. To clear it, delete the secret. A value it can't use (bad JSON, an unknown line or
+status) is logged in the Worker's logs, and the parts it can use still apply.
+
 ## Deploying
 
 The Cloudflare adapter generates the Worker config at build time (`dist/server/wrangler.json`) and

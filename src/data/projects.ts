@@ -17,8 +17,10 @@ export interface ProjectLink {
   href: string;
 }
 
+export type ProjectId = 'yr' | 'ms' | 'mz' | 'ew' | 'cp';
+
 export interface Project {
-  id: 'yr' | 'ms' | 'mz' | 'ew' | 'cp';
+  id: ProjectId;
   code: string;
   name: string;
   jp?: string;

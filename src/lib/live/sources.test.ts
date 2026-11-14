@@ -3,6 +3,8 @@ import {
   github,
   osu,
   parseTwitchDuration,
+  STATUS_URL,
+  statusPage,
   steam,
   twitch,
   youtube,
@@ -359,5 +361,31 @@ describe('steam', () => {
       lastOnlineAt: new Date(1_791_000_000 * 1000).toISOString(),
       updatedAt: NOW.toISOString(),
     });
+  });
+});
+
+describe('status page', () => {
+  it('turns the status page answer into line services', async () => {
+    const fetch = fakeFetch({
+      [STATUS_URL]: {
+        updatedAt: NOW.toISOString(),
+        status: 'up',
+        components: [
+          { id: 'compost', status: 'down' },
+          { id: 'yorimichi', status: 'up' },
+        ],
+      },
+    });
+    expect(await statusPage()(context(fetch))).toEqual({
+      lines: { ms: 'service', cp: 'suspended', yr: 'service' },
+      updatedAt: NOW.toISOString(),
+    });
+  });
+
+  it('throws on an error answer, so the cache keeps the last good value', async () => {
+    const fetch = fakeFetch({ [STATUS_URL]: 503 });
+    await expect(statusPage()(context(fetch))).rejects.toThrow(
+      '503 from status.mystwiz.net',
+    );
   });
 });

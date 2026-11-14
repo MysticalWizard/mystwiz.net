@@ -105,4 +105,33 @@ describe('board snapshot', () => {
     });
     expect(youtube).toHaveBeenCalledTimes(1);
   });
+
+  it('carries line services and overrides on a live board only', async () => {
+    const services = async () => ({
+      lines: { cp: 'suspended' as const },
+      updatedAt: at,
+    });
+    const live = await boardSnapshot({
+      sources: { services },
+      cache: createCache(),
+      ctx,
+      live: true,
+      overrides: { yr: 'paused' },
+    });
+    expect(live.data).toEqual({
+      services: { lines: { cp: 'suspended' }, updatedAt: at },
+      overrides: { yr: 'paused' },
+    });
+
+    const load = vi.fn(services);
+    const built = await boardSnapshot({
+      sources: { services: load },
+      cache: createCache(),
+      ctx,
+      live: false,
+      overrides: { yr: 'paused' },
+    });
+    expect(built.data).toEqual({});
+    expect(load).not.toHaveBeenCalled();
+  });
 });

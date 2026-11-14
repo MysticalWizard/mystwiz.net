@@ -350,6 +350,14 @@ const en = {
       private: 'Private line',
       suspended: 'Out of service',
     },
+    // Live service from status.mystwiz.net (or STATUS_OVERRIDE), replacing the status above.
+    service: {
+      service: 'In service',
+      delayed: 'Delays',
+      suspended: 'Suspended',
+      maintenance: 'Maintenance',
+      paused: 'Not running',
+    },
     noLinks: {
       building: 'Opening later',
       private: 'Not public',

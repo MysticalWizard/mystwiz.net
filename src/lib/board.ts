@@ -2,6 +2,7 @@
 // states, the way real boards alternate languages. This module is shared by the server render
 // and the browser, so it stays free of DOM and server-only code.
 import type { Strings } from '../i18n';
+import type { LineServices, ServicesData } from './services';
 
 type Departures = Strings['departures'];
 
@@ -49,6 +50,10 @@ export interface BoardData {
   github?: GitHubData | null;
   osu?: OsuData | null;
   steam?: SteamData | null;
+  /** Project lines, from status.mystwiz.net (not on the board: the Projects cards show it). */
+  services?: ServicesData | null;
+  /** Lines set by hand with STATUS_OVERRIDE; these win over `services`. */
+  overrides?: LineServices;
 }
 
 export type BoardLineId = 'yr' | 'tw' | 'yt' | 'gh' | 'osu' | 'st';

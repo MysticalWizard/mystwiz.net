@@ -1,6 +1,7 @@
 ---
 // One card per project line: badge, name, status, description, its stops as a mini route
-// strip, and links.
+// strip, and links. The status pill follows the live service from status.mystwiz.net (or the
+// STATUS_OVERRIDE variable) once the board endpoint answers; see src/lib/services.ts.
 import type { Project } from '../../data/projects';
 import { getStrings } from '../../i18n';
 import LinkButton from '../LinkButton.astro';
@@ -30,7 +31,15 @@ const s = t.projects;
       {p.name}
       {p.jp && <span lang="ja">{p.jp}</span>}
     </h3>
-    <span class:list={['pill', p.status]}>{s.status[p.status]}</span>
+    <span
+      class:list={['pill', p.status]}
+      data-pill={p.id}
+      data-status={p.status}
+      data-label={s.status[p.status]}
+      data-services={JSON.stringify(s.service)}
+    >
+      {s.status[p.status]}
+    </span>
   </header>
   <p>{s.lines[p.id]}</p>
   <ol class="strip">
@@ -55,6 +64,43 @@ const s = t.projects;
     )}
   </footer>
 </article>
+
+<script>
+  import type { ProjectId, ProjectStatus } from '../../data/projects';
+  import type { BoardSnapshot } from '../../lib/live/snapshot';
+  import { lineService, type LineService } from '../../lib/services';
+  import { latestBoard } from '../../scripts/live';
+
+  /** Puts each card's pill on its live service, or back on the card's own status. */
+  function paint(snapshot: BoardSnapshot | undefined) {
+    if (snapshot?.mode !== 'live') return;
+    const { services, overrides } = snapshot.data;
+    for (const pill of document.querySelectorAll<HTMLElement>('[data-pill]')) {
+      const service = lineService(
+        pill.dataset.pill as ProjectId,
+        pill.dataset.status as ProjectStatus,
+        services,
+        overrides,
+      );
+      const labels = JSON.parse(pill.dataset.services ?? '{}') as Record<
+        LineService,
+        string
+      >;
+      const text = (service && labels[service]) || pill.dataset.label || '';
+      if (service) pill.dataset.service = service;
+      else delete pill.dataset.service;
+      // The card's own look (e.g. the construction stripes) only while it shows its own status.
+      if (pill.dataset.status) {
+        pill.classList.toggle(pill.dataset.status, !service);
+      }
+      if (pill.textContent !== text) pill.textContent = text;
+    }
+  }
+
+  document.addEventListener('mz:board', (event) => paint(event.detail));
+  // After a ride the cards are new: catch them up with the last board the site heard.
+  document.addEventListener('astro:page-load', () => paint(latestBoard()));
+</script>
 
 <style>
   .lcard {
@@ -142,6 +188,59 @@ const s = t.projects;
   .pill.here {
     border-color: var(--line);
     color: var(--line-ink);
+  }
+
+  /* Live service: a signal lamp in front of the label. */
+  .pill[data-service]::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .pill[data-service='service'] {
+    color: var(--fg);
+  }
+
+  .pill[data-service='delayed'] {
+    border-color: var(--line);
+    color: var(--line-ink);
+  }
+
+  .pill[data-service='delayed']::before {
+    animation: lamp 1.2s steps(2, jump-none) infinite;
+  }
+
+  .pill[data-service='suspended'] {
+    border-color: var(--line-yr);
+    color: var(--fg);
+  }
+
+  .pill[data-service='suspended']::before {
+    background: var(--line-yr);
+  }
+
+  .pill[data-service='maintenance'],
+  .pill[data-service='paused'] {
+    border-style: dashed;
+  }
+
+  .pill[data-service='paused']::before {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px currentColor;
+  }
+
+  @keyframes lamp {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pill[data-service='delayed']::before {
+      animation: none;
+    }
   }
 
   p {
